@@ -1,0 +1,746 @@
+"use client";
+
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import api from "../../../lib/api";
+import { useAuthStore } from "../../../stores/auth";
+import { useSettingsStore } from "../../../stores/settings";
+import { connectSocket, getSocket } from "../../../lib/socket";
+import dynamic from "next/dynamic";
+import { BoardSkeleton } from "@eyeonchess/ui";
+import MoveList from "../../../components/MoveList";
+import MoveTimeline from "../../../components/MoveTimeline";
+
+const ChessBoard = dynamic(() => import("../../../components/ChessBoard"), {
+  loading: () => <BoardSkeleton />,
+  ssr: false,
+});
+import PlayerClock from "../../../components/PlayerClock";
+import { ConfirmModal } from "@eyeonchess/ui";
+import KeyboardShortcutsHelp from "../../../components/KeyboardShortcutsHelp";
+import ReactionPicker from "../../../components/ReactionPicker";
+import ReactionOverlay, { type ActiveReaction } from "../../../components/ReactionOverlay";
+import GameOverModal from "../../../components/GameOverModal";
+import CapturedPieces from "../../../components/CapturedPieces";
+import { useSound, detectMoveSound } from "../../../lib/useSound";
+import { useKeyboardShortcuts } from "../../../lib/useKeyboardShortcuts";
+import { lookupOpening } from "@eyeonchess/chess";
+import type { Player, MoveRecord, ClockState, ReactionType } from "@eyeonchess/chess";
+import { RESULT_LABELS, TERMINATION_LABELS } from "@eyeonchess/chess";
+
+interface GameOver {
+  result: string;
+  termination: string;
+  ratingChange: { white: number; black: number };
+}
+
+export default function GamePage() {
+  const params = useParams();
+  const router = useRouter();
+  const gameId = params.id as string;
+  const { user, fetchMe } = useAuthStore();
+
+  const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+  const [white, setWhite] = useState<Player | null>(null);
+  const [black, setBlack] = useState<Player | null>(null);
+  const [moves, setMoves] = useState<MoveRecord[]>([]);
+  const [moveUcis, setMoveUcis] = useState<string[]>([]);
+  const [currentPly, setCurrentPly] = useState(0);
+  const [lastMove, setLastMove] = useState<[string, string] | undefined>();
+  const [previewArrow, setPreviewArrow] = useState<{ from: string; to: string } | null>(null);
+  const [fenCopied, setFenCopied] = useState(false);
+  const [showCoordinates, setShowCoordinates] = useState(true);
+  const [clocks, setClocks] = useState<ClockState | null>(null);
+  const [status, setStatus] = useState<string>("WAITING");
+  const [timeControl, setTimeControl] = useState<string>("RAPID");
+  const [gameOver, setGameOver] = useState<GameOver | null>(null);
+  const [drawOffered, setDrawOffered] = useState(false);
+  const [drawIncoming, setDrawIncoming] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
+  const [confirmResign, setConfirmResign] = useState(false);
+  const [confirmDraw, setConfirmDraw] = useState(false);
+  const [confirmAcceptDraw, setConfirmAcceptDraw] = useState(false);
+  const [rematchOffered, setRematchOffered] = useState(false);
+  const [rematchIncoming, setRematchIncoming] = useState(false);
+  const [activeReactions, setActiveReactions] = useState<ActiveReaction[]>([]);
+  const lastReactionTime = useRef(0);
+
+  const sound = useSound();
+  const { darkMode, setDarkMode } = useSettingsStore();
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [flipDisplay, setFlipDisplay] = useState(false);
+
+  useKeyboardShortcuts({
+    ArrowLeft: () => setCurrentPly((p) => Math.max(0, p - 1)),
+    ArrowRight: () => setCurrentPly((p) => Math.min(moves.length, p + 1)),
+    Home: () => setCurrentPly(0),
+    End: () => setCurrentPly(moves.length),
+    r: () => status === "ACTIVE" && !gameOver && setConfirmResign(true),
+    R: () => status === "ACTIVE" && !gameOver && setConfirmResign(true),
+    f: () => setFlipDisplay((f) => !f),
+    F: () => setFlipDisplay((f) => !f),
+    Escape: () => {
+      setConfirmResign(false);
+      setConfirmDraw(false);
+      setConfirmAcceptDraw(false);
+      setShowShortcuts(false);
+    },
+    "?": () => setShowShortcuts((s) => !s),
+  });
+
+  const joinedRef = useRef(false);
+
+  const isWhite = user?.id === white?.id;
+  const baseOrientation = isWhite ? "white" : "black";
+  const orientation = flipDisplay
+    ? baseOrientation === "white"
+      ? "black"
+      : "white"
+    : baseOrientation;
+  const isMyTurn =
+    status === "ACTIVE" &&
+    ((clocks?.turn === "white" && isWhite) || (clocks?.turn === "black" && !isWhite));
+  const isActive = status === "ACTIVE";
+
+  useEffect(() => {
+    fetchMe();
+  }, [fetchMe]);
+
+  useEffect(() => {
+    if (user) connectSocket();
+  }, [user]);
+
+  const [isSpectator, setIsSpectator] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  // Load initial game state via REST (fallback to public endpoint for spectators)
+  useEffect(() => {
+    async function loadGame(data: { game: Record<string, unknown> }) {
+      const g = data.game as {
+        white: Player | null;
+        black: Player | null;
+        fen: string;
+        status: string;
+        timeControl: string;
+        moves?: { ply: number; san: string; uci?: string; fen: string }[];
+      };
+      setWhite(g.white);
+      setBlack(g.black);
+      setFen(g.fen);
+      setStatus(g.status);
+      setTimeControl(g.timeControl);
+
+      if (g.moves && g.moves.length > 0) {
+        const moveRecords = g.moves.map((m) => ({
+          ply: m.ply,
+          san: m.san,
+          fen: m.fen,
+        }));
+        setMoves(moveRecords);
+        setMoveUcis(g.moves.map((m) => m.uci || ""));
+        setCurrentPly(moveRecords.length);
+        const last = g.moves[g.moves.length - 1];
+        if (last.uci && last.uci.length >= 4) {
+          setLastMove([last.uci.slice(0, 2), last.uci.slice(2, 4)]);
+        }
+      }
+    }
+
+    async function load() {
+      try {
+        const { data } = await api.get(`/api/v1/games/${gameId}`);
+        await loadGame(data);
+      } catch {
+        // Not authenticated or game not found — try public view
+        try {
+          const { data } = await api.get(`/api/v1/games/${gameId}/view`);
+          await loadGame(data);
+          setIsSpectator(true);
+        } catch {
+          router.push("/login");
+        }
+      }
+    }
+    load();
+  }, [gameId, router]);
+
+  // Join game room via socket
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket || !user || joinedRef.current) return;
+
+    socket.emit("game:join", gameId);
+    joinedRef.current = true;
+
+    // Full state on reconnect
+    socket.on("game:state", (data) => {
+      const g = data.game;
+      setWhite(g.white);
+      setBlack(g.black);
+      setFen(g.fen);
+      setStatus(g.status);
+      if (data.clocks) setClocks(data.clocks);
+      if (g.moves && g.moves.length > 0) {
+        const moveRecords = g.moves.map((m: { ply: number; san: string; fen: string }) => ({
+          ply: m.ply,
+          san: m.san,
+          fen: m.fen,
+        }));
+        setMoves(moveRecords);
+        setMoveUcis(g.moves.map((m: { uci?: string }) => m.uci || ""));
+        setCurrentPly(moveRecords.length);
+      }
+      setReconnecting(false);
+      if (g.status === "ACTIVE") sound.playNotify();
+    });
+
+    socket.on("game:moved", (data) => {
+      setFen(data.fen);
+      setMoves((prev) => [...prev, { ply: data.ply, san: data.san, fen: data.fen }]);
+      setMoveUcis((prev) => [...prev, `${data.from}${data.to}`]);
+      setCurrentPly(data.ply);
+      setLastMove([data.from, data.to]);
+      if (data.clocks) setClocks(data.clocks);
+      setDrawIncoming(false);
+      setDrawOffered(false);
+      // Play sound
+      sound.play(
+        detectMoveSound({ san: data.san, captured: data.san.includes("x") ? "x" : undefined })
+      );
+    });
+
+    socket.on("game:over", (data: GameOver) => {
+      setGameOver(data);
+      setStatus("COMPLETED");
+      sound.playGameOver();
+    });
+
+    socket.on("game:draw:offered", () => {
+      setDrawIncoming(true);
+      sound.playNotify();
+    });
+
+    socket.on("game:draw:declined", () => {
+      setDrawOffered(false);
+    });
+
+    socket.on("game:rematch:offered", () => {
+      setRematchIncoming(true);
+      sound.playNotify();
+    });
+
+    socket.on("game:rematch:started", (data: { newGameId: string }) => {
+      router.push(`/game/${data.newGameId}`);
+    });
+
+    socket.on("game:reaction", (data: { userId: string; reaction: ReactionType }) => {
+      setActiveReactions((prev) => [
+        ...prev.slice(-4),
+        {
+          id: crypto.randomUUID(),
+          reaction: data.reaction,
+          fromOpponent: true,
+          timestamp: Date.now(),
+          xOffset: 15 + Math.random() * 70,
+        },
+      ]);
+      sound.playNotify();
+    });
+
+    socket.on("game:error", (data: { message: string }) => {
+      console.error("Game error:", data.message);
+    });
+
+    socket.on("disconnect", () => {
+      setReconnecting(true);
+    });
+
+    socket.on("connect", () => {
+      if (joinedRef.current) {
+        socket.emit("game:join", gameId);
+      }
+      setReconnecting(false);
+    });
+
+    return () => {
+      socket.off("game:state");
+      socket.off("game:moved");
+      socket.off("game:over");
+      socket.off("game:draw:offered");
+      socket.off("game:draw:declined");
+      socket.off("game:rematch:offered");
+      socket.off("game:rematch:started");
+      socket.off("game:reaction");
+      socket.off("game:error");
+    };
+  }, [gameId, user]);
+
+  const handleMove = useCallback(
+    (from: string, to: string, promotion?: string) => {
+      const socket = getSocket();
+      if (!socket || !isMyTurn) return;
+      socket.emit("game:move", { gameId, from, to, promotion });
+    },
+    [gameId, isMyTurn]
+  );
+
+  function resign() {
+    const socket = getSocket();
+    if (!socket) return;
+    socket.emit("game:resign", gameId);
+  }
+
+  function offerDraw() {
+    const socket = getSocket();
+    if (!socket) return;
+    socket.emit("game:draw:offer", gameId);
+    setDrawOffered(true);
+  }
+
+  function acceptDraw() {
+    const socket = getSocket();
+    if (!socket) return;
+    socket.emit("game:draw:accept", gameId);
+  }
+
+  function declineDraw() {
+    const socket = getSocket();
+    if (!socket) return;
+    socket.emit("game:draw:decline", gameId);
+    setDrawIncoming(false);
+  }
+
+  function sendReaction(reaction: ReactionType) {
+    const socket = getSocket();
+    if (!socket) return;
+    const now = Date.now();
+    if (now - lastReactionTime.current < 2000) return;
+    lastReactionTime.current = now;
+    socket.emit("game:reaction", { gameId, reaction });
+    setActiveReactions((prev) => [
+      ...prev.slice(-4),
+      {
+        id: crypto.randomUUID(),
+        reaction,
+        fromOpponent: false,
+        timestamp: now,
+        xOffset: 15 + Math.random() * 70,
+      },
+    ]);
+  }
+
+  function removeReaction(id: string) {
+    setActiveReactions((prev) => prev.filter((r) => r.id !== id));
+  }
+
+  function goToPly(ply: number) {
+    setCurrentPly(ply);
+  }
+
+  const displayFen =
+    currentPly === 0
+      ? "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+      : moves.find((m) => m.ply === currentPly)?.fen || fen;
+
+  const isViewingLatest = currentPly === moves.length;
+
+  const openingName = useMemo(() => {
+    if (moves.length === 0) return null;
+    const sans = moves.map((m) => m.san);
+    const opening = lookupOpening(sans);
+    return opening ? `${opening.eco} ${opening.name}` : null;
+  }, [moves]);
+
+  // Players based on orientation
+  const topPlayer = isWhite ? black : white;
+  const bottomPlayer = isWhite ? white : black;
+  const topClockMs = isWhite ? (clocks?.blackTimeLeft ?? 0) : (clocks?.whiteTimeLeft ?? 0);
+  const bottomClockMs = isWhite ? (clocks?.whiteTimeLeft ?? 0) : (clocks?.blackTimeLeft ?? 0);
+  const topActive = isWhite ? clocks?.turn === "black" : clocks?.turn === "white";
+  const bottomActive = isWhite ? clocks?.turn === "white" : clocks?.turn === "black";
+
+  const isUnlimited = timeControl === "UNLIMITED";
+
+  function resultLabel(go: GameOver) {
+    return `${RESULT_LABELS[go.result] || go.result} ${TERMINATION_LABELS[go.termination] || ""}`;
+  }
+
+  return (
+    <main className="flex flex-col h-[100dvh] lg:h-auto lg:min-h-screen overflow-hidden lg:overflow-auto p-1 lg:p-4">
+      <div className="max-w-5xl w-full mx-auto flex flex-col flex-1 min-h-0 lg:block">
+        <div className="flex flex-col lg:flex-row gap-1 lg:gap-6 items-start flex-1 min-h-0">
+          {/* ── LEFT: Board area ── */}
+          <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full justify-center lg:justify-start">
+            {/* Top player */}
+            <div className="flex items-center justify-between px-1 py-0.5">
+              <div className="flex items-center gap-1.5">
+                <div className="w-5 h-5 lg:w-8 lg:h-8 bg-gray-700 rounded-full flex items-center justify-center text-[10px] lg:text-sm font-bold shrink-0">
+                  {topPlayer?.username?.[0]?.toUpperCase() || "?"}
+                </div>
+                <span className="text-xs lg:text-sm font-medium truncate">
+                  {topPlayer?.username || "Opponent"}
+                  <span className="text-gray-400 ml-1">({topPlayer?.rating || "?"})</span>
+                </span>
+              </div>
+              {!isUnlimited && clocks && (
+                <PlayerClock timeMs={topClockMs} isActive={!!topActive} isRunning={isActive} />
+              )}
+            </div>
+
+            {/* Desktop: captured pieces */}
+            <div className="hidden lg:block">
+              <CapturedPieces fen={displayFen} color={isWhite ? "white" : "black"} />
+            </div>
+
+            {/* Board */}
+            <div className="w-full lg:w-[min(100%,480px)] relative">
+              <ChessBoard
+                fen={displayFen}
+                orientation={orientation}
+                movable={isActive && isMyTurn && isViewingLatest}
+                lastMove={lastMove}
+                check={false}
+                coordinates={showCoordinates}
+                onMove={handleMove}
+                arrows={
+                  previewArrow
+                    ? [{ from: previewArrow.from, to: previewArrow.to, color: "yellow" }]
+                    : undefined
+                }
+              />
+              <ReactionOverlay reactions={activeReactions} onExpired={removeReaction} />
+            </div>
+
+            {/* Desktop: captured pieces */}
+            <div className="hidden lg:block">
+              <CapturedPieces fen={displayFen} color={isWhite ? "black" : "white"} />
+            </div>
+
+            {/* Bottom player */}
+            <div className="flex items-center justify-between px-1 py-0.5">
+              <div className="flex items-center gap-1.5">
+                <div className="w-5 h-5 lg:w-8 lg:h-8 bg-gray-700 rounded-full flex items-center justify-center text-[10px] lg:text-sm font-bold shrink-0">
+                  {bottomPlayer?.username?.[0]?.toUpperCase() || "?"}
+                </div>
+                <span className="text-xs lg:text-sm font-medium truncate">
+                  {bottomPlayer?.username || "You"}
+                  <span className="text-gray-400 ml-1">({bottomPlayer?.rating || "?"})</span>
+                </span>
+              </div>
+              {!isUnlimited && clocks && (
+                <PlayerClock
+                  timeMs={bottomClockMs}
+                  isActive={!!bottomActive}
+                  isRunning={isActive}
+                />
+              )}
+            </div>
+
+            {/* Mobile: move timeline */}
+            <div className="lg:hidden">
+              <MoveTimeline
+                moves={moves}
+                currentPly={currentPly}
+                totalMoves={moves.length}
+                onGoToPly={goToPly}
+              />
+            </div>
+
+            {/* Mobile: action buttons (icons) */}
+            <div className="lg:hidden flex gap-1.5 justify-center px-1 py-0.5">
+              <button
+                onClick={() => setFlipDisplay((f) => !f)}
+                className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                title="Flip board"
+              >
+                {"\uD83D\uDD04"}
+              </button>
+              {isActive && !gameOver && (
+                <>
+                  {drawIncoming ? (
+                    <>
+                      <button
+                        onClick={() => setConfirmAcceptDraw(true)}
+                        className="px-2 py-1 bg-green-600 hover:bg-green-700 rounded text-xs"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={declineDraw}
+                        className="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+                      >
+                        Decline
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setConfirmDraw(true)}
+                        disabled={drawOffered}
+                        className="px-2 py-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded text-sm"
+                        title="Offer draw"
+                      >
+                        {drawOffered ? "\u2713" : "\uD83E\uDD1D"}
+                      </button>
+                      <button
+                        onClick={() => setConfirmResign(true)}
+                        className="px-2 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                        title="Resign"
+                      >
+                        {"\uD83C\uDFF3\uFE0F"}
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* ── RIGHT: Desktop panel ── */}
+          <div className="hidden lg:block flex-1 space-y-4 min-w-0">
+            {openingName && (
+              <div className="text-xs text-gray-400 text-center px-2 py-1 bg-gray-900 rounded">
+                {openingName}
+              </div>
+            )}
+            <MoveList
+              moves={moves}
+              currentPly={currentPly}
+              onGoToPly={goToPly}
+              onMoveHover={(ply) => {
+                const uci = moveUcis[ply - 1];
+                if (uci && uci.length >= 4) {
+                  setPreviewArrow({ from: uci.slice(0, 2), to: uci.slice(2, 4) });
+                }
+              }}
+              onMoveHoverEnd={() => setPreviewArrow(null)}
+            />
+            <div className="flex gap-2 justify-center flex-wrap">
+              <button
+                onClick={() => goToPly(0)}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+              >
+                &laquo;
+              </button>
+              <button
+                onClick={() => goToPly(Math.max(0, currentPly - 1))}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+              >
+                &lsaquo;
+              </button>
+              <button
+                onClick={() => goToPly(Math.min(moves.length, currentPly + 1))}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+              >
+                &rsaquo;
+              </button>
+              <button
+                onClick={() => goToPly(moves.length)}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+              >
+                &raquo;
+              </button>
+              <button
+                onClick={() => setFlipDisplay((f) => !f)}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+              >
+                &updownarrow;
+              </button>
+              <button
+                onClick={() => {
+                  navigator.clipboard
+                    .writeText(displayFen)
+                    .then(() => {
+                      setFenCopied(true);
+                      setTimeout(() => setFenCopied(false), 1500);
+                    })
+                    .catch(() => {});
+                }}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs"
+                title="Copy FEN"
+              >
+                {fenCopied ? "\u2713 FEN" : "FEN"}
+              </button>
+              <button
+                onClick={() => setShowCoordinates((c) => !c)}
+                className={`px-3 py-1.5 rounded text-xs ${showCoordinates ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-800 text-gray-500"}`}
+              >
+                a-h
+              </button>
+            </div>
+            {isActive && (
+              <div className="flex gap-2">
+                {drawIncoming ? (
+                  <>
+                    <button
+                      onClick={() => setConfirmAcceptDraw(true)}
+                      className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-medium"
+                    >
+                      Accept Draw
+                    </button>
+                    <button
+                      onClick={declineDraw}
+                      className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm font-medium"
+                    >
+                      Decline
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setConfirmDraw(true)}
+                      disabled={drawOffered}
+                      className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 rounded text-sm font-medium"
+                    >
+                      {drawOffered ? "Draw Offered" : "Offer Draw"}
+                    </button>
+                    <button
+                      onClick={() => setConfirmResign(true)}
+                      className="flex-1 py-2 bg-red-600 hover:bg-red-700 rounded text-sm font-medium"
+                    >
+                      Resign
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+            {isActive && !gameOver && (
+              <ReactionPicker onReact={sendReaction} disabled={!isActive} />
+            )}
+            {!isActive && (
+              <div className="flex gap-2 justify-center">
+                {!isSpectator && (
+                  <button
+                    onClick={() => router.push("/play")}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-medium"
+                  >
+                    Back to Play
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    navigator.clipboard
+                      .writeText(window.location.href)
+                      .then(() => {
+                        setShareCopied(true);
+                        setTimeout(() => setShareCopied(false), 2000);
+                      })
+                      .catch(() => {});
+                  }}
+                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded font-medium"
+                >
+                  {shareCopied ? "\u2713 Link Copied" : "Share Game"}
+                </button>
+              </div>
+            )}
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => setShowShortcuts(true)}
+                className="py-1 text-xs text-gray-500 hover:text-gray-300"
+              >
+                Shortcuts (?)
+              </button>
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="py-1 text-xs text-gray-500 hover:text-gray-300"
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? "\u2600\uFE0F Light" : "\uD83C\uDF19 Dark"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Reconnecting overlay */}
+      {reconnecting && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-40">
+          <div className="bg-gray-900 rounded-lg p-6 text-center">
+            <p className="text-lg font-medium mb-2">Reconnecting...</p>
+            <p className="text-gray-400 text-sm">Trying to reconnect to the game</p>
+          </div>
+        </div>
+      )}
+
+      {/* Game over modal */}
+      {gameOver && (
+        <GameOverModal
+          gameOver={gameOver}
+          rematchIncoming={rematchIncoming}
+          rematchOffered={rematchOffered}
+          onRematchOffer={() => {
+            const socket = getSocket();
+            if (socket) {
+              socket.emit("game:rematch:offer", gameId);
+              setRematchOffered(true);
+            }
+          }}
+          onRematchAccept={() => {
+            const socket = getSocket();
+            if (socket) socket.emit("game:rematch:accept", gameId);
+          }}
+          onRematchDecline={() => {
+            setRematchIncoming(false);
+            router.push("/play");
+          }}
+          onClose={() => {
+            setGameOver(null);
+            router.push("/play");
+          }}
+          resultLabel={resultLabel(gameOver)}
+        />
+      )}
+
+      <KeyboardShortcutsHelp
+        open={showShortcuts}
+        onClose={() => setShowShortcuts(false)}
+        shortcuts={[
+          { key: "←/→", description: "Previous/next move" },
+          { key: "Home/End", description: "First/last move" },
+          { key: "R", description: "Resign" },
+          { key: "F", description: "Flip board" },
+          { key: "Esc", description: "Close modal" },
+          { key: "?", description: "This help" },
+        ]}
+      />
+
+      {/* Confirmation modals */}
+      <ConfirmModal
+        open={confirmResign}
+        title="Resign?"
+        message="Are you sure you want to resign this game? Your opponent will win."
+        confirmLabel="Resign"
+        confirmVariant="danger"
+        onConfirm={() => {
+          resign();
+          setConfirmResign(false);
+        }}
+        onCancel={() => setConfirmResign(false)}
+      />
+      <ConfirmModal
+        open={confirmDraw}
+        title="Offer Draw?"
+        message="Are you sure you want to offer a draw to your opponent?"
+        confirmLabel="Offer Draw"
+        confirmVariant="primary"
+        onConfirm={() => {
+          offerDraw();
+          setConfirmDraw(false);
+        }}
+        onCancel={() => setConfirmDraw(false)}
+      />
+      <ConfirmModal
+        open={confirmAcceptDraw}
+        title="Accept Draw?"
+        message="Are you sure you want to accept the draw offer? The game will end as a draw."
+        confirmLabel="Accept"
+        confirmVariant="primary"
+        onConfirm={() => {
+          acceptDraw();
+          setConfirmAcceptDraw(false);
+        }}
+        onCancel={() => setConfirmAcceptDraw(false)}
+      />
+    </main>
+  );
+}

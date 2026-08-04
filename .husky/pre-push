@@ -1,0 +1,1 @@
+pnpm exec turbo test --concurrency=1

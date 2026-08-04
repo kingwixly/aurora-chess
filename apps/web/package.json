@@ -1,0 +1,47 @@
+{
+  "name": "@eyeonchess/web",
+  "version": "2.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000 --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@eyeonchess/api-client": "workspace:*",
+    "@eyeonchess/chess": "workspace:*",
+    "@eyeonchess/ui": "workspace:*",
+    "axios": "^1.13.6",
+    "chess.js": "^1.4.0",
+    "chessground": "^9.2.1",
+    "next": "^14",
+    "next-pwa": "^5.6.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "sharp": "^0.33.0",
+    "socket.io-client": "^4.8.3",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "babel-loader": "^8.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.0",
+    "autoprefixer": "^10",
+    "jsdom": "^29.0.1",
+    "postcss": "^8",
+    "tailwindcss": "^3",
+    "typescript": "^5",
+    "vitest": "^4.1.0"
+  }
+}

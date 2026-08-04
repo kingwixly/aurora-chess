@@ -1,0 +1,361 @@
+<p align="center">
+  <img src="logo.png" alt="EyeOnChess" width="200">
+</p>
+<h1 align="center">EyeOnChess</h1>
+<p align="center">A fully self-hostable, open source chess platform.<br/>Play, analyze, and compete — on your own server.</p>
+
+<p align="center">
+  <a href="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/ci.yml"><img src="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/security.yml"><img src="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/security.yml/badge.svg" alt="Security"></a>
+  <a href="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/release.yml"><img src="https://github.com/amiwrpremium/eye-on-chess/actions/workflows/release.yml/badge.svg" alt="Release"></a>
+  <a href="https://app.codacy.com/gh/amiwrpremium/eye-on-chess/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/bec76f3311ba4634bb6456cbf9cc36b6" alt="Codacy Badge"></a>
+  <a href="https://app.codacy.com/gh/amiwrpremium/eye-on-chess/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage"><img src="https://app.codacy.com/project/badge/Coverage/bec76f3311ba4634bb6456cbf9cc36b6" alt="Codacy Coverage"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/node-%3E%3D22-339933?logo=node.js&logoColor=white" alt="Node.js >= 22">
+  <a href="https://github.com/amiwrpremium/eye-on-chess/commits/master"><img src="https://img.shields.io/github/last-commit/amiwrpremium/eye-on-chess" alt="Last Commit"></a>
+  <a href="https://github.com/amiwrpremium/eye-on-chess/issues"><img src="https://img.shields.io/github/issues/amiwrpremium/eye-on-chess" alt="Issues"></a>
+  <a href="https://github.com/amiwrpremium/eye-on-chess/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+  <img src="https://img.shields.io/github/repo-size/amiwrpremium/eye-on-chess" alt="Repo Size">
+  <img src="https://img.shields.io/github/languages/top/amiwrpremium/eye-on-chess" alt="Top Language">
+  <a href="https://github.com/amiwrpremium/eye-on-chess/stargazers"><img src="https://img.shields.io/github/stars/amiwrpremium/eye-on-chess?style=social" alt="Stars"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-14-black?logo=next.js" alt="Next.js 14">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white" alt="React 18">
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 3">
+  <img src="https://img.shields.io/badge/Fastify-5-000000?logo=fastify&logoColor=white" alt="Fastify 5">
+  <img src="https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white" alt="Prisma 6">
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white" alt="Redis">
+  <img src="https://img.shields.io/badge/Socket.io-4-010101?logo=socket.io&logoColor=white" alt="Socket.io 4">
+  <img src="https://img.shields.io/badge/Stockfish-15-5C9E31" alt="Stockfish 15">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Nginx-Alpine-009639?logo=nginx&logoColor=white" alt="Nginx">
+  <img src="https://img.shields.io/badge/Node.js-22_LTS-339933?logo=node.js&logoColor=white" alt="Node.js 22">
+  <img src="https://img.shields.io/badge/pnpm-10-F69220?logo=pnpm&logoColor=white" alt="pnpm 10">
+  <img src="https://img.shields.io/badge/Turborepo-2-EF4444?logo=turborepo&logoColor=white" alt="Turborepo">
+  <img src="https://img.shields.io/badge/Vitest-4-6E9F18?logo=vitest&logoColor=white" alt="Vitest 4">
+  <img src="https://img.shields.io/badge/ESLint-9-4B32C3?logo=eslint&logoColor=white" alt="ESLint 9">
+  <img src="https://img.shields.io/badge/Prettier-3-F7B93E?logo=prettier&logoColor=black" alt="Prettier 3">
+  <img src="https://img.shields.io/badge/Pino-10-687634" alt="Pino 10">
+  <img src="https://img.shields.io/badge/Zustand-5-764ABC" alt="Zustand 5">
+  <img src="https://img.shields.io/badge/chess.js-1.4-green" alt="chess.js">
+  <img src="https://img.shields.io/badge/Chessground-9-B58863" alt="Chessground">
+  <img src="https://img.shields.io/badge/Grafana-11-F46800?logo=grafana&logoColor=white" alt="Grafana 11">
+  <img src="https://img.shields.io/badge/Prometheus-3-E6522C?logo=prometheus&logoColor=white" alt="Prometheus 3">
+  <img src="https://img.shields.io/badge/Loki-3-F7D02C?logo=grafana&logoColor=black" alt="Loki 3">
+  <img src="https://img.shields.io/badge/Promtail-3-F7D02C" alt="Promtail 3">
+</p>
+
+---
+
+## Screenshots
+
+See the full step-by-step walkthrough in the [`screenshots/`](screenshots/README.md) directory.
+
+---
+
+## Features
+
+**Game Play**
+
+- Real-time multiplayer via Socket.io
+- Challenge friends directly
+- 31 bot personalities from Amir (200) to Erfan (3200) — each with unique playstyle and behavior
+- Three bot tiers: custom JS engine (200-1200), Stockfish hybrid (1300-1900), full Stockfish (2000+)
+- Bot chat messages — bots talk during games based on personality and game events
+- Simulated think time — bots pause before moving (beginners: 1-3s confused, grandmasters: 300ms instant)
+- Bot emoji reactions — bots send 👍 ✨ 🤦 🤔 based on personality during games
+- Opening preferences — custom-tier bots follow preferred openings (Bella attempts Scholar's Mate, Ahmed plays Ruy Lopez)
+- Game mode presets: Challenge (no help), Friendly (hints + takebacks), Assisted (all tools), Custom
+- Time controls: Bullet, Blitz, Rapid, Classical, Unlimited, or custom
+- Elo rating system (K=32) with automatic updates
+- Draw offers, resignation, timeout detection
+- Rematch system after game ends
+- Emoji reactions during live games (6 chess-themed reactions)
+- Move feedback and classification during bot games
+- PGN export (copy to clipboard + .pgn file download)
+- Game notes (per-game annotations, auto-saved)
+- Sound effects on moves, captures, check, and game events
+
+**Post-Game Analysis**
+
+- Stockfish-powered analysis (depth 18) on every position
+- Move classifications: Brilliant, Great, Best, Excellent, Good, Inaccuracy, Mistake, Blunder
+- Per-player accuracy percentage
+- Interactive evaluation graph
+- Best move arrows for mistakes
+- Opening recognition (ECO codes)
+
+**Personal Stats**
+
+- Rating history chart
+- Win/loss/draw record (overall, vs humans, vs bots)
+- Top openings with win rates
+- Accuracy tracking (average, best, worst game)
+- Win/loss streaks
+- 30-day activity chart
+
+**Social**
+
+- Friend system with online presence indicators
+- User profiles with game statistics (wins/losses/draws)
+- User search
+- Activity feed showing recent games, analyses, and new friends
+- Keyboard shortcuts throughout the app
+
+**Collections**
+
+- Organize games into named collections
+- Add/remove games from collections
+- Browse collection contents
+
+**Invite System**
+
+- Invite-only registration with invite codes
+- Quota system: 10 invites per batch, 75% usage unlocks next batch
+- Admin can generate invites
+
+**PWA & Offline**
+
+- Progressive Web App — installable on mobile and desktop
+- Offline bot play with Stockfish WASM (same behavior as online)
+- Offline games sync to server when connection resumes
+- Offline fallback page when navigating without network
+- Online-only features (friends, history, stats, etc.) grayed out when offline
+- Smart caching: pages, WASM, sounds, fonts, images all cached for offline use
+
+**Customization**
+
+- Dark / light mode
+- 6 board themes: Classic, Wood, Green, Blue, Purple, Dark
+- 3 piece styles: Classic, Modern, Minimal
+- Sound toggle
+- Settings saved to your profile (synced across devices)
+- White-label support (custom site name and URL)
+
+**API**
+
+- Versioned API (`/api/v1/`) with backward-compatible redirects
+- Zod runtime request validation with auto-generated OpenAPI schemas
+- Structured error codes (`{ code: "AUTH_INVALID_CREDENTIALS", error: "..." }`)
+- Interactive API docs at `/docs` (Swagger UI)
+
+**Admin Panel**
+
+- Rich dashboard with 17+ metrics: user/game stats, result distribution, time control popularity, bot vs human split, top bots, online count
+- User management: search, activate/deactivate, verify, promote/demote, create, delete
+- Game management: browse, filter by status, delete
+- Bot personality editor: edit all parameters via sliders, JSON editors for messages and openings, enable/disable, create/delete bots
+- Reseed from YAML: one-click reset of all bot personalities to YAML defaults
+- Site settings: registration toggle, max users, email verification
+- Full audit log of all admin actions
+- CSRF protection on all mutations
+
+**Self-Hosting**
+
+- Single command deploy: `docker compose up`
+- No external services or third-party APIs
+- PostgreSQL with PgBouncer connection pooling (transaction mode, password from env)
+- Redis with password authentication
+- Nginx reverse proxy with WebSocket support
+- Automatic database migrations on startup
+- Database backup script with rotation
+- Configurable registration (open/closed, user limits)
+- Zombie game cleanup: server automatically aborts bot games stuck in ACTIVE status for >24 hours (runs every 5 minutes)
+- YAML-configurable rate limiting with hot-reload (no restart needed)
+- Request logging with sensitive field redaction
+- Terms of Service / Privacy Policy gate (users must accept)
+- Conventional commits enforced via git hooks
+
+## Quick Start
+
+```bash
+git clone https://github.com/amiwrpremium/eye-on-chess.git
+cd eye-on-chess
+cp .env.example .env
+# Edit .env — at minimum, change JWT_SECRET and SEED_USER_PASSWORD
+docker compose -f deployment/docker-compose.yml up -d
+```
+
+Open **http://localhost** and log in with the admin credentials from your `.env`.
+
+### Development
+
+```bash
+docker compose -f deployment/docker-compose.dev.yml up --build
+```
+
+All traffic goes through Nginx on **http://localhost** (port 80). No other ports are exposed.
+
+Source files are volume-mounted — changes hot-reload automatically.
+
+To populate the database with demo data (10 users, friendships, games, collections):
+
+```bash
+make seed-demo     # All demo users use password: demo123456
+```
+
+## Configuration
+
+All configuration is done via environment variables in `.env`. See [`.env.example`](.env.example) for a fully documented template.
+
+### Required
+
+| Variable       | Description                                                  |
+| -------------- | ------------------------------------------------------------ |
+| `DATABASE_URL` | PostgreSQL connection string                                 |
+| `REDIS_URL`    | Redis connection string                                      |
+| `JWT_SECRET`   | Secret for JWT signing. Generate with `openssl rand -hex 32` |
+
+### Site
+
+| Variable              | Default            | Description                            |
+| --------------------- | ------------------ | -------------------------------------- |
+| `SITE_NAME`           | `EyeOnChess`       | Display name (white-label)             |
+| `SITE_URL`            | `http://localhost` | Public URL                             |
+| `NEXT_PUBLIC_API_URL` | `http://localhost` | Public URL (routed through Nginx)      |
+| `API_URL`             | `http://api:3001`  | Internal API URL (Docker network)      |
+| `NODE_ENV`            | `development`      | Set to `production` for secure cookies |
+
+### Registration
+
+| Variable                     | Default | Description                            |
+| ---------------------------- | ------- | -------------------------------------- |
+| `REGISTRATION_OPEN`          | `true`  | Set `false` to close registrations     |
+| `MAX_USERS`                  | `0`     | Max users allowed (0 = unlimited)      |
+| `REQUIRE_EMAIL_VERIFICATION` | `false` | Block unverified users from logging in |
+
+### Admin Seed
+
+| Variable             | Default                  | Description                       |
+| -------------------- | ------------------------ | --------------------------------- |
+| `SEED_USER_EMAIL`    | `admin@eyeonchess.local` | Admin email                       |
+| `SEED_USER_USERNAME` | `admin`                  | Admin username                    |
+| `SEED_USER_PASSWORD` | `changeme123`            | Admin password — **change this!** |
+
+### Worker
+
+| Variable         | Default     | Description              |
+| ---------------- | ----------- | ------------------------ |
+| `STOCKFISH_PATH` | `stockfish` | Path to Stockfish binary |
+
+### Observability (Grafana)
+
+| Variable                 | Default | Description                                     |
+| ------------------------ | ------- | ----------------------------------------------- |
+| `GRAFANA_ADMIN_USER`     | `admin` | Grafana admin username                          |
+| `GRAFANA_ADMIN_PASSWORD` | `admin` | Grafana admin password                          |
+| `GRAFANA_PORT`           | —       | Removed — use `grafana.{your-domain}` subdomain |
+
+## Architecture
+
+```
+apps/web        → Next.js 14 frontend — player-facing (TypeScript, Tailwind CSS)
+apps/admin      → Next.js 14 admin panel — separate subdomain (TypeScript, Tailwind CSS)
+apps/api        → Fastify backend (TypeScript, Prisma, Socket.io)
+packages/chess  → Shared chess types, constants, helpers
+packages/ui     → Shared UI components (Toast, ConfirmModal, Skeleton)
+deployment/     → Dockerfiles, Docker Compose files, Nginx config
+scripts/        → Backup utilities
+```
+
+### Services
+
+| Service        | Role                                                            |
+| -------------- | --------------------------------------------------------------- |
+| **Nginx**      | Reverse proxy (ports 80/443), routes /api and /socket.io to API |
+| **Certbot**    | Automatic SSL via Let's Encrypt (runs once, then renews)        |
+| **Migrate**    | Database migrations + seeds (init container, runs once)         |
+| **Web**        | Next.js frontend (player-facing)                                |
+| **Admin**      | Next.js admin panel (`admin.{domain}` subdomain)                |
+| **API**        | Fastify REST API + Socket.io for real-time                      |
+| **Worker**     | Stockfish analysis pipeline (polls Redis queue)                 |
+| **Postgres**   | Primary database (Prisma ORM)                                   |
+| **PgBouncer**  | Connection pooler for PostgreSQL (transaction mode)             |
+| **Redis**      | Presence, game clocks, analysis job queue, caching              |
+| **Prometheus** | Metrics collection (scrapes API /metrics every 15s)             |
+| **Loki**       | Log aggregation                                                 |
+| **Promtail**   | Ships Docker container logs to Loki                             |
+| **Grafana**    | Dashboards and log viewer (via `grafana.{domain}` subdomain)    |
+
+## Tech Stack
+
+| Layer         | Technology                                                 |
+| ------------- | ---------------------------------------------------------- |
+| Frontend      | Next.js 14 (App Router), TypeScript, Tailwind CSS, Zustand |
+| Board UI      | Chessground                                                |
+| Chess Logic   | chess.js                                                   |
+| Backend       | Fastify, TypeScript, Zod                                   |
+| Database      | PostgreSQL, Prisma ORM, PgBouncer                          |
+| Real-time     | Socket.io                                                  |
+| Cache         | Redis                                                      |
+| Analysis      | Stockfish 15                                               |
+| Auth          | Custom JWT (access token + httpOnly refresh cookie)        |
+| Observability | Grafana 11, Prometheus 3, Loki 3, Promtail 3               |
+| Deployment    | Docker Compose, Nginx                                      |
+
+## Backup & Restore
+
+```bash
+# Backup
+./scripts/backup.sh
+
+# Restore
+gunzip -c backups/eyeonchess_YYYYMMDD_HHMMSS.sql.gz | \
+  docker compose -f deployment/docker-compose.yml exec -T postgres psql -U postgres eyeonchess
+```
+
+Backups are saved to `./backups/` with automatic rotation (keeps last 7).
+
+## Documentation
+
+Full documentation is in the [`docs/`](docs/index.md) directory:
+
+- [Quick Start](docs/getting-started/quick-start.md)
+- [Configuration Reference](docs/getting-started/configuration.md)
+- [Architecture Overview](docs/architecture/overview.md)
+- [API Reference](docs/api/index.md)
+- [Frontend Guide](docs/frontend/index.md)
+- [Bot Personalities](docs/frontend/bots.md)
+- [Admin Panel](docs/admin/overview.md)
+- [Database Schema](docs/database/schema.md)
+- [Deployment Guide](docs/deployment/index.md)
+
+### Testing
+
+```bash
+# Run all tests
+pnpm test
+
+# Run tests for a specific package
+pnpm --filter api test
+```
+
+## Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for:
+
+- How to run locally
+- Branch naming conventions
+- PR guidelines
+- Code style notes
+
+## Acknowledgments
+
+- **[Stockfish](https://stockfishchess.org/)** — The powerful open source chess engine used for game analysis and bot play. Stockfish is licensed under the [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.en.html). We are grateful to the Stockfish team and contributors for making this incredible engine freely available.
+- **[chess.js](https://github.com/jhlywa/chess.js)** — Chess move generation, validation, and FEN/PGN parsing.
+- **[Chessground](https://github.com/lichess-org/chessground)** — The interactive chessboard UI library, originally built for [Lichess](https://lichess.org/).
+- **[Lichess](https://lichess.org/)** — Inspiration for many features and UX patterns.
+
+## Disclaimer
+
+This software is provided **"as is"**, without warranty of any kind, express or implied. Use it at your own risk.
+
+EyeOnChess is an independent open source project. It is **not affiliated with, endorsed by, or associated with** Lichess, Chess.com, Stockfish, or any other chess platform or organization. All trademarks and product names are the property of their respective owners.
+
+## License
+
+[MIT](LICENSE)

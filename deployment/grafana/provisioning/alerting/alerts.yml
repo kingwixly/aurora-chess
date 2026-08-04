@@ -1,0 +1,71 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: EyeOnChess Alerts
+    folder: EyeOnChess
+    interval: 1m
+    rules:
+      - uid: analysis-queue-stuck
+        title: Analysis queue depth high
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: eyeonchess_analysis_queue_depth
+              intervalMs: 15000
+              maxDataPoints: 20
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [50]
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Analysis queue depth has been above 50 for 5 minutes
+          description: "Current depth: {{ $value }}. Worker may be stuck or overwhelmed."
+
+      - uid: active-games-spike
+        title: Active games unusually high
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: eyeonchess_active_games
+              intervalMs: 15000
+              maxDataPoints: 20
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [100]
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Active games count unusually high
+          description: "{{ $value }} active games. May indicate stuck games not being cleaned up."

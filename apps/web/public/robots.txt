@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /game/
+Disallow: /board-test
+
+Sitemap: /sitemap.xml

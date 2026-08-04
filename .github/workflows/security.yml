@@ -1,0 +1,60 @@
+name: Security
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: "0 6 * * 1" # Weekly Monday 6am UTC
+
+jobs:
+  audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
+        continue-on-error: true
+
+  secrets-scan:
+    name: Secrets Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Scanning for potential secrets..."
+          FOUND=0
+
+          # Check for common secret patterns in source files
+          if grep -rn --include="*.ts" --include="*.tsx" --include="*.js" \
+            -E "(password|secret|token|key)\s*[:=]\s*['\"][^'\"]{8,}" \
+            apps/ packages/ 2>/dev/null | grep -v "node_modules" | grep -v ".test."; then
+            echo "WARNING: Possible hardcoded secrets found"
+            FOUND=1
+          fi
+
+          # Check for .env files that shouldn't be committed
+          if git ls-files | grep -E "^\.env$|^\.env\.local$"; then
+            echo "ERROR: .env file tracked in git"
+            FOUND=1
+          fi
+
+          if [ $FOUND -eq 0 ]; then
+            echo "No secrets found"
+          fi

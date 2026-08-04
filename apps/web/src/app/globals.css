@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html.light body {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+html.light .bg-gray-950 {
+  background-color: #ffffff;
+}
+html.light .bg-gray-900 {
+  background-color: #f3f4f6;
+}
+html.light .bg-gray-800 {
+  background-color: #e5e7eb;
+}
+html.light .bg-gray-700 {
+  background-color: #d1d5db;
+}
+html.light .text-white {
+  color: #111827;
+}
+html.light .text-gray-300 {
+  color: #374151;
+}
+html.light .text-gray-400 {
+  color: #6b7280;
+}
+html.light .text-gray-500 {
+  color: #9ca3af;
+}
+html.light .border-gray-700 {
+  border-color: #d1d5db;
+}
+
+@keyframes reaction-float {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+.animate-reaction-float {
+  animation: reaction-float 2.5s ease-out forwards;
+}

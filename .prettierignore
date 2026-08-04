@@ -1,0 +1,10 @@
+node_modules/
+.next/
+dist/
+.turbo/
+pnpm-lock.yaml
+backups/
+*.sql
+apps/web/public/stockfish/
+.claude/
+.pnpm-store/

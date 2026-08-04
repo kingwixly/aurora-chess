@@ -1,0 +1,73 @@
+#!/bin/bash
+# Conventional Commit Message Validator
+# This file is the single source of truth for allowed types and scopes.
+
+# ── Allowed Types ────────────────────────────────────────
+TYPES=(
+  feat      # New feature
+  fix       # Bug fix
+  docs      # Documentation only
+  style     # Formatting, no logic change
+  refactor  # Code restructuring, no feature/fix
+  perf      # Performance improvement
+  test      # Adding or updating tests
+  build     # Build system or dependencies
+  ci        # CI/CD changes
+  chore     # Maintenance, tooling
+  revert    # Reverting a previous commit
+)
+
+# ── Allowed Scopes ───────────────────────────────────────
+SCOPES=(
+  api         # Backend (Fastify, routes, middleware)
+  web         # Frontend (Next.js, components, pages)
+  db          # Database schema, migrations, seed
+  auth        # Authentication, JWT, sessions
+  game        # Game logic, clocks, Socket.io events
+  analysis    # Stockfish, classification, worker
+  admin       # Admin panel, audit, settings
+  friends     # Friend system, presence
+  deploy      # Docker, Nginx, compose, CI
+  docs        # Documentation
+  test        # Test infrastructure
+  lint        # Linting, formatting config
+  deps        # Dependency updates
+)
+
+# ── Validation ───────────────────────────────────────────
+commit_msg_file="$1"
+commit_msg=$(head -1 "$commit_msg_file")
+
+# Build regex from arrays
+types_pattern=$(IFS='|'; echo "${TYPES[*]}")
+scopes_pattern=$(IFS='|'; echo "${SCOPES[*]}")
+
+# Pattern: type(scope): subject  OR  type: subject
+pattern="^(${types_pattern})(\((${scopes_pattern})\))?: .+$"
+
+if ! echo "$commit_msg" | grep -Eq "$pattern"; then
+  echo ""
+  echo "ERROR: Invalid commit message format."
+  echo ""
+  echo "Expected: <type>(<scope>): <subject>"
+  echo "Example:  feat(api): add user search endpoint"
+  echo ""
+  echo "Allowed types: ${TYPES[*]}"
+  echo "Allowed scopes: ${SCOPES[*]}"
+  echo ""
+  exit 1
+fi
+
+# Check subject starts lowercase
+subject=$(echo "$commit_msg" | sed -E "s/^[a-z]+(\([a-z]+\))?: //")
+if echo "$subject" | grep -Eq "^[A-Z]"; then
+  echo "ERROR: Subject must start with lowercase letter."
+  echo "Got: $subject"
+  exit 1
+fi
+
+# Check no trailing period
+if echo "$commit_msg" | grep -Eq "\.$"; then
+  echo "ERROR: Subject must not end with a period."
+  exit 1
+fi

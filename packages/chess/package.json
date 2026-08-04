@@ -1,0 +1,24 @@
+{
+  "name": "@eyeonchess/chess",
+  "version": "2.2.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.0",
+    "typescript": "^5",
+    "vitest": "^4"
+  },
+  "dependencies": {
+    "chess.js": "^1.4.0"
+  }
+}

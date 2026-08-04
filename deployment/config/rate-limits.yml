@@ -1,0 +1,94 @@
+# ──────────────────────────────────────────────────────────
+# EyeOnChess Rate Limiting Configuration
+#
+# Changes to this file are hot-reloaded (no restart needed).
+# Mount this file into the API container at /app/config/rate-limits.yml
+#
+# Format:
+#   max: max requests in the time window
+#   timeWindow: window duration (e.g. "1 minute", "10 seconds", "1 hour")
+#   methods: optional array of HTTP methods (default: all)
+#
+# ──────────────────────────────────────────────────────────
+
+# Global default — applies to all routes not listed below
+global:
+  max: 100
+  timeWindow: "1 minute"
+
+# Per-route overrides
+routes:
+  # Auth — strict to prevent brute force
+  "/api/v1/auth/login":
+    max: 5
+    timeWindow: "1 minute"
+
+  "/api/v1/auth/register":
+    max: 5
+    timeWindow: "1 minute"
+
+  "/api/v1/auth/refresh":
+    max: 30
+    timeWindow: "1 minute"
+
+  "/api/v1/auth/logout":
+    max: 10
+    timeWindow: "1 minute"
+
+  # Game creation
+  "/api/v1/games/bot":
+    max: 10
+    timeWindow: "1 minute"
+
+  "/api/v1/games/friend":
+    max: 10
+    timeWindow: "1 minute"
+
+  # Game moves — higher limit for active play
+  "/api/v1/games/*/move":
+    max: 60
+    timeWindow: "1 minute"
+
+  # Game sync — expensive (chess.js replay + DB transaction)
+  "/api/v1/games/*/sync-moves":
+    max: 5
+    timeWindow: "1 minute"
+
+  "/api/v1/games/sync":
+    max: 10
+    timeWindow: "1 minute"
+
+  # Analysis — expensive operation
+  "/api/v1/games/*/analyze":
+    max: 5
+    timeWindow: "1 minute"
+
+  # Admin — already has its own rate limiter, but cap globally too
+  "/api/v1/admin/*":
+    max: 60
+    timeWindow: "1 minute"
+
+  # User profiles — public, unauthenticated
+  "/api/v1/users/*":
+    max: 30
+    timeWindow: "1 minute"
+
+  # User search
+  "/api/v1/users/search":
+    max: 30
+    timeWindow: "1 minute"
+
+  # Health check — limited to prevent abuse (Docker healthcheck + monitoring)
+  "/health":
+    max: 120
+    timeWindow: "1 minute"
+
+  # Metrics — no limit (Prometheus scrapes)
+  "/metrics":
+    max: 1000
+    timeWindow: "1 minute"
+
+  # Public game view — unauthenticated
+  "/api/v1/games/*/view":
+    max: 30
+    timeWindow: "1 minute"

@@ -1,0 +1,45 @@
+FROM node:22-alpine AS base
+RUN apk add --no-cache wget libc6-compat && npm install -g pnpm@10.32.1
+
+FROM base AS deps
+WORKDIR /app
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json tsconfig.base.json ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/api-client/package.json ./packages/api-client/
+COPY packages/chess/package.json ./packages/chess/
+COPY packages/ui/package.json ./packages/ui/
+COPY tooling/eslint-config/package.json ./tooling/eslint-config/
+COPY tooling/prettier-config/package.json ./tooling/prettier-config/
+COPY tooling/typescript-config/package.json ./tooling/typescript-config/
+RUN pnpm install --frozen-lockfile && pnpm store prune
+
+FROM base AS builder
+WORKDIR /app
+ENV NODE_ENV=production
+ARG NEXT_PUBLIC_API_URL=http://localhost
+ARG NEXT_PUBLIC_ADMIN_URL=
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_ADMIN_URL=${NEXT_PUBLIC_ADMIN_URL}
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=deps /app/packages/api-client/node_modules* ./packages/api-client/node_modules/
+COPY --from=deps /app/packages/chess/node_modules* ./packages/chess/node_modules/
+COPY --from=deps /app/packages/ui/node_modules* ./packages/ui/node_modules/
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json tsconfig.base.json ./
+COPY tooling ./tooling
+COPY packages/api-client ./packages/api-client
+COPY packages/chess ./packages/chess
+COPY packages/ui ./packages/ui
+COPY apps/web ./apps/web
+RUN pnpm --filter @eyeonchess/web build
+
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
+
+EXPOSE 3000
+ENV HOSTNAME="0.0.0.0"
+CMD ["node", "apps/web/server.js"]

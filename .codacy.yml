@@ -1,0 +1,48 @@
+---
+engines:
+  duplication:
+    exclude_paths:
+      - "apps/web/public/stockfish/**"
+      - "apps/api/prisma/migrations/**"
+
+exclude_paths:
+  # Database migrations (auto-generated)
+  - "apps/api/prisma/migrations/**"
+  # Documentation
+  - "docs/**"
+  - "**.md"
+  # Docker and deployment
+  - "deployment/**"
+  - "apps/api/Dockerfile"
+  - "apps/api/Dockerfile.worker"
+  - "apps/web/Dockerfile"
+  - "Makefile"
+  # CI/CD workflows
+  - ".github/**"
+  # Vendored/third-party
+  - "apps/web/public/stockfish/**"
+  # Config files
+  - "**.json"
+  - "**.yml"
+  - "**.yaml"
+  - ".prettierignore"
+  - ".gitignore"
+  # Generated/build output
+  - "**/dist/**"
+  - "**/.next/**"
+  - "**/coverage/**"
+  - "**/node_modules/**"
+  # Lock files
+  - "pnpm-lock.yaml"
+  # Scripts and tooling
+  - "scripts/**"
+  - ".claude/**"
+  - ".githooks/**"
+  - ".husky/**"
+  # Test setup
+  - "apps/web/src/test-setup.ts"
+  # Assets
+  - "**.png"
+  - "**.ico"
+  - "**.wasm"
+  - "**.svg"

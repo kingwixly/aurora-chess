@@ -1,0 +1,338 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @eyeonchess/api run db:generate
+
+      - name: ESLint
+        run: pnpm lint:eslint
+
+      - name: Prettier
+        run: pnpm format:check
+
+      - name: TypeScript
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            pnpm turbo run typecheck --filter='...[origin/master]'
+          else
+            pnpm turbo run typecheck
+          fi
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: ci-test-secret
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @eyeonchess/api run db:generate
+
+      - name: Run tests with coverage
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            pnpm turbo run test:coverage --filter='...[origin/master]'
+          else
+            pnpm turbo run test:coverage
+          fi
+
+      - name: Upload chess coverage
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: chess-coverage
+          path: packages/chess/coverage/lcov.info
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Upload API coverage
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-coverage
+          path: apps/api/coverage/lcov.info
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Upload web coverage
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-coverage
+          path: apps/web/coverage/lcov.info
+          retention-days: 1
+          if-no-files-found: ignore
+
+  # Detect which paths changed (for conditional Docker builds on PRs)
+  changes:
+    name: Detect Changes
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      web: ${{ steps.filter.outputs.web }}
+      worker: ${{ steps.filter.outputs.worker }}
+      migrate: ${{ steps.filter.outputs.migrate }}
+      admin: ${{ steps.filter.outputs.admin }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'packages/chess/**'
+              - 'deployment/Dockerfile.base'
+              - 'pnpm-lock.yaml'
+            web:
+              - 'apps/web/**'
+              - 'packages/chess/**'
+              - 'packages/api-client/**'
+              - 'packages/ui/**'
+              - 'deployment/Dockerfile.base'
+              - 'pnpm-lock.yaml'
+            worker:
+              - 'apps/api/**'
+              - 'packages/chess/**'
+              - 'deployment/Dockerfile.base'
+              - 'pnpm-lock.yaml'
+            migrate:
+              - 'apps/api/prisma/**'
+              - 'deployment/Dockerfile.base'
+              - 'pnpm-lock.yaml'
+            admin:
+              - 'apps/admin/**'
+              - 'packages/api-client/**'
+              - 'packages/ui/**'
+              - 'pnpm-lock.yaml'
+
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    needs: [lint, test, changes]
+    if: |
+      always() &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      (github.event_name == 'push' || needs.changes.outputs.api == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+
+      - name: Build API Docker image
+        run: docker build -f apps/api/Dockerfile.prod -t eyeonchess-api .
+
+  build-web:
+    name: Build Web
+    runs-on: ubuntu-latest
+    needs: [lint, test, changes]
+    if: |
+      always() &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      (github.event_name == 'push' || needs.changes.outputs.web == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+
+      - name: Build Web Docker image
+        run: docker build -f apps/web/Dockerfile.prod -t eyeonchess-web .
+
+  build-worker:
+    name: Build Worker
+    runs-on: ubuntu-latest
+    needs: [lint, test, changes]
+    if: |
+      always() &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      (github.event_name == 'push' || needs.changes.outputs.worker == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+
+      - name: Build Worker Docker image
+        run: docker build -f apps/api/Dockerfile.worker -t eyeonchess-worker .
+
+  build-migrate:
+    name: Build Migrate
+    runs-on: ubuntu-latest
+    needs: [lint, test, changes]
+    if: |
+      always() &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      (github.event_name == 'push' || needs.changes.outputs.migrate == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+
+      - name: Build Migrate Docker image
+        run: docker build -f apps/api/Dockerfile.migrate -t eyeonchess-migrate .
+
+  build-admin:
+    name: Build Admin
+    runs-on: ubuntu-latest
+    needs: [lint, test, changes]
+    if: |
+      always() &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      (github.event_name == 'push' || needs.changes.outputs.admin == 'true')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Admin Docker image
+        run: docker build -f apps/admin/Dockerfile -t eyeonchess-admin .
+
+  compose:
+    name: Docker Compose
+    runs-on: ubuntu-latest
+    needs: [build-api, build-web, build-worker, build-migrate, build-admin]
+    if: |
+      always() &&
+      !contains(needs.*.result, 'failure')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy env
+        run: cp .env.example .env
+
+      - name: Build base image
+        run: docker build -f deployment/Dockerfile.base -t eyeonchess-base .
+
+      - name: Start services
+        run: docker compose --env-file .env -f deployment/docker-compose.dev.yml up --build -d
+
+      - name: Wait for services
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost/health > /dev/null 2>&1; then
+              echo "API is healthy"
+              exit 0
+            fi
+            echo "Waiting for API... ($i/60)"
+            sleep 3
+          done
+          echo "API failed to start"
+          docker compose --env-file .env -f deployment/docker-compose.dev.yml logs api --tail 30
+          exit 1
+
+      - name: Health check
+        run: curl -sf http://localhost/health
+
+      - name: Settings check
+        run: curl -sf http://localhost/api/v1/settings
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose --env-file .env -f deployment/docker-compose.dev.yml logs --tail 50
+
+      - name: Stop services
+        if: always()
+        run: docker compose --env-file .env -f deployment/docker-compose.dev.yml down -v
+
+  codacy-coverage:
+    name: Codacy Coverage
+    needs: [lint, test, compose]
+    if: |
+      always() &&
+      needs.test.result == 'success' &&
+      github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download chess coverage
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: chess-coverage
+
+      - name: Download API coverage
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: api-coverage
+          path: api-coverage/
+
+      - name: Download web coverage
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: web-coverage
+          path: web-coverage/
+
+      - name: Upload chess coverage to Codacy
+        if: hashFiles('lcov.info') != ''
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r lcov.info --partial
+
+      - name: Upload API coverage to Codacy
+        if: hashFiles('api-coverage/lcov.info') != ''
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r api-coverage/lcov.info --partial
+
+      - name: Upload web coverage to Codacy
+        if: hashFiles('web-coverage/lcov.info') != ''
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r web-coverage/lcov.info --partial
+
+      - name: Finalize Codacy coverage
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
