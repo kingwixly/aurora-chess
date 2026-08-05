@@ -1,4 +1,10 @@
-import { computeAutoTitle, resolveTitle, type Title } from "@eyeonchess/chess";
+import {
+  computeAutoTitle,
+  resolveTitle,
+  type Title,
+  type ManualTitle,
+  type AutoTitle,
+} from "@eyeonchess/chess";
 import { prisma } from "./prisma.js";
 import { logger } from "./logger.js";
 
@@ -30,8 +36,8 @@ export const PUBLIC_USER_SELECT = {
 } as const;
 
 interface TitleFields {
-  titleManual?: Title | null;
-  titleAuto?: Title | null;
+  titleManual?: ManualTitle | null;
+  titleAuto?: AutoTitle | null;
   titleBanned?: boolean;
 }
 

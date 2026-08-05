@@ -1,18 +1,14 @@
 FROM node:22-alpine AS base
 RUN apk add --no-cache wget openssl && npm install -g pnpm@10.32.1
 
-FROM base AS deps
+FROM base AS runner
 WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/chess/package.json ./packages/chess/
-RUN pnpm install --frozen-lockfile && pnpm store prune
-
-FROM base AS runner
-WORKDIR /app
-COPY --from=deps /app ./
 COPY packages/chess ./packages/chess
 COPY apps/api ./apps/api
+RUN pnpm install --frozen-lockfile && pnpm store prune
 RUN pnpm --filter @eyeonchess/api run db:generate
 ENV NODE_ENV=production
 

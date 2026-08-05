@@ -1,0 +1,9 @@
+FROM eyeonchess-base AS base
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
+COPY apps/api/package.json ./apps/api/
+COPY packages/chess/package.json ./packages/chess/
+RUN pnpm install --frozen-lockfile && pnpm store prune
+RUN echo "BEFORE:" && ls apps/api/node_modules/prisma/build
+COPY packages/chess ./packages/chess
+COPY apps/api ./apps/api
+RUN echo "AFTER:" && ls apps/api/node_modules/ || echo "node_modules GONE"

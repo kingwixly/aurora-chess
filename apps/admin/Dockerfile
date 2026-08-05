@@ -6,6 +6,7 @@ WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json tsconfig.base.json ./
 COPY apps/admin/package.json ./apps/admin/
 COPY packages/api-client/package.json ./packages/api-client/
+COPY packages/chess/package.json ./packages/chess/
 COPY packages/ui/package.json ./packages/ui/
 COPY tooling/eslint-config/package.json ./tooling/eslint-config/
 COPY tooling/prettier-config/package.json ./tooling/prettier-config/
@@ -19,15 +20,17 @@ ARG NEXT_PUBLIC_API_URL=http://localhost
 ARG NEXT_PUBLIC_SITE_URL=http://localhost
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/admin/node_modules ./apps/admin/node_modules
-COPY --from=deps /app/packages/api-client/node_modules* ./packages/api-client/node_modules/
-COPY --from=deps /app/packages/ui/node_modules* ./packages/ui/node_modules/
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json tsconfig.base.json ./
 COPY tooling ./tooling
 COPY packages/api-client ./packages/api-client
+COPY packages/chess ./packages/chess
 COPY packages/ui ./packages/ui
 COPY apps/admin ./apps/admin
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/admin/node_modules ./apps/admin/node_modules
+COPY --from=deps /app/packages/api-client/node_modules* ./packages/api-client/node_modules/
+COPY --from=deps /app/packages/chess/node_modules* ./packages/chess/node_modules/
+COPY --from=deps /app/packages/ui/node_modules* ./packages/ui/node_modules/
 RUN pnpm --filter @eyeonchess/admin build
 
 FROM base AS runner
