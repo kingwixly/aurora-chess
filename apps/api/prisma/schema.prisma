@@ -1,0 +1,852 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──────────────────────────────────────────────
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum GameStatus {
+  WAITING
+  ACTIVE
+  COMPLETED
+  ABORTED
+}
+
+enum GameResult {
+  WHITE_WIN
+  BLACK_WIN
+  DRAW
+  ABORTED
+}
+
+enum Termination {
+  CHECKMATE
+  RESIGNATION
+  TIMEOUT
+  AGREEMENT
+}
+
+enum TimeControl {
+  BULLET
+  BLITZ
+  RAPID
+  CLASSICAL
+  UNLIMITED
+}
+
+enum MoveClassification {
+  BRILLIANT
+  GREAT
+  BEST
+  EXCELLENT
+  GOOD
+  INACCURACY
+  MISTAKE
+  BLUNDER
+  FORCED
+}
+
+/// Staff-assigned titles: FIDE titles plus NM/WNM. Never computed.
+/// FIDE titles (WCM and above, verified holders only) plus Aurora's own
+/// staff-granted masters.
+enum ManualTitle {
+  GM
+  WGM
+  IM
+  WIM
+  FM
+  WFM
+  CM
+  WCM
+  NM  // National Master (national federation, not FIDE)
+  WNM // Woman National Master
+  HM  // Honorary Master
+  RM  // Resident Master
+  OM  // Opening Master
+}
+
+/// Unofficial automatic titles, earned by performance. Site-local, never FIDE.
+/// Unofficial automatic titles, earned by performance. No FIDE ID required.
+enum AutoTitle {
+  UM  // Undermaster          - 2400 overall
+  AM  // Aurora Master        - 2200 overall
+  BM  // Bullet/Blitz Master  - 2200 bullet or blitz
+  TdM // Traditional Master   - 2200 classical
+  PM  // Puzzle Master        - top 5% of solvers
+  EM  // Endgame Master       - sub-7-piece ending win rate
+  TM  // Tournament Master    - 3+ major tournament wins
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// ── Models ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  rating       Int      @default(1500)
+  peakRating   Int      @default(1500)
+  /// Glicko-2 rating deviation: how uncertain this rating is. 350 means we
+  /// know essentially nothing, which is correct for a new account.
+  deviation    Float    @default(350)
+  /// Glicko-2 volatility: how erratic this player's results are.
+  volatility   Float    @default(0.06)
+  role         UserRole @default(USER)
+
+  // ── Titles ──────────────────────────────────────────────
+  // Staff-assigned: FIDE titles, NM, and the unofficial manual masters.
+  // Always masks titleAuto when set.
+  titleManual     ManualTitle?
+  // Derived from performance. Sticky: never lost to a losing streak.
+  titleAuto       AutoTitle?
+  // Set when staff writes titleAuto by hand. Suspends automatic recomputation
+  // so the next completed game does not clobber the manual value.
+  titleAutoLocked Boolean      @default(false)
+  // Suppresses all title display without destroying the underlying state.
+  titleBanned     Boolean      @default(false)
+  titleBanReason  String?
+
+  // Moderator shield, rendered before the title. Independent of role so that
+  // staff can be recognised publicly without granting them admin access, and
+  // vice versa.
+  modShield       Boolean      @default(false)
+  /// Public staff rank, e.g. "Moderator" or "Admin". Renders the Aurora mark
+  /// beside their name. Independent of `role`, which controls access.
+  staffRank       String?
+
+  /// Sequential signup number, used to award the Founder badge to the first 50.
+  /// Assigned at creation and never changed.
+  accountNumber   Int          @default(autoincrement())
+
+  /// Hide recent games from other players' view of this profile.
+  hideRecentGames Boolean      @default(false)
+
+  // ── Profile ─────────────────────────────────────────────
+  /// ISO 3166-1 alpha-2, uppercase. Flag beside the name.
+  countryCode     String?
+  /// Short self-description. Plain text only — links on a public profile are a
+  /// spam vector and can wait for a trust signal.
+  bio             String?
+
+  // ── Moderation ──────────────────────────────────────────
+  /// Exempt from automated cheat detection. Set for titled players, whose
+  /// engine-like accuracy is the point rather than evidence, and for anyone
+  /// staff have cleared after review.
+  cheatExempt     Boolean      @default(false)
+  /// Device fingerprints this account has been seen from, for ban evasion.
+  deviceIds       String[]     @default([])
+  /// Addresses this account has been seen from. Kept short deliberately.
+  knownIps        String[]     @default([])
+  punishments     Punishment[] @relation("PunishedUser")
+  appeals         Appeal[]
+  reportsMade     Report[]     @relation("Reporter")
+  reportsAgainst  Report[]     @relation("ReportedUser")
+  /// Blocks /standing/appeal only. Standing itself stays readable — a person
+  /// should always see what they are accused of, even having lost the right
+  /// to argue about it.
+  appealBanned    Boolean      @default(false)
+  cheatReports    CheatReport[]
+  usernameHistory UsernameHistory[]
+  messagesSent    Message[]         @relation("MessageAuthor")
+  conversations   ConversationMember[]
+
+  /// The one badge the user displays beside their name. Must be a badge they
+  /// have earned — `resolveFlair` refuses to render an unearned key, since
+  /// this field is user-settable.
+  activeFlair     String?
+
+  // ── Badges ──────────────────────────────────────────────
+  // Profile-only credentials and achievements. A user holds many and pins a
+  // few; unlike titles these never appear beside a username elsewhere.
+  badges          UserBadge[]
+  // ── FIDE ──────────────────────────────────────────────
+  /// FIDE ID, recorded when staff verify a title or arbiter credential.
+  fideId          String?
+  /// Site verification complete AND a registered FIDE account confirmed.
+  /// Rendered as a mark BEFORE the mod shield and title.
+  fideVerified    Boolean      @default(false)
+  /// Staff-enabled panel on the player's profile. Off until switched on, so a
+  /// half-filled panel never appears publicly.
+  fideProfile     FideProfile?
+
+  // ── Counters backing the automatic titles ───────────────
+  tournamentWins  Int          @default(0)
+  puzzleRating    Int          @default(1500)
+  puzzlePeak      Int          @default(1500)
+  puzzleDeviation Float        @default(350)
+  puzzleVolatility Float       @default(0.06)
+  puzzlesSolved   Int          @default(0)
+  endgameWins     Int          @default(0)
+  endgameGames    Int          @default(0)
+
+  ratings         UserRating[]
+  puzzleAttempts  PuzzleAttempt[]
+  active       Boolean  @default(true)
+  tosAccepted  Boolean  @default(false)
+  tosAcceptedAt DateTime?
+  verified     Boolean  @default(false)
+  darkMode     Boolean  @default(true)
+  boardTheme   String   @default("classic")
+  pieceSet     String   @default("classic")
+  soundEnabled Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  gamesAsWhite        Game[]         @relation("WhitePlayer")
+  gamesAsBlack        Game[]         @relation("BlackPlayer")
+  friendshipsInitiated Friendship[]  @relation("Requester")
+  friendshipsReceived  Friendship[]  @relation("Addressee")
+  refreshTokens       RefreshToken[]
+  auditLogs           AuditLog[]
+  collections         Collection[]
+  invitesCreated      Invite[]       @relation("InviteCreator")
+  invitedVia          Invite?        @relation("InviteUsedBy")
+  gameNotes           GameNote[]
+
+  @@index([titleManual])
+  @@index([titleAuto])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  requester User @relation("Requester", fields: [requesterId], references: [id])
+  addressee User @relation("Addressee", fields: [addresseeId], references: [id])
+
+  @@unique([requesterId, addresseeId])
+  @@index([status, addresseeId])
+}
+
+model Game {
+  id            String      @id @default(cuid())
+  whiteId       String?
+  blackId       String?
+  status        GameStatus  @default(WAITING)
+  result        GameResult?
+  termination   Termination?
+  pgn           String      @default("")
+  fen           String      @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+  timeControl   TimeControl @default(RAPID)
+  initialTime   Int         @default(600)
+  increment     Int         @default(0)
+  whiteTimeLeft Int?
+  blackTimeLeft Int?
+  isVsBot       Boolean     @default(false)
+  botElo        Int?
+  createdAt     DateTime    @default(now())
+  startedAt     DateTime?
+  endedAt       DateTime?
+
+  white           User?            @relation("WhitePlayer", fields: [whiteId], references: [id])
+  black           User?            @relation("BlackPlayer", fields: [blackId], references: [id])
+  moves           Move[]
+  analysis        GameAnalysis?
+  gameCollections GameCollection[]
+  gameNotes       GameNote[]
+
+  @@index([status])
+  @@index([whiteId])
+  @@index([blackId])
+  @@index([createdAt])
+  @@index([endedAt])
+  @@index([isVsBot, botElo])
+  /// Move-time statistics, for the timing signal in screening.
+  ///
+  /// Accuracy is NOT duplicated here — it lives on GameAnalysis, which the
+  /// worker computes server-side with Stockfish. Screening must never rest on
+  /// numbers the player's own browser supplied.
+  whiteMoveMsMean   Float?
+  whiteMoveMsStdDev Float?
+  blackMoveMsMean   Float?
+  blackMoveMsStdDev Float?
+  /// Set once screening has run, so it is never repeated.
+  screenedAt     DateTime?
+
+  chatMessages GameChatMessage[]
+
+}
+
+model Move {
+  id        String   @id @default(cuid())
+  gameId    String
+  ply       Int
+  san       String
+  uci       String
+  fen       String
+  timeTaken Int?
+  createdAt DateTime @default(now())
+
+  game     Game           @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  feedback MoveFeedback?
+
+  @@index([gameId])
+}
+
+model GameAnalysis {
+  id            String   @id @default(cuid())
+  gameId        String   @unique
+  whiteAccuracy Float?
+  blackAccuracy Float?
+  createdAt     DateTime @default(now())
+
+  game     Game           @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  feedback MoveFeedback[]
+
+  @@index([createdAt])
+}
+
+model MoveFeedback {
+  id             String             @id @default(cuid())
+  analysisId     String
+  moveId         String             @unique
+  ply            Int
+  classification MoveClassification
+  bestMove       String?
+  evalBefore     Int?
+  evalAfter      Int?
+
+  analysis GameAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  move     Move         @relation(fields: [moveId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId])
+}
+
+model SiteSettings {
+  id                       String  @id @default("singleton")
+  siteName                 String  @default("AuroraChess")
+  registrationOpen         Boolean @default(true)
+  maxUsers                 Int     @default(0)
+  requireEmailVerification Boolean @default(false)
+  updatedAt                DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  targetType String
+  targetId   String?
+  details    String?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([createdAt])
+}
+
+model Collection {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  games GameCollection[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model GameCollection {
+  id           String @id @default(cuid())
+  gameId       String
+  collectionId String
+
+  game       Game       @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, collectionId])
+  @@index([collectionId])
+}
+
+model Invite {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  creatorId String
+  usedById  String?   @unique
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  creator User  @relation("InviteCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  usedBy  User? @relation("InviteUsedBy", fields: [usedById], references: [id], onDelete: SetNull)
+
+  @@index([creatorId])
+  @@index([code])
+}
+
+model GameNote {
+  id        String   @id @default(cuid())
+  userId    String
+  gameId    String
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([userId])
+  @@index([gameId])
+}
+
+model BotProfile {
+  id               String  @id @default(cuid())
+  botId            String  @unique
+  name             String
+  elo              Int
+  description      String
+  avatar           String
+  category         String  @default("beginner")
+  tier             String  @default("custom")
+  enabled          Boolean @default(true)
+  randomMoveChance Float   @default(0)
+  blunderChance    Float   @default(0)
+  captureGreed     Float   @default(0)
+  aggressionBias   Float   @default(0)
+  maxDepth         Int     @default(3)
+  queenEarly       Boolean @default(false)
+  pawnPusher       Boolean @default(false)
+  sortOrder        Int     @default(0)
+  messages           Json?
+  preferredOpenings  Json?
+  createdAt          DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([elo])
+  @@index([category])
+}
+
+
+/// Per-time-control rating.
+///
+/// Replaces the single `User.rating` as the source of truth for competitive
+/// standing. `User.rating` is retained as the pooled/overall figure so that
+/// existing leaderboards and profile summaries keep working.
+model UserRating {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timeControl TimeControl
+  rating      Int         @default(1500)
+  peak        Int         @default(1500)
+  deviation   Float       @default(350)
+  volatility  Float       @default(0.06)
+  games       Int         @default(0)
+  wins        Int         @default(0)
+  losses      Int         @default(0)
+  draws       Int         @default(0)
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([userId, timeControl])
+  @@index([timeControl, rating])
+}
+
+/// A badge a user holds. Shown on their profile only.
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Stable key, e.g. "fide-arbiter". Resolved to icon and label in the
+  /// shared package, so adding a badge needs no migration.
+  badgeKey  String
+  /// Pinned badges sort first on the profile.
+  pinned    Boolean  @default(false)
+  pinOrder  Int?
+  /// Supporting evidence for verified credentials - a FIDE ID, a federation
+  /// reference. Staff-visible only.
+  evidence  String?
+  grantedAt DateTime @default(now())
+  /// Null for automatic grants; admin user id otherwise.
+  grantedBy String?
+
+  @@unique([userId, badgeKey])
+  @@index([badgeKey])
+  @@index([userId, pinned])
+}
+
+/// Site-wide derived values that are too expensive to compute per request.
+///
+/// Currently just the puzzle-rating percentile behind PM: that title is a
+/// ranking rather than a fixed bar, so the cutoff has to be recomputed
+/// periodically over the whole population.
+model SiteStat {
+  key       String   @id
+  value     Int
+  updatedAt DateTime @updatedAt
+}
+
+
+/// Staff-maintained FIDE details, shown as a panel on a player's profile.
+///
+/// Deliberately a separate table rather than columns on User: it is optional,
+/// entirely staff-maintained, and read only on the profile page — so it stays
+/// out of every user query that does not need it.
+model FideProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Off by default. Staff switch it on once the details are filled in.
+  enabled   Boolean  @default(false)
+
+  /// FIDE's own rating pools. Null means unrated in that pool, which is
+  /// meaningfully different from zero.
+  standard  Int?
+  rapid     Int?
+  blitz     Int?
+
+  /// FIDE Arena titles (AGM, AIM, AFM, ACM) and arbiter/trainer credentials.
+  /// Shown ONLY in this panel, never before a username — they are not
+  /// over-the-board playing titles.
+  arenaTitles String[] @default([])
+
+  /// Link to the player's FIDE profile page. Optional.
+  profileUrl String?
+  federation String?
+
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
+
+/// A tactics puzzle.
+///
+/// Solutions are stored as a UCI line alternating solver and opponent. The
+/// checker in @aurora/chess accepts any mating move on a mate puzzle rather
+/// than only the stored one -- several positions have more than one mate.
+model Puzzle {
+  id           String   @id
+  fen          String
+  rating       Int      @default(1200)
+  title        String
+  intro        String
+  themes       String[] @default([])
+  /// UCI moves, solver first, alternating.
+  moves        String[] @default([])
+  /// One per move, same order.
+  explanations String[] @default([])
+  /// Aggregate stats, used to keep puzzle ratings honest over time.
+  attempts     Int      @default(0)
+  solves       Int      @default(0)
+  enabled      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  puzzleAttempts PuzzleAttempt[]
+
+  @@index([rating, enabled])
+}
+
+/// One solver's result on one puzzle.
+///
+/// Recorded per attempt rather than per puzzle so a player can revisit a
+/// puzzle without the first result being overwritten, and so streaks and
+/// daily activity can be derived without a second table.
+model PuzzleAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  puzzleId  String
+  puzzle    Puzzle   @relation(fields: [puzzleId], references: [id], onDelete: Cascade)
+  solved    Boolean
+  /// Whether a hint was used. Hinted solves do not raise the rating.
+  hinted    Boolean  @default(false)
+  msSpent   Int      @default(0)
+  ratingBefore Int
+  ratingAfter  Int
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([puzzleId])
+}
+
+
+/// What a ban applies to.
+enum BanScope {
+  ACCOUNT
+  IP
+  DEVICE
+}
+
+/// Severity ladder. Everything except a ban becomes a strike once it expires.
+enum PunishmentType {
+  WARNING
+  RESTRICTION
+  SUSPENSION
+  DEACTIVATION
+  BAN
+}
+
+enum AppealStatus {
+  OPEN
+  TRIAGED
+  ACCEPTED
+  DENIED
+}
+
+enum AppealSource {
+  SITE
+  DISCORD
+}
+
+/// A moderation action.
+///
+/// Rows rather than flags on the user, so history survives: an action reversed
+/// in error should still show what happened, and an evasion pattern is only
+/// visible if the old records remain.
+model Punishment {
+  id        String         @id @default(cuid())
+  type      PunishmentType
+  /// Only meaningful for BAN. Account bans also set userId.
+  scope     BanScope       @default(ACCOUNT)
+
+  userId    String?
+  user      User?          @relation("PunishedUser", fields: [userId], references: [id], onDelete: Cascade)
+  ip        String?
+  deviceId  String?
+
+  /// Shown to the person it applies to.
+  reason       String
+  /// Staff-only context. Never sent to the user.
+  internalNote String?
+
+  /// Null means permanent.
+  expiresAt DateTime?
+  /// Moderator flag, or set automatically after three consecutive denials.
+  appealsDisabled Boolean @default(false)
+
+  /// Lifted early by staff.
+  liftedAt   DateTime?
+  liftedBy   String?
+  liftReason String?
+
+  /// Set when the action expires and becomes history.
+  becameStrikeAt DateTime?
+  /// Set when an appeal succeeds. Excluded from escalation and title blocks.
+  overturnedAt   DateTime?
+
+  /// Cheat report this came from, if any, so the standing page can explain it.
+  cheatReportId String?
+
+  issuedBy  String
+  createdAt DateTime @default(now())
+
+  appeals Appeal[]
+
+  @@index([userId, createdAt])
+  @@index([type, expiresAt])
+  @@index([scope, ip])
+  @@index([scope, deviceId])
+}
+
+/// A request to overturn a punishment.
+///
+/// Attaches to any punishment, including one that has already become a strike —
+/// an expired warning still counts toward escalation and blocks automatic
+/// titles, so contesting it is a real stake.
+model Appeal {
+  id           String       @id @default(cuid())
+  punishmentId String
+  punishment   Punishment   @relation(fields: [punishmentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  body   String
+  source AppealSource @default(SITE)
+  /// Set when raised through the expedited Discord lane.
+  discordHandle String?
+  /// Public forum post, if the appellant chose that route. Withdrawing it must
+  /// not change queue position — the row is the same either way.
+  publicPostUrl String?
+  publicWithdrawnAt DateTime?
+
+  status     AppealStatus @default(OPEN)
+  triagedBy  String?
+  triageNote String?
+
+  decidedBy String?
+  decision  String?
+  decidedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+  @@index([punishmentId])
+}
+
+/// A player-submitted report.
+model Report {
+  id         String   @id @default(cuid())
+  reporterId String
+  reporter   User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetId   String
+  target     User     @relation("ReportedUser", fields: [targetId], references: [id], onDelete: Cascade)
+
+  /// cheating | chat | username | other
+  category  String
+  body      String
+  gameId    String?
+  messageId String?
+
+  reviewed   Boolean @default(false)
+  reviewedBy String?
+  outcome    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([reviewed, createdAt])
+  @@index([targetId])
+  @@index([reporterId, createdAt])
+}
+
+/// An automated suspicion, for staff review. Never an automatic punishment.
+///
+/// Accuracy alone does not prove anything — a strong player has strong games,
+/// and a weak player occasionally finds a brilliancy. These are prompts to look,
+/// not verdicts.
+model CheatReport {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId      String?
+
+  /// 0-100. How unusual the play was relative to the player's own history.
+  score       Int
+  /// Machine-readable signals, e.g. ["accuracy-outlier", "rating-jump"].
+  signals     String[] @default([])
+  detail      String?
+
+  reviewed    Boolean  @default(false)
+  reviewedBy  String?
+  /// Staff verdict once reviewed.
+  verdict     String?
+  createdAt   DateTime @default(now())
+
+  @@index([reviewed, createdAt])
+  @@index([userId])
+}
+
+
+/// A username this account used to hold.
+///
+/// Kept so that searching an old name still finds the person. Someone who
+/// changes their name to escape a reputation should not become unfindable, and
+/// an opponent looking up "the player who beat me last week" should not hit a
+/// dead end.
+model UsernameHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username  String
+  /// When they stopped using it.
+  changedAt DateTime @default(now())
+
+  @@index([username])
+  @@index([userId, changedAt])
+}
+
+
+/// A direct conversation between two people.
+///
+/// Modelled as a conversation with members rather than a pair of user ids, so
+/// that read state lives per person and group chats are possible later without
+/// a migration that rewrites every message.
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  /// Denormalised so the conversation list can sort without touching messages.
+  lastMessageAt DateTime @default(now())
+
+  members  ConversationMember[]
+  messages Message[]
+
+  @@index([lastMessageAt])
+}
+
+model ConversationMember {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Everything before this is read. Storing a timestamp rather than per-message
+  /// flags means marking a conversation read is one write, not one per message.
+  lastReadAt     DateTime     @default(now())
+  /// Mute without leaving.
+  muted          Boolean      @default(false)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         User         @relation("MessageAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  body      String
+  /// Soft delete: the row stays so the conversation does not renumber, and so
+  /// staff can still see what was said in a report.
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+
+/// A message sent during a game.
+///
+/// Separate from direct messages: these belong to the game, are visible to
+/// spectators, and are kept with it so a report has something to point at.
+model GameChatMessage {
+  id        String   @id @default(cuid())
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  authorId  String
+  body      String
+  /// Soft delete, so staff can still read it in a report.
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([gameId, createdAt])
+}

@@ -1,0 +1,35 @@
+FROM aurorachess-base AS base
+
+# Source is copied BEFORE `pnpm install`, not after.
+#
+# pnpm populates apps/api/node_modules almost entirely with symlinks into
+# /app/node_modules/.pnpm. A later `COPY apps/api ./apps/api` replaces that
+# directory rather than merging into it on some Docker backends (Docker Desktop
+# on Windows in particular), leaving a node_modules that is present but empty
+# and a `prisma generate` that fails with MODULE_NOT_FOUND.
+#
+# Installing last costs layer caching -- any source change re-runs the install
+# -- but is correct on every backend.
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
+COPY apps/api/package.json ./apps/api/
+COPY packages/chess/package.json ./packages/chess/
+
+COPY packages/chess ./packages/chess
+COPY apps/api ./apps/api
+
+RUN pnpm install --frozen-lockfile && pnpm store prune
+
+RUN pnpm --filter @aurora/api run db:generate
+
+# Migrate, then seed everything the site needs to function.
+#
+# Puzzles belong in this chain rather than in a command you have to remember:
+# without them /puzzles renders an error, and "run this one extra command after
+# every deploy" is a step that eventually gets skipped.
+#
+# Every seed upserts, so re-running on an existing database is safe: puzzle text
+# is updated while attempt counts and ratings are left alone.
+#
+# Kept on one line: backslash continuations inside a JSON exec-form string are
+# taken literally by Docker rather than joined, which breaks the command.
+CMD ["sh", "-c", "export DATABASE_URL=${DIRECT_DATABASE_URL:-$DATABASE_URL} && pnpm --filter @aurora/api run db:migrate && pnpm --filter @aurora/api run db:seed && pnpm --filter @aurora/api run db:seed-bots && pnpm --filter @aurora/api run db:seed-puzzles"]

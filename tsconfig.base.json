@@ -1,0 +1,3 @@
+{
+  "extends": "@aurora/typescript-config/base"
+}

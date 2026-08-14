@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Nothing behind a login is worth crawling, and a punishment record has no
+# business in a search index.
+Disallow: /api/
+Disallow: /admin/
+Disallow: /game/
+Disallow: /standing
+Disallow: /messages
+Disallow: /settings
+Disallow: /friends
+Disallow: /collections
+Disallow: /invites
+Disallow: /history
+
+Sitemap: /sitemap.xml

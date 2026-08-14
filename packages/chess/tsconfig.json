@@ -1,0 +1,7 @@
+{
+  "extends": "@aurora/typescript-config/library",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}

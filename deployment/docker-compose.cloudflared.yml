@@ -1,0 +1,57 @@
+# Cloudflare Tunnel overlay.
+#
+# Usage:
+#   docker compose --env-file .env \
+#     -f deployment/docker-compose.yml \
+#     -f deployment/docker-compose.cloudflared.yml up -d
+#
+# What this changes and why:
+#
+# - Adds `cloudflared`, which dials OUT to Cloudflare. No inbound ports, no
+#   port forwarding, no DDNS, and your home IP stays hidden.
+# - Drops nginx's published ports. With a tunnel nothing should reach the host
+#   directly; cloudflared talks to nginx over the internal Docker network. This
+#   is the single most important line here — leaving 80/443 published would
+#   expose the origin and defeat the point of the tunnel.
+# - Disables certbot. Cloudflare terminates TLS at the edge, so there is no
+#   inbound path for an HTTP-01 challenge and no certificate to renew.
+#
+# Set TUNNEL_TOKEN in .env, from the Cloudflare Zero Trust dashboard
+# (Networks > Tunnels > your tunnel > Install connector).
+#
+# Configure these public hostnames in the tunnel, all pointing at
+# http://nginx:80 — nginx routes between them on Host header:
+#
+#   yourdomain.com        -> http://nginx:80
+#   admin.yourdomain.com  -> http://nginx:80
+#   grafana.yourdomain.com-> http://nginx:80
+#
+# Put Cloudflare Access in front of the admin and grafana hostnames. They are
+# reachable from the public internet once the tunnel is up, and the admin app
+# has no login page of its own.
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: aurorachess-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    depends_on:
+      - nginx
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+
+  nginx:
+    # Remove published ports: the tunnel reaches nginx over the Docker network.
+    # `!override` replaces the base list rather than appending to it, and needs
+    # Compose v2.24 or newer. On older Compose, delete the ports block from
+    # docker-compose.yml by hand instead.
+    ports: !override []
+
+  certbot:
+    # Cloudflare handles TLS. Never start this.
+    profiles:
+      - disabled

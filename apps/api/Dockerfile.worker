@@ -1,0 +1,23 @@
+FROM aurorachess-base AS base
+
+# Worker needs stockfish for analysis
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends stockfish && \
+    rm -rf /var/lib/apt/lists/*
+ENV PATH="/usr/games:${PATH}"
+
+# See Dockerfile.migrate: install runs after the source copies so that copying
+# apps/api cannot clobber the symlinked node_modules pnpm just created.
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
+COPY apps/api/package.json ./apps/api/
+COPY packages/chess/package.json ./packages/chess/
+
+COPY packages/chess ./packages/chess
+COPY apps/api ./apps/api
+
+RUN pnpm install --frozen-lockfile && pnpm store prune
+
+RUN pnpm --filter @aurora/api run db:generate
+
+ENV NODE_ENV=production
+CMD ["pnpm", "--filter", "@aurora/api", "worker:start"]

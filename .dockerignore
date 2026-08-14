@@ -1,0 +1,49 @@
+# Version control
+.git
+.gitignore
+.githooks
+
+# Dependencies (installed inside container)
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.next
+.turbo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# IDE and OS
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+
+# Documentation and meta
+docs
+screenshots
+*.md
+!README.md
+LICENSE
+PROGRESS.md
+
+# Tests (not needed in production images)
+**/*.test.ts
+**/*.test.tsx
+**/vitest.config.ts
+coverage
+
+# CI/CD
+.github
+.husky
+
+# Backups
+backups
+
+# Claude
+.claude

@@ -1,0 +1,4 @@
+{
+  "extends": "@aurora/typescript-config/react-library",
+  "include": ["src"]
+}

@@ -1,0 +1,599 @@
+import { FastifyInstance } from "fastify";
+import bcrypt from "bcrypt";
+import { prisma } from "../lib/prisma.js";
+import { TITLE_SELECT, withTitle } from "../lib/titles.js";
+import { FOUNDER_CUTOFF, isValidCountryCode } from "@aurora/chess";
+import { logger } from "../lib/logger.js";
+import { signAccessToken, generateRefreshToken, hashToken } from "../lib/jwt.js";
+import { getSiteSettings } from "../lib/settings.js";
+import { authMiddleware } from "../middleware/auth.js";
+import { checkBan, clientIp, deviceId, recordSighting } from "../lib/bans.js";
+import { sanitizeString } from "../middleware/admin.js";
+import { registerBodySchema, loginBodySchema, preferencesBodySchema } from "../lib/schemas.js";
+import {
+  apiError,
+  AUTH_INVALID_INVITE,
+  AUTH_INVITE_USED,
+  AUTH_REGISTRATION_CLOSED,
+  AUTH_MAX_USERS,
+  AUTH_EMAIL_EXISTS,
+  AUTH_USERNAME_EXISTS,
+  AUTH_INVALID_CREDENTIALS,
+  AUTH_ACCOUNT_DEACTIVATED,
+  AUTH_EMAIL_NOT_VERIFIED,
+  AUTH_NO_REFRESH_TOKEN,
+  AUTH_INVALID_REFRESH_TOKEN,
+  AUTH_TOKEN_USED,
+  VALIDATION_FAILED,
+  NOT_FOUND,
+} from "../lib/errorCodes.js";
+
+const REFRESH_TOKEN_EXPIRY_DAYS = 7;
+const BCRYPT_ROUNDS = 12;
+const COOKIE_NAME = "refresh_token";
+
+function getCookieDomain(): string | undefined {
+  const siteUrl = process.env.SITE_URL;
+  if (!siteUrl) return undefined;
+  try {
+    const hostname = new URL(siteUrl).hostname;
+    // Set domain to .root-domain so subdomains (admin.*) share the cookie
+    const parts = hostname.split(".");
+    if (parts.length >= 2) return "." + parts.slice(-2).join(".");
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function cookieOptions(maxAgeMs: number) {
+  const domain = getCookieDomain();
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: maxAgeMs,
+    ...(domain ? { domain } : {}),
+  };
+}
+
+async function createTokens(user: { id: string; email: string; username: string; role: string }) {
+  const accessToken = signAccessToken({
+    userId: user.id,
+    email: user.email,
+    username: user.username,
+    role: user.role,
+  });
+
+  const rawRefreshToken = generateRefreshToken();
+  const hashedToken = hashToken(rawRefreshToken);
+
+  await prisma.refreshToken.create({
+    data: {
+      userId: user.id,
+      token: hashedToken,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  return { accessToken, rawRefreshToken };
+}
+
+/** Register authentication routes (register, login, refresh, logout). */
+export async function authRoutes(app: FastifyInstance) {
+  // ── Register ──────────────────────────────────────
+  app.post<{
+    Body: { email: string; username: string; password: string; inviteCode: string };
+  }>("/auth/register", { schema: { body: registerBodySchema } }, async (request, reply) => {
+    const { email, password, inviteCode } = request.body;
+    const username = sanitizeString(request.body.username);
+
+    // Validate invite code
+    const invite = await prisma.invite.findUnique({ where: { code: inviteCode } });
+    if (!invite) {
+      return apiError(reply, 400, AUTH_INVALID_INVITE, "Invalid invite code");
+    }
+    if (invite.usedById) {
+      return apiError(reply, 410, AUTH_INVITE_USED, "Invite code has already been used");
+    }
+
+    // Check registration flags from DB settings
+    const siteSettings = await getSiteSettings();
+    if (!siteSettings.registrationOpen) {
+      return apiError(reply, 403, AUTH_REGISTRATION_CLOSED, "Registration is currently closed");
+    }
+
+    if (siteSettings.maxUsers > 0) {
+      const userCount = await prisma.user.count();
+      if (userCount >= siteSettings.maxUsers) {
+        return apiError(reply, 403, AUTH_MAX_USERS, "Maximum user limit reached");
+      }
+    }
+
+    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    if (existingEmail) {
+      return apiError(reply, 409, AUTH_EMAIL_EXISTS, "Email already in use");
+    }
+
+    const existingUsername = await prisma.user.findUnique({
+      where: { username },
+    });
+    if (existingUsername) {
+      return apiError(reply, 409, AUTH_USERNAME_EXISTS, "Username already taken");
+    }
+
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+
+    const user = await prisma.user.create({
+      data: { email, username, passwordHash },
+    });
+
+    // Founder for the first 50 accounts. Done here rather than by a trigger so
+    // the rule lives with the rest of the signup logic and is easy to find.
+    if (user.accountNumber <= FOUNDER_CUTOFF) {
+      await prisma.userBadge
+        .create({
+          data: { userId: user.id, badgeKey: "founder" },
+        })
+        .catch(() => {
+          // A duplicate is harmless and must not fail a signup.
+        });
+    }
+
+    // Mark invite as used
+    await prisma.invite.update({
+      where: { code: inviteCode },
+      data: { usedById: user.id, usedAt: new Date() },
+    });
+
+    // Auto-create Favorites collection
+    await prisma.collection.create({
+      data: { userId: user.id, name: "Favorites" },
+    });
+
+    const { accessToken, rawRefreshToken } = await createTokens(user);
+
+    reply.setCookie(
+      COOKIE_NAME,
+      rawRefreshToken,
+      cookieOptions(REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+    );
+
+    return {
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        rating: user.rating,
+        role: user.role,
+      },
+    };
+  });
+
+  // ── Login ─────────────────────────────────────────
+  app.post<{
+    Body: { email: string; password: string };
+  }>("/auth/login", { schema: { body: loginBodySchema } }, async (request, reply) => {
+    const { email, password } = request.body;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return apiError(reply, 401, AUTH_INVALID_CREDENTIALS, "Invalid credentials");
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      return apiError(reply, 401, AUTH_INVALID_CREDENTIALS, "Invalid credentials");
+    }
+
+    if (!user.active) {
+      return apiError(reply, 403, AUTH_ACCOUNT_DEACTIVATED, "Account is deactivated");
+    }
+
+    // A banned account still signs in — deliberately.
+    //
+    // Refusing the token here would mean a banned user could never reach their
+    // standing page and could never appeal, which makes every ban permanent in
+    // practice regardless of what the punishment says. The ban is enforced by
+    // capabilities on every other route instead; the standing routes check
+    // none.
+    //
+    // Checked after credentials so a wrong password does not reveal that an
+    // account is banned.
+    const ip = clientIp(request);
+    const device = deviceId(request);
+    let ban: Awaited<ReturnType<typeof checkBan>> = { banned: false };
+    try {
+      ban = await checkBan(user.id, ip, device);
+      await recordSighting(user.id, ip, device);
+    } catch (err) {
+      // Sign-in must not fail because moderation bookkeeping did. Bans are
+      // still enforced by capabilities on every gated route.
+      logger.warn({ err, userId: user.id }, "ban check failed during login; allowing");
+    }
+
+    const loginSettings = await getSiteSettings();
+    if (loginSettings.requireEmailVerification && !user.verified) {
+      return apiError(reply, 403, AUTH_EMAIL_NOT_VERIFIED, "Email not verified");
+    }
+
+    const { accessToken, rawRefreshToken } = await createTokens(user);
+
+    reply.setCookie(
+      COOKIE_NAME,
+      rawRefreshToken,
+      cookieOptions(REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+    );
+
+    return {
+      accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        rating: user.rating,
+        role: user.role,
+      },
+      // Set when an active ban applies. The client sends them straight to their
+      // standing page rather than letting them discover the ban by finding
+      // every button broken.
+      banned: ban.banned
+        ? { reason: ban.reason, expiresAt: ban.expiresAt ?? null, standingPath: "/standing" }
+        : null,
+    };
+  });
+
+  // ── Refresh ───────────────────────────────────────
+  app.post("/auth/refresh", async (request, reply) => {
+    const rawToken = request.cookies[COOKIE_NAME];
+    if (!rawToken) {
+      return apiError(reply, 401, AUTH_NO_REFRESH_TOKEN, "No refresh token");
+    }
+
+    const hashed = hashToken(rawToken);
+    const stored = await prisma.refreshToken.findUnique({
+      where: { token: hashed },
+      include: { user: true },
+    });
+
+    if (!stored || stored.expiresAt < new Date()) {
+      if (stored) {
+        await prisma.refreshToken.delete({ where: { id: stored.id } });
+      }
+      reply.clearCookie(COOKIE_NAME, { path: "/" });
+      return apiError(reply, 401, AUTH_INVALID_REFRESH_TOKEN, "Invalid or expired refresh token");
+    }
+
+    // Rotate: delete old, create new (handle concurrent requests gracefully)
+    const deleted = await prisma.refreshToken.deleteMany({ where: { id: stored.id } });
+    if (deleted.count === 0) {
+      // Another concurrent request already rotated this token
+      return apiError(reply, 401, AUTH_TOKEN_USED, "Token already used");
+    }
+
+    const { accessToken, rawRefreshToken } = await createTokens(stored.user);
+
+    reply.setCookie(
+      COOKIE_NAME,
+      rawRefreshToken,
+      cookieOptions(REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+    );
+
+    return { accessToken };
+  });
+
+  // ── Logout ────────────────────────────────────────
+  app.post("/auth/logout", async (request, reply) => {
+    const rawToken = request.cookies[COOKIE_NAME];
+    if (rawToken) {
+      const hashed = hashToken(rawToken);
+      await prisma.refreshToken
+        .delete({ where: { token: hashed } })
+        .catch((err) => logger.warn({ err }, "failed to delete refresh token on logout"));
+    }
+
+    reply.clearCookie(COOKIE_NAME, { path: "/" });
+    return { success: true };
+  });
+
+  // ── Me ────────────────────────────────────────────
+
+  /**
+   * Account changes: display details, and separately the password.
+   *
+   * Username and email are unique, so a clash is a normal outcome rather than
+   * an error to swallow. Email changes require the current password — an
+   * unattended session should not be able to redirect password resets to a new
+   * address.
+   */
+  app.patch<{
+    Body: {
+      username?: string;
+      email?: string;
+      avatarUrl?: string | null;
+      hideRecentGames?: boolean;
+      activeFlair?: string | null;
+      countryCode?: string | null;
+      bio?: string | null;
+      currentPassword?: string;
+    };
+  }>("/auth/account", { preHandler: authMiddleware }, async (request, reply) => {
+    const userId = request.user.userId;
+    const {
+      username,
+      email,
+      avatarUrl,
+      hideRecentGames,
+      activeFlair,
+      countryCode,
+      bio,
+      currentPassword,
+    } = request.body ?? {};
+
+    const me = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true, email: true, username: true },
+    });
+    if (!me) return apiError(reply, 404, NOT_FOUND, "User not found");
+
+    const data: Record<string, unknown> = {};
+
+    if (username !== undefined && username !== me.username) {
+      const clean = sanitizeString(username).trim();
+      if (clean.length < 3 || clean.length > 20 || !/^[A-Za-z0-9_-]+$/.test(clean)) {
+        return apiError(
+          reply,
+          400,
+          VALIDATION_FAILED,
+          "Usernames are 3-20 characters: letters, numbers, hyphen or underscore"
+        );
+      }
+      const taken = await prisma.user.findFirst({
+        where: { username: { equals: clean, mode: "insensitive" }, id: { not: userId } },
+        select: { id: true },
+      });
+      if (taken) return apiError(reply, 409, VALIDATION_FAILED, "That username is taken");
+      // Also refuse a name someone else used to hold, so a rename cannot be
+      // used to impersonate a player's old identity.
+      const historic = await prisma.usernameHistory.findFirst({
+        where: { username: { equals: clean, mode: "insensitive" }, userId: { not: userId } },
+        select: { id: true },
+      });
+      if (historic) {
+        return apiError(
+          reply,
+          409,
+          VALIDATION_FAILED,
+          "That username was previously used by someone else"
+        );
+      }
+      await prisma.usernameHistory.create({
+        data: { userId, username: me.username },
+      });
+      data.username = clean;
+    }
+
+    if (email !== undefined && email !== me.email) {
+      // Changing the address that receives password resets is a security
+      // decision, not a preference.
+      if (!currentPassword || !(await bcrypt.compare(currentPassword, me.passwordHash))) {
+        return apiError(
+          reply,
+          403,
+          VALIDATION_FAILED,
+          "Enter your current password to change your email"
+        );
+      }
+      const clean = email.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
+        return apiError(reply, 400, VALIDATION_FAILED, "That email address is not valid");
+      }
+      const taken = await prisma.user.findFirst({
+        where: { email: clean, id: { not: userId } },
+        select: { id: true },
+      });
+      if (taken) return apiError(reply, 409, VALIDATION_FAILED, "That email is already in use");
+      data.email = clean;
+    }
+
+    if (avatarUrl !== undefined) {
+      // Remote images are fetched by every viewer's browser, so the URL is
+      // restricted to https and length-capped.
+      if (avatarUrl && !/^https:\/\/\S{1,290}$/.test(avatarUrl)) {
+        return apiError(reply, 400, VALIDATION_FAILED, "Avatar must be an https URL");
+      }
+      data.avatarUrl = avatarUrl || null;
+    }
+
+    if (hideRecentGames !== undefined) data.hideRecentGames = hideRecentGames;
+
+    if (countryCode !== undefined) {
+      if (countryCode === null || countryCode === "") {
+        data.countryCode = null;
+      } else if (!isValidCountryCode(countryCode)) {
+        return apiError(reply, 400, VALIDATION_FAILED, "Unknown country");
+      } else {
+        data.countryCode = countryCode.toUpperCase();
+      }
+    }
+
+    if (bio !== undefined) {
+      const clean = (bio ?? "").trim();
+      if (clean.length > 300) {
+        return apiError(reply, 400, VALIDATION_FAILED, "Bio is limited to 300 characters");
+      }
+      // Links on a public profile are a spam vector; text only until there is
+      // a trust signal worth gating them behind.
+      if (/https?:\/\/|www\./i.test(clean)) {
+        return apiError(reply, 400, VALIDATION_FAILED, "Bios cannot contain links");
+      }
+      data.bio = clean ? sanitizeString(clean) : null;
+    }
+
+    if (activeFlair !== undefined) {
+      if (activeFlair === null) {
+        data.activeFlair = null;
+      } else {
+        // The field is user-settable, so holding the badge is checked here
+        // rather than trusted from the client.
+        const held = await prisma.userBadge.findUnique({
+          where: { userId_badgeKey: { userId, badgeKey: activeFlair } },
+          select: { id: true },
+        });
+        if (!held) {
+          return apiError(reply, 403, VALIDATION_FAILED, "You have not earned that flair");
+        }
+        data.activeFlair = activeFlair;
+      }
+    }
+
+    if (Object.keys(data).length === 0) return { user: null, changed: false };
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data,
+      select: { id: true, username: true, email: true, avatarUrl: true, hideRecentGames: true },
+    });
+
+    return { user, changed: true };
+  });
+
+  /**
+   * Change password.
+   *
+   * Every other session is revoked afterwards: the usual reason for changing a
+   * password is that someone else may have it.
+   */
+  app.post<{ Body: { currentPassword: string; newPassword: string } }>(
+    "/auth/password",
+    { preHandler: authMiddleware },
+    async (request, reply) => {
+      const userId = request.user.userId;
+      const { currentPassword, newPassword } = request.body ?? {};
+
+      if (!currentPassword || !newPassword) {
+        return apiError(reply, 400, VALIDATION_FAILED, "Both passwords are required");
+      }
+      if (newPassword.length < 8) {
+        return apiError(
+          reply,
+          400,
+          VALIDATION_FAILED,
+          "New password must be at least 8 characters"
+        );
+      }
+
+      const me = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { passwordHash: true },
+      });
+      if (!me) return apiError(reply, 404, NOT_FOUND, "User not found");
+
+      if (!(await bcrypt.compare(currentPassword, me.passwordHash))) {
+        return apiError(reply, 403, VALIDATION_FAILED, "Current password is incorrect");
+      }
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash: await bcrypt.hash(newPassword, 10) },
+      });
+
+      // Revoke every refresh token, including this session's.
+      await prisma.refreshToken.deleteMany({ where: { userId } });
+      reply.clearCookie(COOKIE_NAME, { path: "/" });
+
+      return { success: true, signedOut: true };
+    }
+  );
+
+  app.get("/auth/me", { preHandler: authMiddleware }, async (request) => {
+    const user = await prisma.user.findUnique({
+      where: { id: request.user.userId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        rating: true,
+        avatarUrl: true,
+        role: true,
+        tosAccepted: true,
+        darkMode: true,
+        boardTheme: true,
+        pieceSet: true,
+        soundEnabled: true,
+        createdAt: true,
+        ...TITLE_SELECT,
+        countryCode: true,
+        bio: true,
+        fideId: true,
+        // Per-pool ratings. The header and profile show the pool the player
+        // last competed in rather than the pooled figure, which is what makes
+        // "your blitz rating" a real thing rather than a stored number nobody
+        // sees.
+        ratings: {
+          select: { timeControl: true, rating: true, peak: true, games: true, deviation: true },
+        },
+      },
+    });
+
+    if (!user) {
+      throw { statusCode: 404, message: "User not found" };
+    }
+
+    return { user: withTitle(user) };
+  });
+
+  // ── Update preferences ──────────────────────────────
+  app.put<{
+    Body: { darkMode?: boolean; boardTheme?: string; pieceSet?: string; soundEnabled?: boolean };
+  }>(
+    "/auth/preferences",
+    { schema: { body: preferencesBodySchema }, preHandler: authMiddleware },
+    async (request) => {
+      const { darkMode, boardTheme, pieceSet, soundEnabled } = request.body;
+
+      const VALID_BOARD_THEMES = ["classic", "wood", "green", "blue", "purple", "dark"];
+      const VALID_PIECE_SETS = ["classic", "modern", "minimal"];
+
+      const data: Record<string, unknown> = {};
+      if (darkMode !== undefined) data.darkMode = darkMode;
+      if (boardTheme && VALID_BOARD_THEMES.includes(boardTheme)) data.boardTheme = boardTheme;
+      if (pieceSet && VALID_PIECE_SETS.includes(pieceSet)) data.pieceSet = pieceSet;
+      if (soundEnabled !== undefined) data.soundEnabled = soundEnabled;
+
+      const user = await prisma.user.update({
+        where: { id: request.user.userId },
+        data,
+        select: {
+          darkMode: true,
+          boardTheme: true,
+          pieceSet: true,
+          soundEnabled: true,
+        },
+      });
+
+      return { preferences: user };
+    }
+  );
+
+  // ── Accept TOS ──────────────────────────────────────
+  app.post("/auth/accept-tos", { preHandler: authMiddleware }, async (request) => {
+    await prisma.user.update({
+      where: { id: request.user.userId },
+      data: { tosAccepted: true, tosAcceptedAt: new Date() },
+    });
+    return { success: true };
+  });
+
+  // ── Decline TOS ─────────────────────────────────────
+  app.post("/auth/decline-tos", { preHandler: authMiddleware }, async (request) => {
+    // Record the decline but deactivate the account
+    await prisma.user.update({
+      where: { id: request.user.userId },
+      data: { tosAccepted: false, active: false },
+    });
+    return { success: true, message: "Account deactivated" };
+  });
+}
