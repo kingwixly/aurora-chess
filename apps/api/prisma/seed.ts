@@ -23,7 +23,11 @@ async function main() {
 
   const user = await prisma.user.upsert({
     where: { email },
-    update: {},
+    // The whole point of this seed is that an admin exists. `update: {}` meant
+    // an account created by registering first — before the seed ever ran —
+    // stayed a normal USER, so the admin panel bounced its own owner back to
+    // /play. Password is deliberately NOT reset here; only the role is.
+    update: { role: "ADMIN", verified: true },
     create: {
       email,
       username,

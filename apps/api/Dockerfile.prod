@@ -1,5 +1,10 @@
 FROM node:22-alpine AS base
-RUN apk add --no-cache wget openssl && npm install -g pnpm@10.32.1
+# Stockfish is REQUIRED here, not optional. The API plays the bot's move
+# server-side whenever the bot has white — which is exactly what a rematch
+# does, since it swaps colours. Without the binary that request killed the
+# worker and nginx returned 502, so the first game worked and every rematch
+# failed.
+RUN apk add --no-cache wget openssl stockfish && npm install -g pnpm@10.32.1
 
 # Single stage: the previous deps/runner split existed purely to cache the
 # install, and that split is what breaks -- COPY --from=deps lays down

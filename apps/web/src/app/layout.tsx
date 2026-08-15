@@ -72,6 +72,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`dark ${display.variable} ${body.variable} ${mono.variable}`}>
       <head>
+        {/* Modern equivalent of apple-mobile-web-app-capable, which Chrome
+            now warns about on every page load. */}
+        <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
         <link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48x48.png" />

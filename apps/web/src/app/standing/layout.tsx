@@ -20,8 +20,19 @@ export default function StandingLayout({ children }: { children: React.ReactNode
       <header className="border-b border-[#dde1ea] bg-white">
         <div className="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-3 px-6 py-4">
           <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo-mark.png" alt="" className="h-8 w-8 object-contain" />
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 100 100"
+              aria-hidden="true"
+              className="shrink-0"
+            >
+              <circle cx="50" cy="50" r="48" fill="#0A0F1C" />
+              <path d="M32 34 L36 20 L42 30 L50 16 L58 30 L64 20 L68 34 Z" fill="#7DD3E8" />
+              <rect x="34" y="34" width="32" height="6" rx="1" fill="#7DD3E8" />
+              <path d="M38 40 L62 40 L58 62 L42 62 Z" fill="#9AA9C4" />
+              <path d="M33 62 L67 62 L72 76 L28 76 Z" fill="#7DD3E8" />
+            </svg>
             <div>
               <p className="font-display text-lg font-semibold leading-tight">
                 Aurora Chess account standing

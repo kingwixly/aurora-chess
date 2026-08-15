@@ -460,25 +460,34 @@ export async function gameRoutes(app: FastifyInstance) {
       // If bot plays white, make the first move
       let botFirstMove = null;
       if (!playerIsWhite) {
-        const botMoveUci = await getBotMove(game.fen, botElo);
-        const chess = new Chess(game.fen);
-        const from = botMoveUci.slice(0, 2);
-        const to = botMoveUci.slice(2, 4);
-        const promotion = botMoveUci[4] || undefined;
-        const move = chess.move({ from, to, promotion });
+        // Wrapped: the engine is a spawned binary, and if it is missing or
+        // wedged this used to take the whole request down — nginx returned 502
+        // and the game, already created, was orphaned. The bot simply not
+        // having moved yet is recoverable; the client asks for a move once the
+        // socket connects.
+        try {
+          const botMoveUci = await getBotMove(game.fen, botElo);
+          const chess = new Chess(game.fen);
+          const from = botMoveUci.slice(0, 2);
+          const to = botMoveUci.slice(2, 4);
+          const promotion = botMoveUci[4] || undefined;
+          const move = chess.move({ from, to, promotion });
 
-        if (move) {
-          await prisma.move.create({
-            data: { gameId: game.id, ply: 1, san: move.san, uci: botMoveUci, fen: chess.fen() },
-          });
-          await prisma.game.update({
-            where: { id: game.id },
-            data: { fen: chess.fen(), pgn: chess.pgn() },
-          });
-          if (timeControl !== "UNLIMITED") {
-            await clockOnMove(game.id, false);
+          if (move) {
+            await prisma.move.create({
+              data: { gameId: game.id, ply: 1, san: move.san, uci: botMoveUci, fen: chess.fen() },
+            });
+            await prisma.game.update({
+              where: { id: game.id },
+              data: { fen: chess.fen(), pgn: chess.pgn() },
+            });
+            if (timeControl !== "UNLIMITED") {
+              await clockOnMove(game.id, false);
+            }
+            botFirstMove = { from, to, promotion, san: move.san, fen: chess.fen(), ply: 1 };
           }
-          botFirstMove = { from, to, promotion, san: move.san, fen: chess.fen(), ply: 1 };
+        } catch (err) {
+          request.log.error({ err, gameId: game.id }, "bot opening move failed");
         }
       }
 
