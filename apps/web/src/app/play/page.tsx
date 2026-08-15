@@ -90,7 +90,7 @@ export default function PlayPage() {
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-night-950">
-        <p className="text-night-600">Loading...</p>
+        <p className="text-night-400">Loading...</p>
       </main>
     );
   }
@@ -126,7 +126,7 @@ export default function PlayPage() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-night-600 transition-colors hover:bg-night-800 hover:text-white"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-night-400 transition-colors hover:bg-night-800 hover:text-white"
               >
                 {l.label}
               </Link>
@@ -142,7 +142,7 @@ export default function PlayPage() {
             {user.role === "ADMIN" && isOnline && (
               <a
                 href={process.env.NEXT_PUBLIC_ADMIN_URL || "#"}
-                className="rounded-lg px-3 py-1.5 text-sm text-night-600 transition-colors hover:text-white"
+                className="rounded-lg px-3 py-1.5 text-sm text-night-400 transition-colors hover:text-white"
               >
                 Admin
               </a>
@@ -187,7 +187,7 @@ export default function PlayPage() {
                 router.push("/");
               }}
               disabled={!isOnline}
-              className="rounded-lg px-2 py-1.5 text-sm text-night-600 transition-colors hover:text-white disabled:opacity-40"
+              className="rounded-lg px-2 py-1.5 text-sm text-night-400 transition-colors hover:text-white disabled:opacity-40"
             >
               Log out
             </button>
@@ -221,7 +221,7 @@ export default function PlayPage() {
                       </span>
                     )}
                     <div className="font-mono text-2xl font-bold tracking-tight">{tc.label}</div>
-                    <div className="mt-0.5 text-xs uppercase tracking-wider text-night-600 transition-colors group-hover:text-aurora-cyan">
+                    <div className="mt-0.5 text-xs uppercase tracking-wider text-night-400 transition-colors group-hover:text-aurora-cyan">
                       {tc.name}
                     </div>
                   </button>
@@ -253,7 +253,7 @@ export default function PlayPage() {
         </div>
 
         <section className="mt-8">
-          <h2 className="mb-3 text-xs uppercase tracking-wider text-night-600">Your ratings</h2>
+          <h2 className="mb-3 text-xs uppercase tracking-wider text-night-400">Your ratings</h2>
           <RatingPools ratings={user.ratings} />
         </section>
 
@@ -268,7 +268,7 @@ export default function PlayPage() {
             </div>
             <div className="p-5">
               <h2 className="font-display text-xl">Puzzles</h2>
-              <p className="mt-1 text-sm text-night-600">
+              <p className="mt-1 text-sm text-night-400">
                 Sharpen your tactics. Reach the top 5% and you are a Puzzle Master.
               </p>
               <Link
@@ -286,7 +286,7 @@ export default function PlayPage() {
             </div>
             <div className="p-5">
               <h2 className="font-display text-xl">Your statistics</h2>
-              <p className="mt-1 text-sm text-night-600">
+              <p className="mt-1 text-sm text-night-400">
                 Ratings by time control, streaks, and the openings you actually play.
               </p>
               <Link
@@ -304,7 +304,7 @@ export default function PlayPage() {
             </div>
             <div className="p-5">
               <h2 className="font-display text-xl">Collections</h2>
-              <p className="mt-1 text-sm text-night-600">
+              <p className="mt-1 text-sm text-night-400">
                 Save games worth returning to and group them how you like.
               </p>
               <Link
@@ -319,7 +319,7 @@ export default function PlayPage() {
 
         {isOnline && (
           <section className="mt-8 rounded-xl bg-night-900 p-5 ring-1 ring-inset ring-night-700">
-            <h2 className="mb-3 text-xs uppercase tracking-wider text-night-600">
+            <h2 className="mb-3 text-xs uppercase tracking-wider text-night-400">
               Recent activity
             </h2>
             <ErrorBoundary>
@@ -334,7 +334,7 @@ export default function PlayPage() {
             className="mt-5 w-full rounded-xl bg-night-900 px-5 py-4 text-left ring-1 ring-inset ring-night-700 transition-colors hover:bg-night-800"
           >
             <span className="font-medium">Install Aurora</span>
-            <span className="mt-0.5 block text-sm text-night-600">Play from your home screen</span>
+            <span className="mt-0.5 block text-sm text-night-400">Play from your home screen</span>
           </button>
         )}
       </div>

@@ -57,7 +57,7 @@ export default function TimeControlPanel({
         <div className="p-6">
           <div className="text-center">
             <p className="font-mono text-4xl font-bold tracking-tight">{choice.label}</p>
-            <p className="mt-1 text-sm uppercase tracking-wider text-night-600">{choice.name}</p>
+            <p className="mt-1 text-sm uppercase tracking-wider text-night-400">{choice.name}</p>
           </div>
 
           <div className="mt-6 space-y-2">
@@ -82,7 +82,7 @@ export default function TimeControlPanel({
 
             <button
               onClick={onClose}
-              className="w-full rounded-lg py-2.5 text-sm text-night-600 transition-colors hover:text-white"
+              className="w-full rounded-lg py-2.5 text-sm text-night-400 transition-colors hover:text-white"
             >
               Cancel
             </button>

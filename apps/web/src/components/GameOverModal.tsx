@@ -84,7 +84,7 @@ export default function GameOverModal({
         : undefined;
 
   const accent = isDraw
-    ? "text-night-600"
+    ? "text-night-400"
     : !playerColor
       ? "text-white"
       : won
@@ -111,7 +111,7 @@ export default function GameOverModal({
           <h2 id="game-over-title" className={`font-display text-4xl tracking-tight ${accent}`}>
             {headline}
           </h2>
-          <p className="mt-1 text-sm text-night-600">
+          <p className="mt-1 text-sm text-night-400">
             {TERMINATION_TEXT[gameOver.termination] ?? resultLabel}
           </p>
 
@@ -125,14 +125,14 @@ export default function GameOverModal({
                 {delta >= 0 ? "+" : ""}
                 {delta}
               </span>
-              <span className="text-sm text-night-600">rating</span>
+              <span className="text-sm text-night-400">rating</span>
             </div>
           )}
 
           <div className="mt-6 space-y-2">
             {rematchIncoming ? (
               <>
-                <p className="mb-2 text-sm text-night-600">Your opponent wants a rematch.</p>
+                <p className="mb-2 text-sm text-night-400">Your opponent wants a rematch.</p>
                 <button
                   onClick={onRematchAccept}
                   className="w-full rounded-lg bg-aurora-cyan py-3 font-semibold text-night-950 transition-colors hover:bg-[#3ad2e8]"
@@ -147,7 +147,7 @@ export default function GameOverModal({
                 </button>
               </>
             ) : rematchOffered ? (
-              <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-night-800 py-3 text-sm font-medium text-night-600">
+              <div className="flex w-full items-center justify-center gap-2 rounded-lg bg-night-800 py-3 text-sm font-medium text-night-400">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-aurora-cyan motion-reduce:animate-none" />
                 Waiting for your opponent
               </div>
@@ -171,7 +171,7 @@ export default function GameOverModal({
 
             <button
               onClick={onClose}
-              className="w-full rounded-lg py-2.5 font-medium text-night-600 transition-colors hover:text-white"
+              className="w-full rounded-lg py-2.5 font-medium text-night-400 transition-colors hover:text-white"
             >
               Back to the board
             </button>

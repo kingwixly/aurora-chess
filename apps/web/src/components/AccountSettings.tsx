@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { COUNTRIES, flagEmoji } from "@aurora/chess";
+import { COUNTRIES } from "@aurora/chess";
+import { Flag } from "@aurora/ui";
 import api from "../lib/api";
 import FlairPicker from "./FlairPicker";
 import { useAuthStore } from "../stores/auth";
@@ -122,6 +123,13 @@ export default function AccountSettings({ earnedFlairs = [] }: { earnedFlairs?: 
       </Row>
 
       <Row label="Country" hint="Shows a flag beside your name.">
+        {/* The list stays plain text: a <select> cannot render SVG, so the
+            chosen flag is previewed alongside instead. */}
+        {countryCode && (
+          <span className="mb-1.5 inline-flex items-center gap-2 text-sm text-night-400">
+            <Flag code={countryCode} size={16} /> Currently shown beside your name
+          </span>
+        )}
         <select
           value={countryCode}
           onChange={(e) => setCountryCode(e.target.value)}
@@ -130,7 +138,7 @@ export default function AccountSettings({ earnedFlairs = [] }: { earnedFlairs?: 
           <option value="">No country</option>
           {COUNTRIES.map((c) => (
             <option key={c.code} value={c.code}>
-              {flagEmoji(c.code)} {c.name}
+              {c.name}
             </option>
           ))}
         </select>

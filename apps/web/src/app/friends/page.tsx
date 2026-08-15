@@ -161,12 +161,18 @@ export default function FriendsPage() {
 
         {message && <p className="text-sm text-center text-yellow-400">{message}</p>}
 
-        {/* Search */}
-        <div className="bg-night-900 rounded-lg p-4">
-          <h2 className="text-lg font-semibold mb-3">Find Players</h2>
+        {/* Deliberately separated from the friend filter above and labelled
+            differently: one narrows people you already know, the other reaches
+            the whole site. Identical-looking bars side by side is what made
+            them feel like one broken control. */}
+        <div className="rounded-xl bg-night-900 p-4 ring-1 ring-inset ring-aurora-cyan/20">
+          <h2 className="font-display text-lg font-semibold">Find new players</h2>
+          <p className="mb-3 text-xs text-night-400">
+            Searches every account on Aurora, including anyone who has changed their name.
+          </p>
           <input
             type="text"
-            placeholder="Search by username..."
+            placeholder="Search all of Aurora by username..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-3 py-2 bg-night-800 border border-night-700 rounded focus:outline-none focus:border-aurora-cyan"
@@ -254,7 +260,7 @@ export default function FriendsPage() {
             <input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="Filter your friends"
+              placeholder="Filter this list"
               className="min-w-0 flex-1 rounded-lg border border-night-700 bg-night-800 px-3 py-2 text-sm outline-none focus:border-aurora-cyan"
             />
             <button

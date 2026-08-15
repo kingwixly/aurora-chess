@@ -104,6 +104,11 @@ else
         set_env NEXT_PUBLIC_SITE_URL "https://$DOMAIN"
         set_env NEXT_PUBLIC_ADMIN_URL "https://admin.$DOMAIN"
         set_env NODE_ENV production
+        # Required in production, and the API refuses to start without them.
+        # Setting NODE_ENV=production without these produced a config that the
+        # bootstrapper's own API rejected at boot.
+        set_env CORS_ORIGIN "https://$DOMAIN"
+        set_env COOKIE_SECURE true
         # Behind Cloudflare Tunnel, Cloudflare terminates TLS at the edge and
         # nginx serves plain HTTP. Leave SITE_DOMAIN empty so certbot does not
         # try an HTTP-01 challenge it can never satisfy.
@@ -117,6 +122,8 @@ else
         # and browsers silently drop Secure cookies over http://, so login
         # succeeds server-side but never persists.
         set_env NODE_ENV development
+        set_env CORS_ORIGIN "http://$DOMAIN"
+        set_env COOKIE_SECURE false
     fi
 
     ok "Generated .env with random secrets"

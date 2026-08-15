@@ -13,17 +13,54 @@ vi.mock("next/server", () => ({
 
 import { middleware } from "./middleware";
 
-function createMockRequest(pathname: string, hasCookie: boolean) {
+function createMockRequest(pathname: string, hasCookie: boolean, host = "aurorachess.org") {
   return {
     nextUrl: {
       pathname,
     },
-    url: "http://localhost:3000",
+    url: `http://${host}:3000${pathname}`,
+    headers: {
+      get: (name: string) => (name.toLowerCase() === "host" ? host : null),
+    },
     cookies: {
       has: (name: string) => (name === "refresh_token" ? hasCookie : false),
     },
   } as unknown as import("next/server").NextRequest;
 }
+
+describe("standing subdomain", () => {
+  beforeEach(() => {
+    mockRedirect.mockClear();
+    mockNext.mockClear();
+  });
+
+  it("sends any non-standing path on the standing host to the record", () => {
+    // Someone landing on standing.aurorachess.org/play should see their record,
+    // not a "you are signed out" page about playing chess.
+    middleware(createMockRequest("/play", false, "standing.aurorachess.org"));
+    expect(mockRedirect).toHaveBeenCalled();
+    expect(mockRedirect.mock.calls[0][0].toString()).toContain("/standing");
+  });
+
+  it("leaves the standing pages alone on the standing host", () => {
+    middleware(createMockRequest("/standing", false, "standing.aurorachess.org"));
+    expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
+  it("does not redirect a banned user away from appealing", () => {
+    // The whole point of the standing site: reachable without a session.
+    middleware(createMockRequest("/standing/appeal", false, "standing.aurorachess.org"));
+    expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
+  it("sends the standing path on the main host to the subdomain", () => {
+    // One address for standing. A punished player should only ever be pointed
+    // at one place, and that place has to survive a ban.
+    middleware(createMockRequest("/standing", true, "aurorachess.org"));
+    expect(mockRedirect).toHaveBeenCalled();
+    expect(mockRedirect.mock.calls[0][0].toString()).toContain("standing.aurorachess.org");
+  });
+});
 
 describe("middleware", () => {
   it("never redirects away from auth pages, even with a cookie present", () => {

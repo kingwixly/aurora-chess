@@ -29,7 +29,7 @@ export default function BotAvatar({
       <span
         aria-hidden="true"
         style={{ width: size, height: size, fontSize: size * 0.42 }}
-        className={`flex shrink-0 items-center justify-center rounded-lg bg-night-800 font-display font-semibold text-night-600 ring-1 ring-inset ring-night-700 ${className}`}
+        className={`flex shrink-0 items-center justify-center rounded-lg bg-night-800 font-display font-semibold text-night-400 ring-1 ring-inset ring-night-700 ${className}`}
       >
         {/* Emoji avatars from the old roster still render here rather than
             being dropped, so an un-migrated database degrades gracefully. */}

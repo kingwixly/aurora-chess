@@ -32,13 +32,27 @@ export const metadata: Metadata = {
   // previews break for every shared link.
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: { default: "Aurora Chess", template: "%s · Aurora Chess" },
-  description: "A chess club that lives online. Play, study, and earn your title.",
+  // The embed description is what people see before they click, so it leads
+  // with the two things that actually differentiate Aurora.
+  description:
+    "Free, unlimited analysis and puzzles. Nine ways to earn a title, and no ban is ever issued by software.",
   manifest: "/manifest.json",
   openGraph: {
     title: "Aurora Chess",
-    description: "A chess club that lives online. Play, study, and earn your title.",
+    siteName: "Aurora Chess",
+    url: "/",
+    description:
+      "Free, unlimited analysis and puzzles. Nine ways to earn a title, and no ban is ever issued by software.",
     images: [{ url: "/og-card.png", width: 1200, height: 630 }],
     type: "website",
+  },
+  // Discord and X read these rather than the OpenGraph tags in some cases.
+  twitter: {
+    card: "summary_large_image",
+    title: "Aurora Chess",
+    description:
+      "Free, unlimited analysis and puzzles. Nine ways to earn a title, and no ban is ever issued by software.",
+    images: ["/og-card.png"],
   },
   appleWebApp: {
     capable: true,

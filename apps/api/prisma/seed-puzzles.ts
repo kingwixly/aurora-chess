@@ -33,15 +33,15 @@ export const PUZZLES = [
     ],
   },
   {
-    id: "royal-fork",
+    id: "family-fork",
     fen: "r3k2r/ppp2ppp/8/3N4/8/8/PPP2PPP/R3K2R w KQkq - 0 1",
     rating: 1200,
-    title: "Royal fork",
+    title: "Family fork",
     intro: "White to move and win material.",
     themes: ["fork", "knightFork"],
     moves: ["d5c7"],
     explanations: [
-      "Nc7+ forks the king and the a8 rook. Because it is check, Black has no time to save the rook \u2014 the king must move first, and the knight takes on a8 next. Look for this whenever an enemy king and rook sit two squares apart: c7 and f7 are the squares a knight uses against an uncastled king.",
+      "Nxc7+ forks the king and the a8 rook. Because it is check, Black has no time to save the rook \u2014 the king must move first, and the knight takes on a8 next. Look for this whenever an enemy king and rook sit two squares apart: This is a family fork; the name royal fork is reserved for a knight hitting king and queen. Look for it whenever an enemy king and rook sit a knight's double-attack apart \u2014 c7 and f7 are the squares against an uncastled king.",
     ],
   },
   {
@@ -108,6 +108,56 @@ export const PUZZLES = [
       "Rd8! The rook offers itself. The point is not the rook: it is that the f8 rook is the only piece guarding f7, and this deflects it.",
       "Rxd8 accepts. Declining loses to Rxf8+ anyway.",
       "Nf7+ arrives with the f8 rook gone, forking king and rook, and mate follows shortly. This pattern \u2014 knight to f7 against a king boxed on h8 \u2014 is worth memorising; it is the engine room of most smothered-mate combinations.",
+    ],
+  },
+  {
+    id: "rook-deflection",
+    fen: "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",
+    rating: 900,
+    title: "The open file",
+    intro: "White to move and mate.",
+    themes: ["backRankMate", "mateIn1"],
+    moves: ["d1d8"],
+    explanations: [
+      "Rd8#. The rook swings to the back rank and there is nothing to block with. Black's pawns have never moved, so the king has no square \u2014 the weakness behind most back-rank mates, and the reason players spend a tempo on h6 in the middlegame."
+    ],
+  },
+  {
+    id: "two-rook-mate",
+    fen: "7k/8/8/8/8/8/R7/1R5K w - - 0 1",
+    rating: 1200,
+    title: "Two rooks",
+    intro: "White to move and mate in two.",
+    themes: ["mateIn2", "endgame", "rookEndgame"],
+    moves: ["b1g1", "h8h7", "a2h2"],
+    explanations: [
+      "Rg1 takes the whole g-file away, leaving the king only the h-file. Cutting off before checking is the entire method \u2014 check first and the king simply walks.",
+      "Kh7 is forced; every other square is covered.",
+      "Rh2#. The rooks climb like rungs on a ladder: one cuts off, the other delivers. This mates a lone king from anywhere on the board."
+    ],
+  },
+  {
+    id: "royal-fork",
+    fen: "q3k3/5ppp/8/3N4/8/8/5PPP/6K1 w - - 0 1",
+    rating: 1300,
+    title: "Royal fork",
+    intro: "White to move and win the queen.",
+    themes: ["fork", "knightFork"],
+    moves: ["d5c7"],
+    explanations: [
+      "Nc7+ is a royal fork \u2014 king and queen at once, which is the only combination that earns the name. The king must step out of check and the knight collects the queen on a8. A knight is the one piece that can attack a queen without the queen being able to take it back."
+    ],
+  },
+  {
+    id: "king-opposition",
+    fen: "8/5k2/8/8/8/8/3P4/3K4 w - - 0 1",
+    rating: 1500,
+    title: "The king leads",
+    intro: "White to move. How do you promote this pawn?",
+    themes: ["endgame", "pawnEndgame", "opposition"],
+    moves: ["d1c2"],
+    explanations: [
+      "Kc2, not d3 and not the pawn. The king goes ahead of the pawn and slightly to the side; pushing the pawn first lets the black king sit in front of it and the game is drawn. In king-and-pawn endings the king leads and the pawn follows \u2014 the opposite of most players' instinct."
     ],
   },
 ];

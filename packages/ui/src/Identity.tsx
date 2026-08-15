@@ -5,10 +5,10 @@ import {
   TITLE_CRITERIA_TEXT,
   isUnofficialTitle,
   getBadge,
-  flagEmoji,
   getCountry,
   type Title,
 } from "@aurora/chess";
+import { Flag } from "./Flag";
 
 /* ── Aurora band ──────────────────────────────────────────
    The signature element: the logo's ribbon flattened into a line. It marks the
@@ -213,13 +213,11 @@ export function PlayerName({
       {modShield && <ModShield size={size} />}
       <TitleBadge title={title} size={size} />
       {countryCode && (
-        <span
+        <Flag
+          code={countryCode}
           title={getCountry(countryCode)?.name ?? countryCode}
-          aria-label={getCountry(countryCode)?.name ?? countryCode}
-          className="shrink-0 leading-none"
-        >
-          {flagEmoji(countryCode)}
-        </span>
+          size={size === "sm" ? 12 : 14}
+        />
       )}
       <span className="truncate font-medium">{username}</span>
       <FlairIcon flairKey={flair} />

@@ -111,11 +111,11 @@ export default function QueueSnake() {
   return (
     <div className="w-full">
       <div className="mb-2 flex items-baseline justify-between text-xs">
-        <span className="font-mono text-night-600">
+        <span className="font-mono text-night-400">
           Score <span className="text-white">{score}</span>
-          {best > 0 && <span className="ml-3 text-night-600">Best {best}</span>}
+          {best > 0 && <span className="ml-3 text-night-400">Best {best}</span>}
         </span>
-        <span className="text-night-600">Arrow keys or WASD</span>
+        <span className="text-night-400">Arrow keys or WASD</span>
       </div>
 
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-night-900 ring-1 ring-inset ring-night-700">

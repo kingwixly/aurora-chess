@@ -17,11 +17,12 @@ import {
   FideProfilePanel,
   BadgeShelf,
   StaffMark,
+  Flag,
 } from "@aurora/ui";
 import RatingPools from "../../../components/RatingPools";
 import ReportDialog from "../../../components/ReportDialog";
 import type { Title } from "@aurora/chess";
-import { FIDE_PANEL_TITLE_LABELS, flagEmoji, getCountry } from "@aurora/chess";
+import { FIDE_PANEL_TITLE_LABELS, getCountry } from "@aurora/chess";
 
 interface RecentGame {
   id: string;
@@ -244,8 +245,12 @@ export default function ProfilePage() {
               </h1>
               <p className="mt-1 text-sm text-night-400">
                 {getCountry(profile.countryCode) && (
-                  <span className="mr-2">
-                    {flagEmoji(profile.countryCode)} {getCountry(profile.countryCode)!.name}
+                  <span className="mr-2 inline-flex items-center gap-1.5">
+                    <Flag
+                      code={profile.countryCode}
+                      title={getCountry(profile.countryCode)!.name}
+                    />
+                    {getCountry(profile.countryCode)!.name}
                   </span>
                 )}
                 Joined {new Date(profile.createdAt).toLocaleDateString()}

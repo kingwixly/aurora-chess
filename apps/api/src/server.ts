@@ -72,9 +72,16 @@ async function main() {
   const isProduction = process.env.NODE_ENV === "production";
   const siteUrl = process.env.SITE_URL || "http://localhost";
   const adminUrl = process.env.ADMIN_URL || siteUrl.replace("://", "://admin.");
+  // The standing site is a separate origin and must be allowed explicitly.
+  // Leaving it out rejected every API call it made, which surfaced as a
+  // generic "Login failed" with no clue that CORS was the cause.
+  const standingUrl = siteUrl.replace("://", "://standing.");
+  const wwwUrl = siteUrl.replace("://", "://www.");
   const allowedOrigins = isProduction
-    ? [siteUrl, adminUrl]
+    ? [siteUrl, adminUrl, standingUrl, wwwUrl]
     : [
+        standingUrl,
+        wwwUrl,
         siteUrl,
         adminUrl,
         "http://localhost",

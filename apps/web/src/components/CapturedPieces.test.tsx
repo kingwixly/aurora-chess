@@ -61,17 +61,32 @@ describe("CapturedPieces", () => {
     expect(pieces[2].textContent).toBe("\u265F");
   });
 
-  it("applies correct text class for white color", () => {
+  // Captured pieces are drawn with the installed piece artwork rather than
+  // Unicode glyphs: the glyphs rendered inconsistently across platforms, the
+  // same problem that made flags show as country codes on Windows. These tests
+  // check the right image is used, which is what the colour classes used to be
+  // standing in for.
+  it("draws white's captures using the white piece artwork", () => {
+    useSettingsStore.setState({ materialStyle: "board", pieceSet: "sleek" });
     const fen = "rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     const { container } = render(<CapturedPieces fen={fen} color="white" />);
-    const span = container.querySelector("span");
-    expect(span?.className).toContain("text-white");
+    const img = container.querySelector("img");
+    expect(img?.getAttribute("src")).toMatch(/\/sleek\/w[QRBNP]\.png$/);
   });
 
-  it("applies correct text class for black color", () => {
+  it("draws black's captures using the black piece artwork", () => {
+    useSettingsStore.setState({ materialStyle: "board", pieceSet: "sleek" });
     const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1";
     const { container } = render(<CapturedPieces fen={fen} color="black" />);
-    const span = container.querySelector("span");
-    expect(span?.className).toContain("text-night-300");
+    const img = container.querySelector("img");
+    expect(img?.getAttribute("src")).toMatch(/\/sleek\/b[QRBNP]\.png$/);
+  });
+
+  it("falls back to glyphs for the default set, which has no image files", () => {
+    useSettingsStore.setState({ materialStyle: "board", pieceSet: "fontaine" });
+    const fen = "rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    const { container } = render(<CapturedPieces fen={fen} color="white" />);
+    expect(container.querySelector("img")).toBeNull();
+    expect(container.textContent).toContain("\u265B");
   });
 });

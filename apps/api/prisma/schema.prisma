@@ -349,6 +349,10 @@ model SiteSettings {
   id                       String  @id @default("singleton")
   siteName                 String  @default("AuroraChess")
   registrationOpen         Boolean @default(true)
+  /// When true, registration requires a valid invite code. Off by default:
+  /// a public chess site with an invite wall is not really public. The invite
+  /// system stays intact so this can be switched back on if needed.
+  inviteOnly               Boolean @default(false)
   maxUsers                 Int     @default(0)
   requireEmailVerification Boolean @default(false)
   updatedAt                DateTime @updatedAt

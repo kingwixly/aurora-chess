@@ -27,7 +27,8 @@ export const registerBodySchema = z.object({
   email: z.string().email(),
   username: z.string().min(1),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  inviteCode: z.string().min(1),
+  // Optional: the gate is a site setting now, checked in the route.
+  inviteCode: z.string().min(1).optional(),
 });
 
 export const loginBodySchema = z.object({

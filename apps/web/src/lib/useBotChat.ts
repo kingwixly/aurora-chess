@@ -24,8 +24,11 @@ const ALWAYS_SHOW: BotMessageEvent[] = ["gameStart", "onCheckmate", "onCheckmate
 
 export function useBotChat({
   messages,
-  probability = 0.6,
-  cooldownMs = 5000,
+  // Raised from 0.6 with a shorter cooldown. Bots that speak rarely read as
+  // broken rather than reserved, and the cooldown alone already prevents a
+  // wall of text.
+  probability = 0.85,
+  cooldownMs = 3500,
   displayMs = 3000,
 }: UseBotChatOptions): UseBotChatReturn {
   const [currentMessage, setCurrentMessage] = useState<string | null>(null);

@@ -30,7 +30,7 @@ export default function Error({
         This page hit an error. It is usually temporary — trying again often works.
       </p>
       {error.digest && (
-        <p className="font-mono text-xs text-night-600">Reference: {error.digest}</p>
+        <p className="font-mono text-xs text-night-400">Reference: {error.digest}</p>
       )}
       <div className="mt-2 flex gap-2">
         <button

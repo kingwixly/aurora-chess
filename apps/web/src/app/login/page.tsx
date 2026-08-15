@@ -51,7 +51,7 @@ function LoginForm() {
           <Image src="/logo-mark.png" alt="Aurora Chess" width={80} height={80} priority />
         </div>
         <h1 className="text-center font-display text-3xl tracking-tight">Welcome back</h1>
-        <p className="mb-6 mt-2 text-center text-sm text-night-600">Sign in to keep playing.</p>
+        <p className="mb-6 mt-2 text-center text-sm text-night-400">Sign in to keep playing.</p>
         {error && (
           <p className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-center text-sm text-red-300 ring-1 ring-inset ring-red-500/30">
             {error}
@@ -68,7 +68,7 @@ function LoginForm() {
               autoComplete="email"
               id="email"
               name="email"
-              className="w-full rounded-lg border border-night-700 bg-night-800 px-3.5 py-2.5 text-white placeholder:text-night-600 focus:border-aurora-cyan focus:outline-none focus:ring-1 focus:ring-aurora-cyan"
+              className="w-full rounded-lg border border-night-700 bg-night-800 px-3.5 py-2.5 text-white placeholder:text-night-400 focus:border-aurora-cyan focus:outline-none focus:ring-1 focus:ring-aurora-cyan"
             />
           </div>
           <div>
@@ -81,7 +81,7 @@ function LoginForm() {
               autoComplete="current-password"
               id="password"
               name="password"
-              className="w-full rounded-lg border border-night-700 bg-night-800 px-3.5 py-2.5 text-white placeholder:text-night-600 focus:border-aurora-cyan focus:outline-none focus:ring-1 focus:ring-aurora-cyan"
+              className="w-full rounded-lg border border-night-700 bg-night-800 px-3.5 py-2.5 text-white placeholder:text-night-400 focus:border-aurora-cyan focus:outline-none focus:ring-1 focus:ring-aurora-cyan"
             />
           </div>
           <button
@@ -92,7 +92,7 @@ function LoginForm() {
             {loading ? "Logging in..." : "Log In"}
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-night-600">
+        <p className="mt-6 text-center text-sm text-night-400">
           Don&apos;t have an account?{" "}
           <Link href="/register" className="font-medium text-aurora-cyan hover:underline">
             Register

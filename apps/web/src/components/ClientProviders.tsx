@@ -10,6 +10,8 @@ import TosGate from "./TosGate";
 import { useUpdateNotification, checkDeferredUpdate } from "../lib/useUpdateNotification";
 import { useOnlineStatus } from "../lib/useOnlineStatus";
 import { useInstallPrompt } from "../lib/useInstallPrompt";
+import { setDeviceIdProvider } from "@aurora/api-client";
+import { getDeviceId } from "../lib/deviceId";
 
 // Pages that don't require TOS acceptance
 // Pages a user must be able to reach before accepting the terms — plus the
@@ -31,6 +33,23 @@ export default function ClientProviders({ children }: { children: React.ReactNod
   const isOnline = useOnlineStatus();
   const { canInstall, isInstalled, install } = useInstallPrompt();
   const [showIosBanner, setShowIosBanner] = useState(false);
+  const [installDismissed, setInstallDismissed] = useState(false);
+
+  // Register the device identifier once, before any request goes out.
+  useEffect(() => {
+    setDeviceIdProvider(getDeviceId);
+  }, []);
+
+  // Restore the dismissal so the prompt does not return on every page load.
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("aurorachess-install-dismissed") === "1") {
+        setInstallDismissed(true);
+      }
+    } catch {
+      // Private browsing; the prompt shows for this session.
+    }
+  }, []);
 
   // PWA update detection
   useUpdateNotification();
@@ -57,14 +76,31 @@ export default function ClientProviders({ children }: { children: React.ReactNod
           You&apos;re offline &mdash; bot games still work
         </div>
       )}
-      {canInstall && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2 bg-aurora-cyan rounded-full shadow-lg text-sm text-night-950">
+      {canInstall && !installDismissed && (
+        <div className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-aurora-cyan px-4 py-2 text-sm text-night-950 shadow-lg">
           <span>Install AuroraChess app</span>
           <button
             onClick={install}
-            className="px-3 py-1 bg-white text-aurora-cyan rounded-full text-xs font-bold"
+            className="rounded-full bg-white px-3 py-1 text-xs font-bold text-aurora-cyan"
           >
             Install
+          </button>
+          {/* A prompt with no way out is not a prompt. Dark on cyan so it is
+              obvious, and the choice is remembered so it does not return on
+              every page. */}
+          <button
+            onClick={() => {
+              setInstallDismissed(true);
+              try {
+                localStorage.setItem("aurorachess-install-dismissed", "1");
+              } catch {
+                // Private browsing; it will reappear next session.
+              }
+            }}
+            aria-label="Dismiss install prompt"
+            className="ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-night-950/20 text-lg leading-none text-night-950 transition-colors hover:bg-night-950/40"
+          >
+            &times;
           </button>
         </div>
       )}

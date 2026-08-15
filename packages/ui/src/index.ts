@@ -13,3 +13,4 @@ export {
   FideProfilePanel,
 } from "./Identity";
 export type { ProfileBadge, FidePanelData } from "./Identity";
+export { Flag } from "./Flag";

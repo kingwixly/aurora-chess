@@ -111,12 +111,12 @@ function QueueContent() {
       <AuroraBand />
 
       <div className="mx-auto max-w-4xl px-6 py-10">
-        <Link href="/play" className="text-sm text-night-600 transition-colors hover:text-white">
+        <Link href="/play" className="text-sm text-night-400 transition-colors hover:text-white">
           &larr; Back to play
         </Link>
 
         <h1 className="mt-4 font-display text-3xl tracking-tight">Quick play</h1>
-        <p className="mt-1 text-night-600">
+        <p className="mt-1 text-night-400">
           Paired with whoever is closest to your rating and waiting.
         </p>
 
@@ -128,7 +128,7 @@ function QueueContent() {
 
         <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_360px]">
           <div>
-            <h2 className="mb-3 text-xs uppercase tracking-wider text-night-600">Time control</h2>
+            <h2 className="mb-3 text-xs uppercase tracking-wider text-night-400">Time control</h2>
             <div className="grid grid-cols-3 gap-2.5">
               {PRESETS.map((p) => (
                 <button
@@ -152,7 +152,7 @@ function QueueContent() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-display text-xl">Finding an opponent</p>
-                      <p className="mt-1 text-sm text-night-600">
+                      <p className="mt-1 text-sm text-night-400">
                         Waiting {waited}s &middot; rating window widens as you wait
                       </p>
                     </div>
@@ -177,7 +177,7 @@ function QueueContent() {
           </div>
 
           <aside>
-            <h2 className="mb-3 text-xs uppercase tracking-wider text-night-600">While you wait</h2>
+            <h2 className="mb-3 text-xs uppercase tracking-wider text-night-400">While you wait</h2>
             <QueueSnake />
           </aside>
         </div>
@@ -200,7 +200,7 @@ export default function QueuePage() {
           <AuroraBand />
           <div className="mx-auto max-w-4xl px-6 py-10">
             <h1 className="font-display text-3xl tracking-tight">Quick play</h1>
-            <p className="mt-1 text-night-600">Loading...</p>
+            <p className="mt-1 text-night-400">Loading...</p>
           </div>
         </main>
       }

@@ -135,6 +135,11 @@ if (Test-Path $envPath) {
         # is marked Secure, and browsers silently drop Secure cookies over
         # http:// - login then succeeds server-side but never persists.
         "NODE_ENV"               = "development"
+        # Local runs are plain HTTP, so the cookie must NOT be Secure or the
+        # browser drops it and login never persists. Set explicitly rather than
+        # inherited from .env.example, which the API validates at boot.
+        "COOKIE_SECURE"          = "false"
+        "CORS_ORIGIN"            = "http://$Hostname"
     }
 
     # Rewrite in place, uncommenting keys that ship commented out.

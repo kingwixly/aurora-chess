@@ -10,13 +10,49 @@ interface CapturedPiecesProps {
 
 const STARTING_COUNTS: Record<string, number> = { p: 8, n: 2, b: 2, r: 2, q: 1 };
 
-const PIECE_SYMBOLS: Record<string, string> = {
-  q: "\u265B",
-  r: "\u265C",
-  b: "\u265D",
-  n: "\u265E",
-  p: "\u265F",
-};
+const PIECE_CODES: Record<string, string> = { q: "Q", r: "R", b: "B", n: "N", p: "P" };
+
+/**
+ * A captured piece, drawn with the same artwork as the board.
+ *
+ * Unicode chess glyphs render inconsistently across platforms — the same
+ * problem that made flags appear as country codes on Windows. Using the
+ * installed piece set means the captured row matches the board and looks
+ * identical everywhere.
+ */
+function CapturedPiece({
+  piece,
+  colour,
+  set,
+  size,
+}: {
+  piece: string;
+  colour: "w" | "b";
+  set: string;
+  size: number;
+}) {
+  if (set === "fontaine") {
+    // The default set has no image files, so fall back to the glyph.
+    const GLYPHS: Record<string, string> = {
+      q: "\u265B",
+      r: "\u265C",
+      b: "\u265D",
+      n: "\u265E",
+      p: "\u265F",
+    };
+    return <span style={{ fontSize: size }}>{GLYPHS[piece]}</span>;
+  }
+  return (
+    <img
+      src={`/piece-sets/${set}/${colour}${PIECE_CODES[piece]}.png`}
+      alt=""
+      width={size}
+      height={size}
+      style={{ width: size, height: size }}
+      className="shrink-0 object-contain"
+    />
+  );
+}
 
 const PIECE_VALUES: Record<string, number> = { q: 9, r: 5, b: 3, n: 3, p: 1 };
 const PIECE_ORDER = ["q", "r", "b", "n", "p"];
@@ -52,15 +88,11 @@ function materialValue(counts: Record<string, number>): number {
  */
 export default function CapturedPieces({ fen, color }: CapturedPiecesProps) {
   const materialStyle = useSettingsStore((s) => s.materialStyle);
+  const pieceSet = useSettingsStore((s) => s.pieceSet);
 
   const own = countOnBoard(fen, color === "white" ? "w" : "b");
   const opponent = countOnBoard(fen, color === "white" ? "b" : "w");
   const advantage = materialValue(own) - materialValue(opponent);
-
-  const tone =
-    color === "white"
-      ? "text-white opacity-80 drop-shadow-[0_0_1px_rgba(0,0,0,0.8)]"
-      : "text-night-300 drop-shadow-[0_0_1px_rgba(255,255,255,0.3)]";
 
   // Reserve the row height so the board does not shift on the first capture.
   const EMPTY = <div className="min-h-[20px] lg:min-h-[24px]" aria-hidden="true" />;
@@ -78,9 +110,13 @@ export default function CapturedPieces({ fen, color }: CapturedPiecesProps) {
     return (
       <div className="flex min-h-[20px] flex-wrap items-center gap-0.5 text-base lg:min-h-[24px] lg:text-lg">
         {surplus.map((p, i) => (
-          <span key={i} className={tone}>
-            {PIECE_SYMBOLS[p]}
-          </span>
+          <CapturedPiece
+            key={i}
+            piece={p}
+            colour={color === "white" ? "w" : "b"}
+            set={pieceSet}
+            size={18}
+          />
         ))}
         {advantage > 0 && (
           <span
@@ -104,9 +140,13 @@ export default function CapturedPieces({ fen, color }: CapturedPiecesProps) {
   return (
     <div className="flex min-h-[20px] flex-wrap items-center gap-0.5 overflow-hidden text-base lg:min-h-[24px] lg:text-lg">
       {captured.map((p, i) => (
-        <span key={i} className={tone}>
-          {PIECE_SYMBOLS[p]}
-        </span>
+        <CapturedPiece
+          key={i}
+          piece={p}
+          colour={color === "white" ? "w" : "b"}
+          set={pieceSet}
+          size={16}
+        />
       ))}
       {advantage > 0 && (
         <span className="ml-1 font-mono text-sm font-semibold text-emerald-400">+{advantage}</span>

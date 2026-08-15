@@ -124,7 +124,7 @@ export default function BotSelector({ selected, onSelect, bots }: BotSelectorPro
                         </div>
                         {/* Two lines rather than truncate: the descriptions carry the
                             character and a single clipped line wasted them. */}
-                        <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-night-600">
+                        <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-night-400">
                           {bot.description}
                         </p>
                       </div>

@@ -118,7 +118,7 @@ export default function ChallengeFriendPage() {
   if (isLoading || !user) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-night-950">
-        <p className="text-night-600">Loading...</p>
+        <p className="text-night-400">Loading...</p>
       </main>
     );
   }
@@ -135,7 +135,7 @@ export default function ChallengeFriendPage() {
 
         {/* Friend selection */}
         <div className="bg-night-900 rounded-lg p-4">
-          <h2 className="text-sm font-semibold text-night-600 mb-3 font-display">
+          <h2 className="text-sm font-semibold text-night-400 mb-3 font-display">
             Select Opponent
           </h2>
           {friends.length === 0 ? (
@@ -157,7 +157,7 @@ export default function ChallengeFriendPage() {
                     className={`w-2.5 h-2.5 rounded-full shrink-0 ${f.isOnline ? "bg-green-400" : "bg-night-700"}`}
                   />
                   <span className="font-medium">{f.username}</span>
-                  <span className="text-night-600 text-sm">({f.rating})</span>
+                  <span className="text-night-400 text-sm">({f.rating})</span>
                 </button>
               ))}
             </div>
@@ -180,7 +180,7 @@ export default function ChallengeFriendPage() {
         )}
 
         <div className="text-center">
-          <Link href="/play" className="text-night-600 hover:text-white text-sm">
+          <Link href="/play" className="text-night-400 hover:text-white text-sm">
             &larr; Back to Play
           </Link>
         </div>

@@ -7,6 +7,7 @@ import {
   createApp,
 } from "../test/setup.js";
 import jwt from "jsonwebtoken";
+import { getSiteSettings } from "../lib/settings.js";
 
 // Mock bcrypt
 vi.mock("bcrypt", () => ({
@@ -103,8 +104,101 @@ describe("authRoutes", () => {
       expect(JSON.parse(res.body).error).toBeDefined();
     });
 
-    it("returns 400 for invalid invite code", async () => {
+    it("accepts a signup with no invite code at all", async () => {
+      // Registration is open by default now. The invite system is kept and
+      // gated on a setting rather than deleted, so it can be switched back on
+      // from the admin panel without a deployment.
       const prisma = getPrisma();
+      prisma.user.count.mockResolvedValue(0);
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.create.mockResolvedValue({
+        id: "new-id",
+        email: "new@example.com",
+        username: "newuser",
+        rating: 1200,
+        role: "USER",
+      });
+      prisma.invite.update.mockResolvedValue({});
+      prisma.refreshToken.create.mockResolvedValue({});
+      prisma.collection.create.mockResolvedValue({});
+
+      const { inviteCode: _omitted, ...noInvite } = validBody as Record<string, unknown>;
+      const res = await app.inject({
+        method: "POST",
+        url: "/auth/register",
+        payload: noInvite,
+      });
+
+      expect(res.statusCode).toBe(200);
+      // Nothing to consume, so the invite table must not be touched.
+      expect(prisma.invite.update).not.toHaveBeenCalled();
+    });
+
+    it("still consumes a valid invite when one is supplied", async () => {
+      // Codes already sent out must keep working after the gate came down,
+      // otherwise whoever sent them looks unreliable.
+      const prisma = getPrisma();
+      prisma.user.count.mockResolvedValue(0);
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.create.mockResolvedValue({
+        id: "new-id",
+        email: "new@example.com",
+        username: "newuser",
+        rating: 1200,
+        role: "USER",
+      });
+      prisma.invite.update.mockResolvedValue({});
+      prisma.refreshToken.create.mockResolvedValue({});
+      prisma.collection.create.mockResolvedValue({});
+      prisma.invite.findUnique.mockResolvedValue({ code: "valid-code", usedById: null });
+
+      const res = await app.inject({
+        method: "POST",
+        url: "/auth/register",
+        payload: validBody,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(prisma.invite.update).toHaveBeenCalled();
+    });
+
+    it("ignores a spent invite rather than refusing the signup", async () => {
+      const prisma = getPrisma();
+      prisma.user.count.mockResolvedValue(0);
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.create.mockResolvedValue({
+        id: "new-id",
+        email: "new@example.com",
+        username: "newuser",
+        rating: 1200,
+        role: "USER",
+      });
+      prisma.invite.update.mockResolvedValue({});
+      prisma.refreshToken.create.mockResolvedValue({});
+      prisma.collection.create.mockResolvedValue({});
+      prisma.invite.findUnique.mockResolvedValue({ code: "valid-code", usedById: "someone" });
+
+      const res = await app.inject({
+        method: "POST",
+        url: "/auth/register",
+        payload: validBody,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(prisma.invite.update).not.toHaveBeenCalled();
+    });
+
+    it("enforces invites again when the site is set to invite-only", async () => {
+      const prisma = getPrisma();
+      // The settings module is mocked wholesale, so override the function
+      // rather than the underlying row.
+      vi.mocked(getSiteSettings).mockResolvedValueOnce({
+        siteName: "Aurora",
+        registrationOpen: true,
+        inviteOnly: true,
+        maxUsers: 0,
+        requireEmailVerification: false,
+      });
       prisma.invite.findUnique.mockResolvedValue(null);
 
       const res = await app.inject({
@@ -115,24 +209,6 @@ describe("authRoutes", () => {
 
       expect(res.statusCode).toBe(400);
       expect(JSON.parse(res.body).error).toMatch(/invalid invite/i);
-    });
-
-    it("returns 410 for already-used invite", async () => {
-      const prisma = getPrisma();
-      prisma.invite.findUnique.mockResolvedValue({
-        id: "inv-1",
-        code: "valid-code",
-        usedById: "someone",
-      });
-
-      const res = await app.inject({
-        method: "POST",
-        url: "/auth/register",
-        payload: validBody,
-      });
-
-      expect(res.statusCode).toBe(410);
-      expect(JSON.parse(res.body).error).toMatch(/already been used/i);
     });
 
     it("returns 400 for short password", async () => {

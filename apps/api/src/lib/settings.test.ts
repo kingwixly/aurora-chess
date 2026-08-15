@@ -29,6 +29,7 @@ describe("getSiteSettings", () => {
       id: "singleton",
       siteName: "MyChess",
       registrationOpen: false,
+      inviteOnly: undefined,
       maxUsers: 100,
       requireEmailVerification: true,
       updatedAt: new Date(),
@@ -39,6 +40,7 @@ describe("getSiteSettings", () => {
     expect(settings).toEqual({
       siteName: "MyChess",
       registrationOpen: false,
+      inviteOnly: undefined,
       maxUsers: 100,
       requireEmailVerification: true,
     });
@@ -58,6 +60,9 @@ describe("getSiteSettings", () => {
     expect(settings).toEqual({
       siteName: "EnvChess",
       registrationOpen: false,
+      // Opt-in: an unconfigured install is open rather than accidentally
+      // locked behind codes nobody has.
+      inviteOnly: false,
       maxUsers: 50,
       requireEmailVerification: true,
     });
@@ -71,6 +76,7 @@ describe("getSiteSettings", () => {
     expect(settings).toEqual({
       siteName: "AuroraChess",
       registrationOpen: true,
+      inviteOnly: false,
       maxUsers: 0,
       requireEmailVerification: false,
     });

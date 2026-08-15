@@ -237,6 +237,9 @@ vi.mock("../lib/settings.js", () => ({
   getSiteSettings: vi.fn().mockResolvedValue({
     siteName: "AuroraChess",
     registrationOpen: true,
+    // Open by default, matching production. The invite-only path is exercised
+    // by overriding this in the test that cares.
+    inviteOnly: false,
     maxUsers: 0,
     requireEmailVerification: false,
   }),

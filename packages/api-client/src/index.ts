@@ -25,9 +25,32 @@ export function getAccessToken() {
   return accessToken;
 }
 
+/**
+ * Device identifier, supplied by the host app.
+ *
+ * Injected rather than computed here so this package stays free of browser
+ * assumptions and can be used server-side.
+ */
+let deviceIdProvider: (() => string) | null = null;
+
+export function setDeviceIdProvider(fn: () => string) {
+  deviceIdProvider = fn;
+}
+
 api.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  // Sent on every request so moderation can act on a device rather than only
+  // an account. Without it, device bans and the per-device signup limit look
+  // enabled but never match anything.
+  if (deviceIdProvider) {
+    try {
+      const id = deviceIdProvider();
+      if (id) config.headers["x-aurora-device"] = id;
+    } catch {
+      // Never let fingerprinting break a request.
+    }
   }
   return config;
 });
@@ -82,7 +105,15 @@ api.interceptors.response.use(
       accessToken = null;
       refreshSubscribers = [];
       if (typeof window !== "undefined") {
-        window.location.href = "/login";
+        // Send people to the login page on the MAIN site, not to /login on
+        // whatever host they happen to be on. The admin and standing
+        // subdomains have no login page of their own, so a relative redirect
+        // there produced a bounce with no explanation.
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+        const onMainSite = !siteUrl || window.location.origin === siteUrl;
+        window.location.href = onMainSite
+          ? "/login"
+          : `${siteUrl}/login?next=${encodeURIComponent(window.location.href)}`;
       }
       return Promise.reject(error);
     }

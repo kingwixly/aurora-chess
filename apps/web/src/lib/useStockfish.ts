@@ -11,6 +11,8 @@ export interface EngineLine {
 
 interface StockfishHook {
   ready: boolean;
+  /** Handshake progress, for loading feedback. */
+  loadState: "downloading" | "starting" | "ready" | "failed";
   getBotMove: (fen: string, elo: number) => Promise<string | null>;
   evaluate: (
     fen: string,
@@ -49,6 +51,17 @@ const DEFAULT_MOVETIME_MS = 600;
 export function useStockfish(): StockfishHook {
   const workerRef = useRef<Worker | null>(null);
   const [ready, setReady] = useState(false);
+  /**
+   * How far the handshake has got, so the UI can show progress.
+   *
+   * The engine is a multi-megabyte WASM download; on a cold cache it can take
+   * many seconds. Without this the page said "Loading Stockfish engine" with no
+   * movement, which is indistinguishable from a hang — and it never cleared
+   * because nothing re-rendered when readiness arrived on a ref.
+   */
+  const [loadState, setLoadState] = useState<"downloading" | "starting" | "ready" | "failed">(
+    "downloading"
+  );
   const readyRef = useRef(false);
 
   const queueRef = useRef<PendingCommand[]>([]);
@@ -87,6 +100,7 @@ export function useStockfish(): StockfishHook {
 
       if (!sawUciOk && line.includes("uciok")) {
         sawUciOk = true;
+        setLoadState("starting");
         worker.postMessage("isready");
         return;
       }
@@ -95,6 +109,7 @@ export function useStockfish(): StockfishHook {
       if (!readyRef.current && line.includes("readyok") && !activeRef.current) {
         readyRef.current = true;
         setReady(true);
+        setLoadState("ready");
         return;
       }
 
@@ -105,11 +120,21 @@ export function useStockfish(): StockfishHook {
       if (line.includes(active.waitFor)) finish();
     };
 
-    worker.onerror = () => finish(new Error("Stockfish worker error"));
+    worker.onerror = () => {
+      setLoadState("failed");
+      finish(new Error("Stockfish worker error"));
+    };
 
     worker.postMessage("uci");
 
+    // A handshake that never completes is a failure, not a slow load. Without
+    // a bound the page waits forever and says nothing useful.
+    const handshakeTimeout = setTimeout(() => {
+      if (!readyRef.current) setLoadState("failed");
+    }, 45000);
+
     return () => {
+      clearTimeout(handshakeTimeout);
       worker.terminate();
       workerRef.current = null;
       activeRef.current = null;
@@ -268,5 +293,5 @@ export function useStockfish(): StockfishHook {
     [send, setOption]
   );
 
-  return { ready, getBotMove, evaluate, evaluateMultiPV };
+  return { ready, loadState, getBotMove, evaluate, evaluateMultiPV };
 }

@@ -228,7 +228,7 @@ export default function PlayBotPage() {
   if (isLoading || !user) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-night-950">
-        <p className="text-night-600">Loading...</p>
+        <p className="text-night-400">Loading...</p>
       </main>
     );
   }
@@ -258,7 +258,7 @@ export default function PlayBotPage() {
               <div key={g.id} className="flex items-center justify-between gap-2">
                 <div className="text-xs text-night-300">
                   <span className="font-mono">Elo {g.botElo}</span>
-                  <span className="text-night-600 ml-2">
+                  <span className="text-night-400 ml-2">
                     {g.moves.length} move{g.moves.length !== 1 ? "s" : ""}
                   </span>
                 </div>
@@ -284,16 +284,48 @@ export default function PlayBotPage() {
           </div>
         )}
         {!botEngine.ready && (
-          <div className="bg-aurora-cyan/10 border border-aurora-cyan/40 rounded-lg p-3 text-center text-night-950">
-            <p className="text-sm text-aurora-cyan">Loading Stockfish engine...</p>
-            <p className="text-xs text-aurora-cyan mt-1">~7MB download (cached after first load)</p>
+          <div
+            className={`rounded-lg border p-3 text-center ${
+              botEngine.loadState === "failed"
+                ? "border-red-500/40 bg-red-500/10"
+                : "border-aurora-cyan/40 bg-aurora-cyan/10"
+            }`}
+          >
+            {botEngine.loadState === "failed" ? (
+              <>
+                <p className="text-sm font-medium text-red-300">The engine could not load</p>
+                <p className="mt-1 text-xs text-red-300/80">
+                  Reload the page. If it keeps happening, your browser may be blocking WebAssembly.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-aurora-cyan">
+                  {botEngine.loadState === "starting"
+                    ? "Starting the engine..."
+                    : "Downloading the engine..."}
+                </p>
+                {/* Indeterminate, honestly: the worker reports handshake stages,
+                    not bytes, so a percentage would be invented. Two stages plus
+                    motion is enough to show it is alive. */}
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-night-800">
+                  <div
+                    className="h-full rounded-full bg-aurora-cyan transition-all duration-500"
+                    style={{ width: botEngine.loadState === "starting" ? "75%" : "35%" }}
+                  />
+                </div>
+                <p className="mt-1.5 text-xs text-aurora-cyan/80">
+                  ~7MB, cached after the first load
+                </p>
+              </>
+            )}
           </div>
         )}
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
         {/* Game Mode */}
         <div className="bg-night-900 rounded-lg p-4">
-          <h2 className="text-sm font-semibold text-night-600 mb-3 font-display">Game Mode</h2>
+          <h2 className="text-sm font-semibold text-night-400 mb-3 font-display">Game Mode</h2>
           <div className="grid grid-cols-2 gap-2">
             {modes.map((m) => (
               <button
@@ -302,7 +334,7 @@ export default function PlayBotPage() {
                 className={`p-3 rounded-lg text-left transition-colors ${modePreset === m ? "bg-aurora-cyan" : "bg-night-800 hover:bg-night-700"} text-night-950`}
               >
                 <span className="block text-sm font-medium">{GAME_MODE_LABELS[m].name}</span>
-                <span className="block text-xs text-night-600">{GAME_MODE_LABELS[m].desc}</span>
+                <span className="block text-xs text-night-400">{GAME_MODE_LABELS[m].desc}</span>
               </button>
             ))}
           </div>
@@ -339,7 +371,7 @@ export default function PlayBotPage() {
         {/* Bot Difficulty */}
         <div className="bg-night-900 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-night-600 font-display">Bot Difficulty</h2>
+            <h2 className="text-sm font-semibold text-night-400 font-display">Bot Difficulty</h2>
             <button
               onClick={() => {
                 setUseCustomElo(!useCustomElo);
@@ -359,13 +391,13 @@ export default function PlayBotPage() {
           ) : useCustomElo || botList.length === 0 ? (
             <>
               {botList.length === 0 && !isOnline && (
-                <p className="text-xs text-night-600 text-center mb-2">
+                <p className="text-xs text-night-400 text-center mb-2">
                   Bot personalities available when online. Using custom Elo.
                 </p>
               )}
               <div className="text-center mb-2">
                 <span className="font-mono text-3xl font-bold tracking-tight">{botElo}</span>
-                <span className="text-night-600 ml-2">{eloLabel(botElo)}</span>
+                <span className="text-night-400 ml-2">{eloLabel(botElo)}</span>
               </div>
               <input
                 type="range"
@@ -394,7 +426,7 @@ export default function PlayBotPage() {
 
         {/* Color */}
         <div className="bg-night-900 rounded-lg p-4">
-          <h2 className="text-sm font-semibold text-night-600 mb-3 font-display">Play As</h2>
+          <h2 className="text-sm font-semibold text-night-400 mb-3 font-display">Play As</h2>
           <div className="grid grid-cols-3 gap-2">
             {(["white", "random", "black"] as const).map((c) => (
               <button
@@ -447,12 +479,12 @@ export default function PlayBotPage() {
             className="w-full rounded-xl py-3 font-medium ring-1 ring-inset ring-night-700 transition-colors hover:bg-night-800 disabled:opacity-40"
           >
             Surprise me
-            <span className="ml-2 text-sm text-night-600">random opponent and time</span>
+            <span className="ml-2 text-sm text-night-400">random opponent and time</span>
           </button>
         </div>
 
         <div className="text-center">
-          <Link href="/play" className="text-sm text-night-600 transition-colors hover:text-white">
+          <Link href="/play" className="text-sm text-night-400 transition-colors hover:text-white">
             &larr; Back
           </Link>
         </div>

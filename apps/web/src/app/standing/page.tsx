@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { AuroraBand } from "@aurora/ui";
 import api from "../../lib/api";
 import { useAuthStore } from "../../stores/auth";
 import SignedOut from "../../components/SignedOut";
@@ -25,6 +24,14 @@ interface Punishment {
 interface Standing {
   punishments: Punishment[];
   appeals: { id: string; punishmentId: string; status: string; createdAt: string }[];
+  capabilities?: {
+    playPublic: boolean;
+    playFriends: boolean;
+    playBots: boolean;
+    puzzles: boolean;
+    chat: boolean;
+    browse: boolean;
+  };
   automaticTitlesBlocked: boolean;
   automaticTitlesUnblockedAt: string | null;
   strikeWindowMonths: number;
@@ -40,11 +47,11 @@ const BLOCK_REASONS: Record<string, string> = {
 };
 
 const TONE: Record<string, string> = {
-  WARNING: "ring-amber-500/40 bg-amber-500/5",
-  RESTRICTION: "ring-amber-500/40 bg-amber-500/5",
-  SUSPENSION: "ring-orange-500/40 bg-orange-500/5",
-  DEACTIVATION: "ring-red-500/40 bg-red-500/5",
-  BAN: "ring-red-500/50 bg-red-500/10",
+  WARNING: "ring-amber-500/50 bg-amber-50",
+  RESTRICTION: "ring-amber-500/50 bg-amber-50",
+  SUSPENSION: "ring-orange-500/50 bg-orange-50",
+  DEACTIVATION: "ring-red-500/50 bg-red-50",
+  BAN: "ring-red-500/50 bg-red-50",
 };
 
 export default function StandingPage() {
@@ -71,8 +78,8 @@ export default function StandingPage() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-night-950">
-        <p className="text-night-400">Loading...</p>
+      <main className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-[#5a6478]">Loading...</p>
       </main>
     );
   }
@@ -82,22 +89,43 @@ export default function StandingPage() {
   const history = data?.punishments.filter((p) => !p.active) ?? [];
 
   return (
-    <main className="min-h-screen bg-night-950">
-      <AuroraBand />
+    <main>
       <div className="mx-auto max-w-2xl px-6 py-10">
         <h1 className="font-display text-3xl tracking-tight">Your standing</h1>
-        <p className="mt-1 text-sm text-night-400">
+        <p className="mt-1 text-sm text-[#5a6478]">
           Everything on your record, and what you can do about it.
         </p>
 
+        {!loading && data && (
+          <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-[#dde1ea] sm:grid-cols-4">
+            {[
+              { label: "Play", ok: data.capabilities?.playPublic },
+              { label: "Friends", ok: data.capabilities?.playFriends },
+              { label: "Puzzles", ok: data.capabilities?.puzzles },
+              { label: "Chat", ok: data.capabilities?.chat },
+            ].map((c) => (
+              <div key={c.label} className="bg-white px-4 py-3">
+                <dt className="text-xs uppercase tracking-wider text-[#6b7488]">{c.label}</dt>
+                <dd
+                  className={`mt-0.5 font-display text-lg ${
+                    c.ok ? "text-emerald-700" : "text-red-700"
+                  }`}
+                >
+                  {c.ok ? "Available" : "Restricted"}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
         {loading ? (
-          <p className="mt-6 text-sm text-night-400">Loading...</p>
+          <p className="mt-6 text-sm text-[#5a6478]">Loading...</p>
         ) : active.length === 0 && history.length === 0 ? (
           // Worth saying explicitly. A blank page reads as a fault; being told
           // your record is clean is information.
-          <div className="mt-6 rounded-xl bg-night-900 p-6 text-center ring-1 ring-inset ring-night-700">
-            <p className="font-display text-xl text-emerald-400">Nothing on your record</p>
-            <p className="mt-1 text-sm text-night-400">
+          <div className="mt-6 rounded-xl bg-white p-6 text-center ring-1 ring-inset ring-[#dde1ea]">
+            <p className="font-display text-xl text-emerald-700">Nothing on your record</p>
+            <p className="mt-1 text-sm text-[#5a6478]">
               No action has ever been taken on your account.
             </p>
           </div>
@@ -105,36 +133,36 @@ export default function StandingPage() {
           <>
             {active.length > 0 && (
               <section className="mt-6">
-                <h2 className="mb-2 text-xs uppercase tracking-wider text-night-500">Active</h2>
+                <h2 className="mb-2 text-xs uppercase tracking-wider text-[#6b7488]">Active</h2>
                 <ul className="space-y-3">
                   {active.map((p) => (
                     <li
                       key={p.id}
-                      className={`rounded-xl p-5 ring-1 ring-inset ${TONE[p.type] ?? "ring-night-700 bg-night-900"}`}
+                      className={`rounded-xl p-5 ring-1 ring-inset ${TONE[p.type] ?? "ring-[#dde1ea] bg-white"}`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <h3 className="font-display text-xl capitalize">{p.type.toLowerCase()}</h3>
-                        <span className="shrink-0 font-mono text-xs text-night-400">
+                        <span className="shrink-0 font-mono text-xs text-[#5a6478]">
                           {p.expiresAt
                             ? `until ${new Date(p.expiresAt).toLocaleDateString()}`
                             : "permanent"}
                         </span>
                       </div>
-                      <p className="mt-2 text-sm text-night-300">{p.effect}</p>
-                      <p className="mt-2 rounded-lg bg-night-950/50 px-3 py-2 text-sm">
-                        <span className="text-night-500">Reason: </span>
+                      <p className="mt-2 text-sm text-[#0A0F1C]">{p.effect}</p>
+                      <p className="mt-2 rounded-lg bg-[#f6f7fb] px-3 py-2 text-sm">
+                        <span className="text-[#6b7488]">Reason: </span>
                         {p.reason}
                       </p>
                       <div className="mt-3">
                         {p.canAppeal ? (
                           <Link
                             href={`/standing/appeal?punishment=${p.id}`}
-                            className="inline-block rounded-lg bg-aurora-cyan px-4 py-2 text-sm font-semibold text-night-950"
+                            className="inline-block rounded-lg bg-[#0A5C86] px-4 py-2 text-sm font-semibold text-white"
                           >
                             Appeal this
                           </Link>
                         ) : (
-                          <p className="text-xs text-night-500">
+                          <p className="text-xs text-[#6b7488]">
                             {BLOCK_REASONS[p.appealBlockedBecause ?? ""] ??
                               "This cannot be appealed."}
                           </p>
@@ -147,9 +175,9 @@ export default function StandingPage() {
             )}
 
             {data?.automaticTitlesBlocked && (
-              <section className="mt-6 rounded-xl bg-night-900 p-5 ring-1 ring-inset ring-night-700">
+              <section className="mt-6 rounded-xl bg-white p-5 ring-1 ring-inset ring-[#dde1ea]">
                 <h2 className="font-display text-lg">Automatic titles paused</h2>
-                <p className="mt-1 text-sm text-night-400">
+                <p className="mt-1 text-sm text-[#5a6478]">
                   Titles earned by rating are not awarded while a strike counts, for{" "}
                   {data.strikeWindowMonths} months.
                   {data.automaticTitlesUnblockedAt &&
@@ -163,28 +191,28 @@ export default function StandingPage() {
 
             {history.length > 0 && (
               <section className="mt-6">
-                <h2 className="mb-2 text-xs uppercase tracking-wider text-night-500">History</h2>
-                <ul className="divide-y divide-night-700 overflow-hidden rounded-xl bg-night-900 ring-1 ring-inset ring-night-700">
+                <h2 className="mb-2 text-xs uppercase tracking-wider text-[#6b7488]">History</h2>
+                <ul className="divide-y divide-[#dde1ea] overflow-hidden rounded-xl bg-white ring-1 ring-inset ring-[#dde1ea]">
                   {history.map((p) => (
                     <li key={p.id} className="px-5 py-3">
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-sm">
                           <span className="capitalize">{p.type.toLowerCase()}</span>
                           {p.overturnedAt && (
-                            <span className="ml-2 rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs text-emerald-300">
+                            <span className="ml-2 rounded bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700">
                               overturned
                             </span>
                           )}
                         </span>
-                        <span className="shrink-0 font-mono text-xs text-night-500">
+                        <span className="shrink-0 font-mono text-xs text-[#6b7488]">
                           {new Date(p.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="mt-0.5 text-xs text-night-400">{p.reason}</p>
+                      <p className="mt-0.5 text-xs text-[#5a6478]">{p.reason}</p>
                       {p.canAppeal && (
                         <Link
                           href={`/standing/appeal?punishment=${p.id}`}
-                          className="mt-1.5 inline-block text-xs font-medium text-aurora-cyan hover:underline"
+                          className="mt-1.5 inline-block text-xs font-medium text-[#0A5C86] hover:underline"
                         >
                           Appeal this
                         </Link>
@@ -197,9 +225,30 @@ export default function StandingPage() {
           </>
         )}
 
-        <p className="mt-8 text-center text-xs text-night-500">
+        <div className="mt-10 grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/standing/rules"
+            className="rounded-xl bg-white p-4 ring-1 ring-inset ring-[#dde1ea] transition-colors hover:bg-[#f6f7fb]"
+          >
+            <p className="font-display text-base">Rules</p>
+            <p className="mt-0.5 text-sm text-[#5a6478]">
+              What is expected, and what each level of action does.
+            </p>
+          </Link>
+          <Link
+            href="/standing/how-it-works"
+            className="rounded-xl bg-white p-4 ring-1 ring-inset ring-[#dde1ea] transition-colors hover:bg-[#f6f7fb]"
+          >
+            <p className="font-display text-base">How moderation works</p>
+            <p className="mt-0.5 text-sm text-[#5a6478]">
+              Who decides, what we look at, and how to appeal.
+            </p>
+          </Link>
+        </div>
+
+        <p className="mt-8 text-center text-xs text-[#6b7488]">
           Every action here was issued by a person, not a script.{" "}
-          <Link href="/fair-play" className="text-aurora-cyan hover:underline">
+          <Link href="/standing/how-it-works" className="text-[#0A5C86] hover:underline">
             How moderation works
           </Link>
         </p>

@@ -45,13 +45,13 @@ export default function Home() {
             <>
               <Link
                 href="/history"
-                className="hidden rounded-lg px-3 py-2 text-sm font-medium text-night-600 transition-colors hover:text-white sm:inline-block"
+                className="hidden rounded-lg px-3 py-2 text-sm font-medium text-night-400 transition-colors hover:text-white sm:inline-block"
               >
                 Games
               </Link>
               <Link
                 href="/stats"
-                className="hidden rounded-lg px-3 py-2 text-sm font-medium text-night-600 transition-colors hover:text-white sm:inline-block"
+                className="hidden rounded-lg px-3 py-2 text-sm font-medium text-night-400 transition-colors hover:text-white sm:inline-block"
               >
                 Stats
               </Link>
@@ -74,7 +74,7 @@ export default function Home() {
                   await logout();
                   router.refresh();
                 }}
-                className="rounded-lg px-3 py-2 text-sm text-night-600 transition-colors hover:text-white"
+                className="rounded-lg px-3 py-2 text-sm text-night-400 transition-colors hover:text-white"
               >
                 Log out
               </button>
@@ -83,7 +83,7 @@ export default function Home() {
             <>
               <Link
                 href="/login"
-                className="rounded-lg px-4 py-2 text-sm font-medium text-night-600 transition-colors hover:text-white"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-night-400 transition-colors hover:text-white"
               >
                 Log in
               </Link>
@@ -109,7 +109,7 @@ export default function Home() {
               <br />
               <span className="bg-aurora bg-clip-text text-transparent">over the board.</span>
             </h1>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-night-600">
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-night-400">
               Aurora recognises every FIDE and national title. It also awards its own, earned by
               playing rather than by paperwork. Reach 2200 here and you are an Aurora Master,
               whether or not you have ever entered a rated event.
@@ -128,7 +128,7 @@ export default function Home() {
                     className="rounded-lg px-6 py-3 font-semibold text-white ring-1 ring-inset ring-night-700 transition-colors hover:bg-night-800"
                   >
                     Quick play
-                    <span className="ml-2 text-sm font-normal text-night-600">random opponent</span>
+                    <span className="ml-2 text-sm font-normal text-night-400">random opponent</span>
                   </Link>
                 </>
               ) : (
@@ -170,7 +170,7 @@ export default function Home() {
         <h2 className="font-display text-3xl tracking-tight">
           {AUTO_TITLES.length + 2} ways to earn a title
         </h2>
-        <p className="mt-3 max-w-2xl text-night-600">
+        <p className="mt-3 max-w-2xl text-night-400">
           Aurora titles are unofficial and site-local. {AUTO_TITLES.length} are earned on the board
           and awarded automatically, {MANUAL_UNOFFICIAL_TITLES.length} are granted by staff, and
           verified federation titles carry across. They say nothing about FIDE and are not meant to
@@ -182,7 +182,7 @@ export default function Home() {
             <li key={t} className="bg-night-900 p-6">
               <span className="font-mono text-sm font-bold text-[#b6a6ff]">{t}</span>
               <h3 className="mt-2 font-display text-xl">{TITLE_LABELS[t]}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-night-600">
+              <p className="mt-2 text-sm leading-relaxed text-night-400">
                 {TITLE_CRITERIA_TEXT[t]}
               </p>
             </li>
@@ -195,7 +195,7 @@ export default function Home() {
               {MANUAL_UNOFFICIAL_TITLES.join(" \u00B7 ")}
             </span>
             <h3 className="mt-2 font-display text-xl">Granted by staff</h3>
-            <p className="mt-2 text-sm leading-relaxed text-night-600">
+            <p className="mt-2 text-sm leading-relaxed text-night-400">
               {MANUAL_UNOFFICIAL_TITLES.map((t) => TITLE_LABELS[t]).join(", ")}. Awarded for
               contributions rather than rating, and never handed out quietly.
             </p>
@@ -206,7 +206,7 @@ export default function Home() {
               GM &middot; IM &middot; FM
             </span>
             <h3 className="mt-2 font-display text-xl">Federation titles</h3>
-            <p className="mt-2 text-sm leading-relaxed text-night-600">
+            <p className="mt-2 text-sm leading-relaxed text-night-400">
               Hold a FIDE or national title? Send staff your ID and it appears on your profile,
               verified.
             </p>
@@ -220,21 +220,21 @@ export default function Home() {
         <div className="grid gap-10 sm:grid-cols-3">
           <div>
             <h3 className="font-display text-xl">Play any time control</h3>
-            <p className="mt-2 text-sm leading-relaxed text-night-600">
+            <p className="mt-2 text-sm leading-relaxed text-night-400">
               Bullet through classical, each with its own rating. Win at blitz and it counts as
               blitz.
             </p>
           </div>
           <div>
             <h3 className="font-display text-xl">Analyse every game</h3>
-            <p className="mt-2 text-sm leading-relaxed text-night-600">
+            <p className="mt-2 text-sm leading-relaxed text-night-400">
               Stockfish runs in your browser. Move classification, accuracy, and the line you should
               have played.
             </p>
           </div>
           <div>
             <h3 className="font-display text-xl">Bring your club</h3>
-            <p className="mt-2 text-sm leading-relaxed text-night-600">
+            <p className="mt-2 text-sm leading-relaxed text-night-400">
               Invite-only or open, your call. Arbiters and club officials get verified badges.
             </p>
           </div>
@@ -242,7 +242,7 @@ export default function Home() {
       </section>
 
       <footer className="border-t border-night-700">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 text-sm text-night-600 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 text-sm text-night-400 sm:flex-row sm:items-center sm:justify-between">
           <span>Aurora Chess</span>
           <div className="flex gap-6">
             <Link href="/legal/terms" className="transition-colors hover:text-white">

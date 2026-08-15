@@ -655,6 +655,14 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
           const botAdvantage = playerIsWhite ? -ev.score : ev.score;
           if (botAdvantage > 300) botChat.triggerMessage("onWinning");
           else if (botAdvantage < -300) botChat.triggerMessage("onLosing");
+          else if (chess.history().length > 6 && chess.history().length % 4 === 0) {
+            // Quiet positions used to produce nothing at all, so a positional
+            // game was silent throughout — which reads as broken rather than
+            // reserved. Every fourth move in a balanced position the bot says
+            // whatever it would when slightly ahead or behind. The cooldown
+            // still stops it becoming a wall of text.
+            botChat.triggerMessage(botAdvantage >= 0 ? "onWinning" : "onLosing");
+          }
           const bm = ev.bestMove;
           const validBestMove = bm != null && bm.length >= 4;
           if (activeSettings.threats && validBestMove) {
@@ -899,8 +907,19 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
         if (bot) params.set("botId", bot.id);
         const paramStr = params.toString();
         router.push(`/play/bot/${newId}${paramStr ? `?${paramStr}` : ""}`);
-      } catch {
-        setError("Failed to create rematch.");
+      } catch (err: unknown) {
+        // Surface what the server said. A bare "Failed to create rematch" gave
+        // no way to tell a validation error from a moderation block from a
+        // network blip — and the retry appearing to work made it look random.
+        const res = (err as { response?: { status?: number; data?: { error?: string } } })
+          ?.response;
+        setError(
+          res?.data?.error
+            ? `Could not start a rematch: ${res.data.error}`
+            : res?.status
+              ? `Could not start a rematch (HTTP ${res.status}). Try again.`
+              : "Could not start a rematch. Check your connection and try again."
+        );
       }
     } else {
       // Offline: generate new offline ID
@@ -975,14 +994,17 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
           </p>
           <div className="flex gap-2 justify-center">
             <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-aurora-cyan hover:bg-[#3ad2e8] rounded-lg text-sm font-medium text-night-950"
+              onClick={() => router.refresh()}
+              className="rounded-lg bg-aurora-cyan px-4 py-2 text-sm font-medium text-night-950 hover:bg-[#3ad2e8]"
             >
               Retry
             </button>
             <button
-              onClick={() => (window.location.href = "/play/bot")}
-              className="px-4 py-2 bg-night-800 hover:bg-night-700 rounded-lg text-sm font-medium"
+              // router.push, not window.location. A full page load throws away
+              // the in-memory access token, so Exit dropped you on /play/bot
+              // signed out — it looked like the button had logged you out.
+              onClick={() => router.push("/play/bot")}
+              className="rounded-lg bg-night-800 px-4 py-2 text-sm font-medium hover:bg-night-700"
             >
               Exit
             </button>
@@ -1303,7 +1325,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
 
             <div className="p-6 text-center">
               <h2
-                className={`font-display text-4xl tracking-tight ${gameOver.includes("Draw") ? "text-night-600" : (playerIsWhite && gameOver.includes("White wins")) || (!playerIsWhite && gameOver.includes("Black wins")) ? "text-emerald-400" : "text-red-400"}`}
+                className={`font-display text-4xl tracking-tight ${gameOver.includes("Draw") ? "text-night-400" : (playerIsWhite && gameOver.includes("White wins")) || (!playerIsWhite && gameOver.includes("Black wins")) ? "text-emerald-400" : "text-red-400"}`}
               >
                 {gameOver.includes("Draw")
                   ? "Draw"
@@ -1312,13 +1334,13 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                     ? "You won"
                     : "You lost"}
               </h2>
-              <p className="mt-1 text-sm text-night-600">{gameOver}</p>
+              <p className="mt-1 text-sm text-night-400">{gameOver}</p>
 
               <div className="mt-5 flex items-center justify-center gap-3 rounded-xl bg-night-800 px-4 py-3">
                 <BotAvatar name={bot?.name ?? "Bot"} avatar={bot?.avatar} size={44} />
                 <div className="text-left">
                   <p className="font-medium">{bot ? bot.name : "Bot"}</p>
-                  <p className="font-mono text-xs text-night-600">{botElo}</p>
+                  <p className="font-mono text-xs text-night-400">{botElo}</p>
                 </div>
               </div>
 
@@ -1366,7 +1388,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                         navigator.clipboard.writeText(pgn);
                       } catch {}
                     }}
-                    className="rounded-lg px-3 py-1.5 text-xs text-night-600 transition-colors hover:text-white"
+                    className="rounded-lg px-3 py-1.5 text-xs text-night-400 transition-colors hover:text-white"
                   >
                     Copy PGN
                   </button>

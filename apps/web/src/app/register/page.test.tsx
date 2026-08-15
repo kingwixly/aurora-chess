@@ -50,10 +50,19 @@ describe("RegisterPage", () => {
     expect(img).toBeInTheDocument();
   });
 
-  it("has an invite code field", () => {
+  it("offers an invite code field without requiring one", () => {
+    // Registration is open now. The field is still there so codes already sent
+    // out keep working, but it is optional and no longer the first thing
+    // someone meets.
     render(<RegisterPage />);
-    expect(screen.getByText("Invite Code")).toBeInTheDocument();
+    expect(screen.getByText("Have an invite code?")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Paste your invite code")).toBeInTheDocument();
+  });
+
+  it("does not block submission when no invite code is given", () => {
+    render(<RegisterPage />);
+    const invite = screen.getByPlaceholderText("Paste your invite code");
+    expect(invite).not.toBeRequired();
   });
 
   it("has an email field", () => {

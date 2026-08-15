@@ -8,6 +8,7 @@ import { signAccessToken, generateRefreshToken, hashToken } from "../lib/jwt.js"
 import { getSiteSettings } from "../lib/settings.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { checkBan, clientIp, deviceId, recordSighting } from "../lib/bans.js";
+import { checkSignupVelocity, releaseSignupAttempt } from "../lib/signupVelocity.js";
 import { sanitizeString } from "../middleware/admin.js";
 import { registerBodySchema, loginBodySchema, preferencesBodySchema } from "../lib/schemas.js";
 import {
@@ -84,35 +85,77 @@ async function createTokens(user: { id: string; email: string; username: string;
 export async function authRoutes(app: FastifyInstance) {
   // ── Register ──────────────────────────────────────
   app.post<{
-    Body: { email: string; username: string; password: string; inviteCode: string };
+    Body: { email: string; username: string; password: string; inviteCode?: string };
   }>("/auth/register", { schema: { body: registerBodySchema } }, async (request, reply) => {
     const { email, password, inviteCode } = request.body;
     const username = sanitizeString(request.body.username);
 
-    // Validate invite code
-    const invite = await prisma.invite.findUnique({ where: { code: inviteCode } });
-    if (!invite) {
-      return apiError(reply, 400, AUTH_INVALID_INVITE, "Invalid invite code");
-    }
-    if (invite.usedById) {
-      return apiError(reply, 410, AUTH_INVITE_USED, "Invite code has already been used");
-    }
-
-    // Check registration flags from DB settings
     const siteSettings = await getSiteSettings();
     if (!siteSettings.registrationOpen) {
       return apiError(reply, 403, AUTH_REGISTRATION_CLOSED, "Registration is currently closed");
     }
 
+    // Registration is open, so bulk signup is the thing worth slowing down —
+    // one account is free, ten from one machine in an hour is a script.
+    const signupIp = clientIp(request);
+    const signupDevice = deviceId(request);
+    const velocity = await checkSignupVelocity(signupIp, signupDevice);
+    if (!velocity.allowed) {
+      // The message is deliberately vague about which signal tripped: telling
+      // someone it was their device is a hint about how to avoid it.
+      reply.header("Retry-After", String(velocity.retryAfter ?? 3600));
+      logger.warn({ reason: velocity.reason, ip: signupIp }, "signup velocity limit hit");
+      return apiError(
+        reply,
+        429,
+        VALIDATION_FAILED,
+        "Too many accounts have been created from here recently. Try again later."
+      );
+    }
+
+    // Invites are optional now. The system is kept intact and gated on a
+    // setting, so it can be switched back on from the admin panel without a
+    // deployment if open signup ever becomes a problem.
+    //
+    // A code supplied when none is required is still honoured and consumed —
+    // otherwise an outstanding invite would silently stop working the moment
+    // the gate came down, and whoever sent it would look unreliable.
+    let invite: { code: string; usedById: string | null } | null = null;
+    if (inviteCode) {
+      invite = await prisma.invite.findUnique({
+        where: { code: inviteCode },
+        select: { code: true, usedById: true },
+      });
+    }
+
+    if (siteSettings.inviteOnly) {
+      if (!inviteCode || !invite) {
+        await releaseSignupAttempt(signupIp, signupDevice);
+        return apiError(reply, 400, AUTH_INVALID_INVITE, "Invalid invite code");
+      }
+      if (invite.usedById) {
+        await releaseSignupAttempt(signupIp, signupDevice);
+        return apiError(reply, 410, AUTH_INVITE_USED, "Invite code has already been used");
+      }
+    } else if (invite?.usedById) {
+      // Not required, and this one is spent: ignore it rather than refusing an
+      // otherwise valid signup.
+      invite = null;
+    }
+
     if (siteSettings.maxUsers > 0) {
       const userCount = await prisma.user.count();
       if (userCount >= siteSettings.maxUsers) {
+        await releaseSignupAttempt(signupIp, signupDevice);
         return apiError(reply, 403, AUTH_MAX_USERS, "Maximum user limit reached");
       }
     }
 
     const existingEmail = await prisma.user.findUnique({ where: { email } });
     if (existingEmail) {
+      // Not a spent attempt: someone who forgot they already have an account
+      // should not be pushed toward the limit for it.
+      await releaseSignupAttempt(signupIp, signupDevice);
       return apiError(reply, 409, AUTH_EMAIL_EXISTS, "Email already in use");
     }
 
@@ -120,6 +163,7 @@ export async function authRoutes(app: FastifyInstance) {
       where: { username },
     });
     if (existingUsername) {
+      await releaseSignupAttempt(signupIp, signupDevice);
       return apiError(reply, 409, AUTH_USERNAME_EXISTS, "Username already taken");
     }
 
@@ -141,11 +185,13 @@ export async function authRoutes(app: FastifyInstance) {
         });
     }
 
-    // Mark invite as used
-    await prisma.invite.update({
-      where: { code: inviteCode },
-      data: { usedById: user.id, usedAt: new Date() },
-    });
+    // Mark the invite used, when one was actually supplied and unspent.
+    if (invite) {
+      await prisma.invite.update({
+        where: { code: invite.code },
+        data: { usedById: user.id, usedAt: new Date() },
+      });
+    }
 
     // Auto-create Favorites collection
     await prisma.collection.create({
