@@ -641,6 +641,15 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
         syncGameToServer(newMoves, [...allUciMoves, moveUci], chess.fen(), dbResult, term);
       } else {
         // Single eval call for all features (evalBar, threats, suggestions, engine)
+        // Chatter must not depend on the evaluation running. Friendly mode has
+        // the eval bar, threats, suggestions and engine all off, so anything
+        // inside the eval block below never fires — which is why bots said
+        // almost nothing in the default mode.
+        const plies = chess.history().length;
+        if (plies > 4 && plies % 3 === 0) {
+          botChat.triggerMessage(Math.random() < 0.5 ? "onWinning" : "onLosing");
+        }
+
         const needsEval =
           activeSettings.evalBar ||
           activeSettings.threats ||
@@ -655,14 +664,6 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
           const botAdvantage = playerIsWhite ? -ev.score : ev.score;
           if (botAdvantage > 300) botChat.triggerMessage("onWinning");
           else if (botAdvantage < -300) botChat.triggerMessage("onLosing");
-          else if (chess.history().length > 6 && chess.history().length % 4 === 0) {
-            // Quiet positions used to produce nothing at all, so a positional
-            // game was silent throughout — which reads as broken rather than
-            // reserved. Every fourth move in a balanced position the bot says
-            // whatever it would when slightly ahead or behind. The cooldown
-            // still stops it becoming a wall of text.
-            botChat.triggerMessage(botAdvantage >= 0 ? "onWinning" : "onLosing");
-          }
           const bm = ev.bestMove;
           const validBestMove = bm != null && bm.length >= 4;
           if (activeSettings.threats && validBestMove) {

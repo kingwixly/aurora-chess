@@ -55,6 +55,8 @@ export default function PuzzlesPage() {
   const [delta, setDelta] = useState<number | null>(null);
   const [hinted, setHinted] = useState(false);
   const [failedOnce, setFailedOnce] = useState(false);
+  /** Forces the board back to `fen` even when `fen` itself has not changed. */
+  const [boardNonce, setBoardNonce] = useState(0);
   const startedAt = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -134,18 +136,20 @@ export default function PuzzlesPage() {
       });
 
       if (data.status === "wrong") {
-        // Show the position briefly so the mistake is visible, then undo.
         setFailedOnce(true);
-        setNotes((n) => [
-          ...n,
-          {
-            text: "Not this one. Look again — what is the opponent's king short of?",
-            side: "opponent",
-          },
-        ]);
-        // The board re-renders from `fen`, which has not changed, so the
-        // illegal attempt snaps back on its own.
+        setNotes((n) => {
+          const text = "Not this one. Look again — what is the opponent's king short of?";
+          // Replace rather than append. Repeating the same line for every wrong
+          // attempt turned the panel into a wall of identical messages.
+          const withoutDuplicate = n.filter((x) => x.text !== text);
+          return [...withoutDuplicate, { text, side: "opponent" as const }];
+        });
+        // Bumping a counter alongside the FEN is what actually resets the
+        // board. Setting `fen` to the value it already holds is a no-op to
+        // React, so the second wrong move in a row never snapped back — the
+        // piece just stayed where it was dropped.
         setFen(chess.fen());
+        setBoardNonce((n) => n + 1);
         return;
       }
 
@@ -234,6 +238,9 @@ export default function PuzzlesPage() {
           <div>
             <div className="mx-auto w-full max-w-[560px]">
               <ChessBoard
+                // Keyed on the nonce so a repeated wrong move remounts the
+                // board and the piece returns to its square.
+                key={boardNonce}
                 fen={fen}
                 orientation={sideToMove === "White" ? "white" : "black"}
                 movable={state === "solving"}

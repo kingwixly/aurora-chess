@@ -275,12 +275,25 @@ export async function authRoutes(app: FastifyInstance) {
 
     return {
       accessToken,
+      // The SAME shape /auth/me returns. A trimmed payload here meant the store
+      // held a user with tosAccepted undefined immediately after login, so the
+      // terms gate fired on every single sign-in — the field was missing, not
+      // false.
       user: {
         id: user.id,
         email: user.email,
         username: user.username,
         rating: user.rating,
         role: user.role,
+        tosAccepted: user.tosAccepted,
+        avatarUrl: user.avatarUrl,
+        darkMode: user.darkMode,
+        boardTheme: user.boardTheme,
+        pieceSet: user.pieceSet,
+        soundEnabled: user.soundEnabled,
+        countryCode: user.countryCode,
+        bio: user.bio,
+        createdAt: user.createdAt,
       },
       // Set when an active ban applies. The client sends them straight to their
       // standing page rather than letting them discover the ban by finding

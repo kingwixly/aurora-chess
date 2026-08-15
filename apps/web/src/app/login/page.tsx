@@ -15,12 +15,22 @@ function LoginForm() {
   const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/play";
   const login = useAuthStore((s) => s.login);
   const user = useAuthStore((s) => s.user);
+  const fetchMe = useAuthStore((s) => s.fetchMe);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // If a valid session already exists, there is nothing to do here.
+  // Restore the session before deciding. Without this `user` is null on first
+  // paint, so a signed-in person was shown the login form and had to enter
+  // credentials they had already given.
+  useEffect(() => {
+    // Optional-called: the store shape is mocked in places, and a missing
+    // fetchMe must not stop the login form rendering.
+    fetchMe?.();
+  }, [fetchMe]);
+
   useEffect(() => {
     if (user) router.replace(next);
   }, [user, router, next]);

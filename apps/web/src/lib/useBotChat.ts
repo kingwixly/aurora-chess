@@ -27,7 +27,7 @@ export function useBotChat({
   // Raised from 0.6 with a shorter cooldown. Bots that speak rarely read as
   // broken rather than reserved, and the cooldown alone already prevents a
   // wall of text.
-  probability = 0.85,
+  probability = 0.95,
   cooldownMs = 3500,
   displayMs = 3000,
 }: UseBotChatOptions): UseBotChatReturn {

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { COUNTRIES } from "@aurora/chess";
-import { Flag } from "@aurora/ui";
+import { Flag, FLAG_COUNTRIES } from "@aurora/ui";
 import api from "../lib/api";
 import FlairPicker from "./FlairPicker";
 import { useAuthStore } from "../stores/auth";
@@ -136,7 +135,7 @@ export default function AccountSettings({ earnedFlairs = [] }: { earnedFlairs?: 
           className={INPUT}
         >
           <option value="">No country</option>
-          {COUNTRIES.map((c) => (
+          {FLAG_COUNTRIES.map((c) => (
             <option key={c.code} value={c.code}>
               {c.name}
             </option>

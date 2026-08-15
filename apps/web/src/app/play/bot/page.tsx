@@ -250,7 +250,7 @@ export default function PlayBotPage() {
           </div>
         )}
         {savedGames.length > 0 && (
-          <div className="bg-aurora-cyan/10 border border-aurora-cyan/40 rounded-lg p-3 space-y-2 text-night-950">
+          <div className="bg-aurora-cyan/10 border border-aurora-cyan/40 rounded-lg p-3 space-y-2 text-night-200">
             <p className="text-sm font-medium text-aurora-cyan text-center">
               Resume in-progress game{savedGames.length > 1 ? "s" : ""}
             </p>

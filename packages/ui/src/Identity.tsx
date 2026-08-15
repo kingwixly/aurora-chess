@@ -100,9 +100,9 @@ export function TitleBadge({ title, size = "md", className = "" }: TitleBadgePro
  * Aurora", and this is "this person is Aurora staff". Reusing one for both
  * would make every browser tab look like a staff badge.
  *
- * The knight is drawn lighter than the source artwork — the original navy is
- * near-invisible against the dark header, which left a ribbon floating with no
- * piece under it.
+ * Uses the artwork exactly as supplied. An earlier version lightened the navy
+ * for contrast against the dark header; that was reverted on request — the mark
+ * reads by its shape and the ribbon carries the colour.
  */
 export function StaffMark({ rank, size = 16 }: { rank?: string | null; size?: number }) {
   if (!rank) return null;

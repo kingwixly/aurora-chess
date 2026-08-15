@@ -205,7 +205,7 @@ export default function InvitesPage() {
                   <div className="flex gap-1 shrink-0 ml-2">
                     <button
                       onClick={() => copyLink(inv.code)}
-                      className="px-2 py-1 bg-aurora-cyan/30 hover:bg-aurora-cyan text-aurora-cyan hover: text-xs rounded transition-colors text-night-950"
+                      className="px-2 py-1 bg-aurora-cyan/30 hover:bg-aurora-cyan text-aurora-cyan hover: text-xs rounded transition-colors text-night-200"
                     >
                       Link
                     </button>

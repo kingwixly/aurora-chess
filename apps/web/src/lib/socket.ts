@@ -5,6 +5,17 @@ import { useToast } from "@aurora/ui";
 let socket: Socket | null = null;
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
 let wasDisconnected = false;
+/**
+ * When the disconnect happened.
+ *
+ * Navigating between pages tears the socket down and rebuilds it, so every tab
+ * change counted as a reconnection and fired a toast. A real network drop lasts
+ * seconds; a route change is over in milliseconds.
+ */
+let disconnectedAt = 0;
+
+/** Only announce a reconnection if the outage was long enough to notice. */
+const RECONNECT_NOTICE_THRESHOLD_MS = 3000;
 
 /**
  * Establishes a Socket.IO connection to the API server.
@@ -41,7 +52,12 @@ export function connectSocket() {
 
   socket.on("connect", () => {
     if (wasDisconnected) {
-      useToast.getState().show("Reconnected", "success");
+      // Silent unless the connection was actually gone for a moment. Telling
+      // someone they reconnected when they merely clicked a link is noise, and
+      // noise trains people to ignore the toast that matters.
+      if (Date.now() - disconnectedAt > RECONNECT_NOTICE_THRESHOLD_MS) {
+        useToast.getState().show("Reconnected", "success");
+      }
       wasDisconnected = false;
     }
     // Start heartbeat
@@ -53,6 +69,7 @@ export function connectSocket() {
 
   socket.on("disconnect", () => {
     wasDisconnected = true;
+    disconnectedAt = Date.now();
     if (heartbeatInterval) {
       clearInterval(heartbeatInterval);
       heartbeatInterval = null;
