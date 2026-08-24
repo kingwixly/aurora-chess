@@ -567,6 +567,49 @@ export async function authRoutes(app: FastifyInstance) {
     }
   );
 
+  /**
+   * What the server thinks of this request.
+   *
+   * Exists because the admin panel failed in a way that was invisible from
+   * both ends: the browser saw a redirect, the server saw a normal request,
+   * and nothing said which of the several possible causes applied. This answers
+   * that in one call, and deliberately reveals nothing an attacker could not
+   * already determine about their own session.
+   */
+  app.get("/auth/whoami", async (request) => {
+    const raw = request.cookies[COOKIE_NAME];
+    let userId: string | null = null;
+    let role: string | null = null;
+    let username: string | null = null;
+
+    if (raw) {
+      const stored = await prisma.refreshToken.findUnique({
+        where: { token: hashToken(raw) },
+        include: { user: { select: { id: true, username: true, role: true, active: true } } },
+      });
+      if (stored?.user) {
+        userId = stored.user.id;
+        role = stored.user.role;
+        username = stored.user.username;
+      }
+    }
+
+    return {
+      refreshCookiePresent: Boolean(raw),
+      refreshCookieValid: Boolean(userId),
+      username,
+      role,
+      isAdmin: role === "ADMIN",
+      // What the API believes about itself, which is what CORS and cookie
+      // scope depend on.
+      seenHost: request.headers.host ?? null,
+      seenOrigin: request.headers.origin ?? null,
+      cookieDomain: getCookieDomain() ?? null,
+      siteUrl: process.env.SITE_URL ?? null,
+      adminUrl: process.env.ADMIN_URL ?? null,
+    };
+  });
+
   app.get("/auth/me", { preHandler: authMiddleware }, async (request) => {
     const user = await prisma.user.findUnique({
       where: { id: request.user.userId },
@@ -576,7 +619,6 @@ export async function authRoutes(app: FastifyInstance) {
         username: true,
         rating: true,
         avatarUrl: true,
-        role: true,
         tosAccepted: true,
         darkMode: true,
         boardTheme: true,
@@ -584,6 +626,10 @@ export async function authRoutes(app: FastifyInstance) {
         soundEnabled: true,
         createdAt: true,
         ...TITLE_SELECT,
+        // AFTER the spread and stated explicitly. TITLE_SELECT happens to
+        // include role today, but the Admin button depends on this field and
+        // must not silently lose it if that constant is ever trimmed.
+        role: true,
         countryCode: true,
         bio: true,
         fideId: true,

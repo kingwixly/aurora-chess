@@ -98,3 +98,15 @@ export {
   isPattern,
   PATTERN_MIN_OCCURRENCES,
 } from "./analysis/index";
+
+// ── Variants ──────────────────────────────────────────────
+export type { BackRank, CastlingSide } from "./variants/index";
+export {
+  isValidBackRank,
+  backRankForPosition,
+  fenForPosition,
+  castlingRookFiles,
+  applyCastling,
+  randomPositionId,
+  STANDARD_POSITION_ID,
+} from "./variants/index";

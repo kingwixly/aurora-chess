@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, type FastifyRequest, type FastifyReply } from "fastify";
 import { prisma } from "../lib/prisma.js";
 import { redis } from "../lib/redis.js";
 import { authMiddleware } from "../middleware/auth.js";
@@ -27,8 +27,8 @@ export async function analysisRoutes(app: FastifyInstance) {
   // server-side analysis. Keeping the old path avoids breaking anything that
   // still calls it.
   const queueAnalysis = async (
-    request: { user: { userId: string }; params: { id: string } },
-    reply: Parameters<Parameters<typeof app.post>[1]>[1]
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
   ) => {
     const userId = request.user.userId;
     const { id: gameId } = request.params;

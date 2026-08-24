@@ -71,24 +71,35 @@ async function main() {
   // CORS — whitelist based on SITE_URL, permissive in development
   const isProduction = process.env.NODE_ENV === "production";
   const siteUrl = process.env.SITE_URL || "http://localhost";
-  const adminUrl = process.env.ADMIN_URL || siteUrl.replace("://", "://admin.");
-  // The standing site is a separate origin and must be allowed explicitly.
-  // Leaving it out rejected every API call it made, which surfaced as a
-  // generic "Login failed" with no clue that CORS was the cause.
-  const standingUrl = siteUrl.replace("://", "://standing.");
-  const wwwUrl = siteUrl.replace("://", "://www.");
-  const allowedOrigins = isProduction
-    ? [siteUrl, adminUrl, standingUrl, wwwUrl]
-    : [
-        standingUrl,
-        wwwUrl,
-        siteUrl,
-        adminUrl,
-        "http://localhost",
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:3002",
-      ];
+
+  /**
+   * Origins allowed to call the API.
+   *
+   * The subdomains are ALWAYS derived from SITE_URL, and `ADMIN_URL` is added
+   * on top rather than replacing the derived value. It used to be
+   * `ADMIN_URL || derived`, which meant a stale `ADMIN_URL` — say
+   * `http://admin.aurora.local` left over in .env from a local setup — silently
+   * replaced the real admin origin. Every request from the real admin panel was
+   * then rejected, and the panel bounced to the login page of a site the user
+   * was already signed in to.
+   *
+   * Deriving first and adding second means a wrong ADMIN_URL is harmless.
+   */
+  const derived = ["admin.", "standing.", "www."].map((sub) => siteUrl.replace("://", `://${sub}`));
+  const allowedOrigins = [
+    siteUrl,
+    ...derived,
+    ...(process.env.ADMIN_URL ? [process.env.ADMIN_URL] : []),
+    ...(isProduction
+      ? []
+      : [
+          "http://localhost",
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "http://localhost:3002",
+        ]),
+  ];
+  fastify.log.info({ allowedOrigins }, "CORS origins");
 
   await fastify.register(cors, {
     origin: (origin, cb) => {
@@ -97,7 +108,12 @@ async function main() {
       if (allowedOrigins.includes(origin)) return cb(null, true);
       // In dev, also allow any localhost variant
       if (!isProduction && origin.startsWith("http://localhost")) return cb(null, true);
-      cb(new Error("CORS origin not allowed"), false);
+      // `cb(null, false)`, NOT an Error. Passing an Error makes Fastify return
+      // 500 with no CORS header at all, so a rejected origin looked like the
+      // server was broken rather than like a configuration problem — which is
+      // exactly how this was misdiagnosed for several rounds.
+      fastify.log.warn({ origin, allowedOrigins }, "CORS origin rejected");
+      cb(null, false);
     },
     credentials: true,
     exposedHeaders: ["X-Request-Id"],

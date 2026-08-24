@@ -1,10 +1,19 @@
-FROM node:22-alpine AS base
-# Stockfish is REQUIRED here, not optional. The API plays the bot's move
-# server-side whenever the bot has white — which is exactly what a rematch
-# does, since it swaps colours. Without the binary that request killed the
-# worker and nginx returned 502, so the first game worked and every rematch
-# failed.
-RUN apk add --no-cache wget openssl stockfish && npm install -g pnpm@10.32.1
+# Debian, not Alpine.
+#
+# Stockfish is REQUIRED in this image: the API plays the bot's move server-side
+# whenever the bot has white, which is exactly what a rematch does since it
+# swaps colours. Without the binary that request killed the process and nginx
+# returned 502 — the first game worked and every rematch failed.
+#
+# Alpine has no stockfish package in main or community, so the base moves to
+# Debian slim, matching Dockerfile.worker which already installs it this way.
+FROM node:22-slim AS base
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends wget openssl ca-certificates stockfish && \
+    rm -rf /var/lib/apt/lists/* && \
+    npm install -g pnpm@10.32.1
+# Debian puts game binaries here, and it is not on PATH by default.
+ENV PATH="/usr/games:${PATH}"
 
 # Single stage: the previous deps/runner split existed purely to cache the
 # install, and that split is what breaks -- COPY --from=deps lays down
