@@ -16,8 +16,9 @@
     "version-packages": "changeset version",
     "check:schema": "node scripts/check-prisma-selects.mjs",
     "check:routes": "node scripts/check-api-routes.mjs",
-    "check": "pnpm check:schema && pnpm check:routes && pnpm check:contrast",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check": "pnpm check:schema-fields && pnpm check:schema && pnpm check:routes && pnpm check:contrast",
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check:schema-fields": "node scripts/check-schema-fields.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",

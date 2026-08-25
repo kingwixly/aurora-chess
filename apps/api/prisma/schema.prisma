@@ -166,10 +166,7 @@ model User {
   supportTickets  SupportTicket[]
   cheatReports    CheatReport[]
   usernameHistory UsernameHistory[]
-  emailTokens     EmailToken[]
-  supportTickets  SupportTicket[]   @relation("TicketAuthor")
   authTokens      AuthToken[]
-  supportTickets  SupportTicket[]   @relation("TicketOpener")
   messagesSent    Message[]         @relation("MessageAuthor")
   conversations   ConversationMember[]
 
