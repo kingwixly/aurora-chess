@@ -331,10 +331,20 @@ export default function PlayBotPage() {
               <button
                 key={m}
                 onClick={() => setModePreset(m)}
-                className={`p-3 rounded-lg text-left transition-colors ${modePreset === m ? "bg-aurora-cyan" : "bg-night-800 hover:bg-night-700"} text-night-950`}
+                className={`p-3 rounded-lg text-left transition-colors ${modePreset === m ? "bg-aurora-cyan text-night-950" : "bg-night-800 hover:bg-night-700 text-night-200"}`}
               >
                 <span className="block text-sm font-medium">{GAME_MODE_LABELS[m].name}</span>
-                <span className="block text-xs text-night-400">{GAME_MODE_LABELS[m].desc}</span>
+                {/* Opacity, not a fixed colour. A muted grey is washed out on
+                    the cyan selected card and too dim on the dark ones; fading
+                    the inherited colour works in both states. */}
+                <span
+                  // Selected cards have a SOLID cyan background, so dark text
+                  // is correct there. Stated with the background alongside it so
+                  // the pairing is obvious rather than inferred from two files.
+                  className={`block text-xs ${modePreset === m ? "bg-aurora-cyan text-night-900" : "text-night-400"}`}
+                >
+                  {GAME_MODE_LABELS[m].desc}
+                </span>
               </button>
             ))}
           </div>
@@ -432,7 +442,7 @@ export default function PlayBotPage() {
               <button
                 key={c}
                 onClick={() => setColorChoice(c)}
-                className={`py-2 rounded-lg text-sm font-medium transition-colors ${colorChoice === c ? "bg-aurora-cyan" : "bg-night-800 hover:bg-night-700"} text-night-950`}
+                className={`py-2 rounded-lg text-sm font-medium transition-colors ${colorChoice === c ? "bg-aurora-cyan text-night-950" : "bg-night-800 hover:bg-night-700 text-night-200"}`}
               >
                 {c.charAt(0).toUpperCase() + c.slice(1)}
               </button>

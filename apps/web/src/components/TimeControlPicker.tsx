@@ -86,7 +86,7 @@ export default function TimeControlPicker({
               <button
                 onClick={() => toggleCategory(cat.key)}
                 disabled={disabled}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${hasSelected ? "bg-aurora-cyan/20 text-aurora-cyan" : "bg-night-800 hover:bg-night-700 text-night-300"} disabled:opacity-50 text-night-950`}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${hasSelected ? "bg-aurora-cyan/20 text-night-200" : "bg-night-800 hover:bg-night-700 text-night-200"} disabled:opacity-50`}
               >
                 <span className="flex items-center gap-2">
                   {cat.label}
@@ -113,7 +113,7 @@ export default function TimeControlPicker({
                       key={p.key}
                       onClick={() => onSelect(p.key)}
                       disabled={disabled}
-                      className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!showCustomTime && selectedTime === p.key ? "bg-aurora-cyan " : "bg-night-800 hover:bg-night-700 text-night-300"} disabled:opacity-50 text-night-950`}
+                      className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!showCustomTime && selectedTime === p.key ? "bg-aurora-cyan  text-night-950" : "bg-night-800 hover:bg-night-700 text-night-200"} disabled:opacity-50`}
                     >
                       {p.label}
                     </button>
@@ -128,14 +128,14 @@ export default function TimeControlPicker({
         <button
           onClick={() => onSelect("unlimited")}
           disabled={disabled}
-          className={`w-full px-4 py-3 rounded-lg text-sm font-medium text-left transition-colors ${isUnlimited ? "bg-aurora-cyan " : "bg-night-800 hover:bg-night-700 text-night-300"} disabled:opacity-50 text-night-950`}
+          className={`w-full px-4 py-3 rounded-lg text-sm font-medium text-left transition-colors ${isUnlimited ? "bg-aurora-cyan  text-night-950" : "bg-night-800 hover:bg-night-700 text-night-200"} disabled:opacity-50`}
         >
           No Time Limit
         </button>
 
         {/* Custom */}
         <div
-          className={`rounded-lg px-4 py-3 transition-colors ${isCustom ? "bg-aurora-cyan/20" : "bg-night-800"} text-night-950`}
+          className={`rounded-lg px-4 py-3 transition-colors ${isCustom ? "bg-aurora-cyan/20 text-night-200" : "bg-night-800 text-night-200"}`}
         >
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-night-300 shrink-0">Custom</span>

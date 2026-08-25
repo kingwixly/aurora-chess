@@ -55,7 +55,7 @@ export default function FriendsStrip() {
 
   return (
     <section className="mt-6">
-      <h2 className="mb-3 text-xs uppercase tracking-wider text-night-500">
+      <h2 className="mb-3 text-xs uppercase tracking-wider text-night-400">
         Friends online ({friends.length})
       </h2>
       <ul className="flex gap-2 overflow-x-auto pb-1">

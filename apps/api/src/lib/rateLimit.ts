@@ -108,11 +108,24 @@ export function getRouteLimit(url: string): RouteLimit {
   // Exact match first
   if (routes[url]) return routes[url];
 
-  // Wildcard match
+  // Wildcard match. `*` covers exactly one path segment.
   for (const [pattern, limit] of Object.entries(routes)) {
     if (!pattern.includes("*")) continue;
     const regex = new RegExp("^" + pattern.replace(/\*/g, "[^/]+") + "$");
     if (regex.test(url)) return limit;
+  }
+
+  // Prefix match, longest first.
+  //
+  // Without this, a rule for "/api/v1/admin" matched nothing at all, because
+  // every real admin route has a segment after it. The rule looked applied and
+  // silently was not, so moderators fell back to the global limit and got rate
+  // limited out of their own panel.
+  const prefixes = Object.entries(routes)
+    .filter(([pattern]) => !pattern.includes("*"))
+    .sort((a, b) => b[0].length - a[0].length);
+  for (const [pattern, limit] of prefixes) {
+    if (url.startsWith(pattern + "/")) return limit;
   }
 
   return currentConfig.global;

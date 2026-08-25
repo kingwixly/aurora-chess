@@ -2,6 +2,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { capabilitiesFor, type Capabilities, type PunishmentRecord } from "@aurora/chess";
 import { prisma } from "../lib/prisma.js";
 import { logger } from "../lib/logger.js";
+import { getSiteSettings } from "../lib/settings.js";
 
 /**
  * Capability enforcement.
@@ -19,6 +20,23 @@ declare module "fastify" {
   interface FastifyRequest {
     capabilities?: Capabilities;
   }
+}
+
+/**
+ * Whether this account still needs to confirm its email.
+ *
+ * Returns false when verification is switched off site-wide, so enabling the
+ * requirement is a single setting rather than a code change — and so an existing
+ * install does not suddenly lock out every account.
+ */
+async function requiresVerification(userId: string): Promise<boolean> {
+  const settings = await getSiteSettings();
+  if (!settings.requireEmailVerification) return false;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { verified: true },
+  });
+  return user ? !user.verified : false;
 }
 
 /** Punishments that could still constrain this account. */
@@ -54,7 +72,22 @@ async function loadPunishments(userId: string): Promise<PunishmentRecord[]> {
 export async function loadCapabilities(request: FastifyRequest): Promise<void> {
   if (!request.user?.userId) return;
   try {
-    request.capabilities = capabilitiesFor(await loadPunishments(request.user.userId));
+    const caps = capabilitiesFor(await loadPunishments(request.user.userId));
+
+    // An unverified account can play bots and nothing else.
+    //
+    // Applied here rather than as a punishment because it is not one — there is
+    // no record, no appeal, and it clears the moment they click the link. Bots
+    // are allowed so a new player can actually try the site while waiting for
+    // an email, which is the difference between a speed bump and a wall.
+    if (await requiresVerification(request.user.userId)) {
+      caps.playPublic = false;
+      caps.playFriends = false;
+      caps.puzzles = false;
+      caps.chat = false;
+    }
+
+    request.capabilities = caps;
   } catch (err) {
     // Fail OPEN, deliberately.
     //

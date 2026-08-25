@@ -1,3 +1,4 @@
+import { isBookMove } from "../openings/book";
 import { Chess } from "chess.js";
 import type { MoveClassification } from "../moves/types";
 
@@ -69,6 +70,28 @@ export function classifyMove(
   const chess = new Chess(fen);
   const legalMoves = chess.moves();
   const isBlackToMove = fen.split(" ")[1] === "b";
+
+  // Book moves are labelled as such, before any evaluation is considered.
+  //
+  // Judging opening moves by centipawns is actively misleading: the engine will
+  // call 1.e4 "great" and 1.d4 "best", implying a difference that does not
+  // exist and teaching a learner nothing. "Book" says the true thing — this is
+  // established theory, and the question of better or worse does not arise yet.
+  //
+  // Gated on the move not being a disaster. The book contains the Bongcloud
+  // and the Grob, and calling a move that drops a piece "Book" because some
+  // database holds it would excuse exactly the mistakes worth flagging.
+  // Theory-and-fine gets BOOK; theory-and-losing gets judged on its merits.
+  const bookLoss = Math.abs(evalBefore - evalAfter);
+  if (bookLoss < 100 && isBookMove(fen, playedMoveUCI)) {
+    return {
+      classification: "BOOK",
+      cpLoss: 0,
+      evalBefore,
+      evalAfter,
+      bestMove: bestMoveUCI,
+    };
+  }
 
   if (legalMoves.length === 1) {
     return {

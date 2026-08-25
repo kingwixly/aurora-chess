@@ -81,7 +81,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
           <span>Install AuroraChess app</span>
           <button
             onClick={install}
-            className="rounded-full bg-white px-3 py-1 text-xs font-bold text-aurora-cyan"
+            className="rounded-full bg-night-950 px-3 py-1 text-xs font-bold text-aurora-cyan"
           >
             Install
           </button>
@@ -98,6 +98,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
               }
             }}
             aria-label="Dismiss install prompt"
+            /* contrast-ok: the parent banner is solid aurora-cyan */
             className="ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-night-950/20 text-lg leading-none text-night-950 transition-colors hover:bg-night-950/40"
           >
             &times;
@@ -118,7 +119,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
               setShowIosBanner(false);
               localStorage.setItem("aurorachess-ios-pwa-dismissed", "1");
             }}
-            className="text-night-500 hover:text-white text-lg shrink-0"
+            className="text-night-400 hover:text-white text-lg shrink-0"
             aria-label="Dismiss"
           >
             &times;

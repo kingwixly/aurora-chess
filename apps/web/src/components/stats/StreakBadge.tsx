@@ -29,11 +29,11 @@ export default function StreakBadge({ current, bestWin }: StreakBadgeProps) {
       <div className="flex items-center justify-between">
         <div>
           <div className={`text-lg font-bold ${streakColor}`}>{streakLabel}</div>
-          <div className="text-xs text-night-500">Current</div>
+          <div className="text-xs text-night-400">Current</div>
         </div>
         <div className="text-right">
           <div className="text-lg font-bold text-yellow-400">{bestWin}</div>
-          <div className="text-xs text-night-500">Best Win Streak</div>
+          <div className="text-xs text-night-400">Best Win Streak</div>
         </div>
       </div>
     </div>

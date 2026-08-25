@@ -106,7 +106,7 @@ export default function LeaderboardPage() {
                 <li key={e.user.id} className="flex items-center gap-4 px-5 py-3">
                   <span
                     className={`w-7 shrink-0 text-right font-mono text-sm ${
-                      e.rank <= 3 ? "font-bold text-aurora-cyan" : "text-night-500"
+                      e.rank <= 3 ? "font-bold text-aurora-cyan" : "text-night-400"
                     }`}
                   >
                     {e.rank}
@@ -124,12 +124,12 @@ export default function LeaderboardPage() {
                   <span className="shrink-0 text-right">
                     <span className="block font-mono text-lg font-bold">{e.rating}</span>
                     {e.solved !== undefined ? (
-                      <span className="block font-mono text-[11px] text-night-500">
+                      <span className="block font-mono text-[11px] text-night-400">
                         {e.solved} solved
                       </span>
                     ) : (
                       e.peak > e.rating && (
-                        <span className="block font-mono text-[11px] text-night-500">
+                        <span className="block font-mono text-[11px] text-night-400">
                           peak {e.peak}
                         </span>
                       )

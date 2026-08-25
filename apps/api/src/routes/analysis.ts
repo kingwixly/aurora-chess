@@ -64,6 +64,10 @@ export async function analysisRoutes(app: FastifyInstance) {
     await redis.rpush(QUEUE_KEY, gameId);
     await redis.set(statusKey(gameId), "queued");
 
+    // Record the queued state so a poll between enqueue and worker pickup
+    // reports "queued" rather than "none". Without this the client saw "none",
+    // stopped polling, and the page only updated when reloaded by hand.
+    await redis.set(statusKey(gameId), "queued", "EX", 3600);
     return { status: "queued", message: "Analysis queued" };
   };
 

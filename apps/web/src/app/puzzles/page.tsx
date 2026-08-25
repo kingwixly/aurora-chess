@@ -348,7 +348,7 @@ export default function PuzzlesPage() {
             )}
 
             {rating !== null && state === "solving" && (
-              <p className="text-center font-mono text-xs text-night-500">
+              <p className="text-center font-mono text-xs text-night-400">
                 Your puzzle rating: {rating}
               </p>
             )}

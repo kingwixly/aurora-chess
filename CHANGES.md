@@ -1,79 +1,71 @@
-# This build
+# This batch
 
-## Done
+Everything since the CORS fix, in one push: email, bots, premoves, odds,
+challenges, engines, events.
 
-**Premoves.** Chessground stored them but nothing ever *played* them — a premove
-was drawn, survived the opponent's move, then silently did nothing. `playPremove()`
-now fires after the position updates, on a deferred tick so the new position is
-committed first. Enabled in live games and bot games.
+## Bugs found
 
-**The analysis board crash.** `Cannot read properties of undefined (reading 'key')`
-was mine: I passed a hex colour where Chessground expects a **named brush**
-(`green`, `blue`, `paleBlue`...). An unknown name resolves to `undefined` and
-crashes inside the shape renderer — which also left dragging in the broken state
-you saw. Brush names are now validated with a fallback.
+**Premoves could never have worked, anywhere.** `movable.color` was set to
+`turnColor`. Chessground decides move-vs-premove by comparing those two, so
+they were always equal and nothing was ever a premove. When it was the
+opponent's turn the `movable` prop was false, making the colour `undefined`, so
+the board did not even know which pieces you could pick up. Fixed with an
+explicit `playerColor`.
 
-**Analysis engine panel**, modelled on your reference: three lines with score
-chips and SAN, depth readout, opening name and ECO code, and a move-feedback
-toggle. Replaces the cyan arrow you correctly noted did not exist.
+**Strong bots played the Scandinavian** because `preferredOpenings` was stored,
+validated, and never read by the engine. Now consulted for the first eight
+plies. A second bug surfaced while testing: black lines were stored as bare
+replies, so index 0 of a line did not match ply 0 of the game and **no black
+line could ever have matched** even after the book was wired up.
 
-**Piece sets.** Rims removed entirely. Fae and Vista re-cropped with connected-
-component filtering, which strips the fragments of neighbouring pieces that the
-gap-based crop left behind — that was the "improper cropping". **Sleek dropped**;
-you were right that it is Vista with transparency. **Minimalistic renamed Fatty.**
+**Challenge notifications were broadcast to the entire site.** `io.emit` sends
+to every connected client, so everyone saw every challenge, including the game
+id. There was no per-user room at all. Added one; challenges, accepts and
+declines are now directed.
 
-**Homescreen boards.** They rendered every piece white because Unicode outline
-and filled chess glyphs are separate characters and the text colour overrode
-both. They now use the real piece images.
+**Registration could crash the API.** `sendVerificationEmail` was called with
+`void` so mail would not delay signup, which means a rejection was unhandled —
+and Node can exit on those. A database hiccup while issuing the token would
+have taken the process down mid-signup.
 
-**Puzzles.** The card still said "Coming soon" — an earlier edit missed after a
-class rename. `/puzzles` hung on "Finding a puzzle..." forever because a failed
-load fell into a state with no UI; it now says what went wrong and offers a
-retry. **If it says no puzzles are loaded, run the seed** — that is the likely
-cause.
+**The mail transport was cached before the token was checked**, so clearing
+`CLOUDFLARE_EMAIL_TOKEN` left mail live until a restart. Bad property to find
+during an incident.
 
-**Staff ranks.** New `staffRank` field, rendering the Aurora mark after the FIDE
-badge and before the name. Independent of `role`, so someone can be recognised
-publicly without holding admin rights.
+## Added
 
-**Founder badge.** New accounts numbered 50 or below get it automatically at
-signup; existing accounts were backfilled by signup date. Verified against 60
-seeded accounts — exactly 50 received it. Staff can grant and revoke it.
+**Odds** — ten kinds, suggested at a 500-point gap, ordered by how well each
+matches. Never applied without agreement, and never rated: a rating describes
+even play, and a handicap result describes the handicap.
 
-**FIDE Verified badge** now carries FIDE's own mark rather than a green tick
-emoji. The badge shelf renders any icon starting with `/` as an image.
+**Concurrency** — five real-time games for an ordinary account, unlimited for
+titled players and for correspondence. Enforced server-side, not just in the
+UI. Someone mid-game gets offered "queue after this one" rather than a flat
+refusal, because declining loses the game entirely and people rarely
+re-challenge.
 
-**Recent games privacy.** Toggle in settings. Hidden games are omitted from the
-response entirely rather than sent and hidden in the UI — anything that reaches
-the client is public whatever the component does with it. Your own profile
-always shows them.
+**Engine selection** — Stockfish 17 and Lite, Maia, Weiss, WorstFish, each with
+its download size stated. Maia and WorstFish are excluded from analysis
+deliberately: Maia predicts the likely _human_ move rather than the best one, so
+offering it as an analyst would give confidently wrong evaluations.
 
-**Account management.** Username, avatar, email and password. Email changes
-require the current password, since that address receives password resets.
-Changing a password revokes every session including the current one.
+**Events page** with WorstFish, the bot ladder, and puzzle streak. Only lists
+things that actually work.
 
-**Player search** on the dashboard, debounced, linking to profiles.
+**Bot dialogue** — 2 lines per event to roughly 8, 2,659 across 31 bots, with
+each bot's own voice kept first.
 
 ## Verified
 
-Schema check clean, 223 shared tests, 244 web tests, every package and app
-typechecks except `apps/api`. 23 migrations replay clean against Postgres 16,
-with the Founder backfill checked on seeded data.
+340 API, 317 shared, 251 web tests. Schema and route checks clean. Everything
+typechecks.
 
-## Not done — and why
+## Still not built
 
-**The bot rematch 502.** Your console shows 502 on `/auth/refresh` *and*
-`/games/bot` — a 502 is nginx failing to reach the API at all, not a bug in the
-rematch handler. Most likely the API container was restarting. Reproduce it once
-the stack is stable and send me the **API** log rather than the browser console;
-if it is still failing then it is a real handler bug and I will fix it properly.
-
-**Friends tab rework** (messaging, friend list, filter-vs-search split). Messaging
-is a whole subsystem — schema, sockets, unread state, moderation — and bolting a
-half version onto this build would have been worse than leaving it.
-
-**The verify/unverify button purpose.** I did not want to guess: it currently
-sets `verified` on the user, which gates nothing. Tell me what it should gate —
-email confirmation, or posting rights, or something else — and it is quick.
-
-**Google sign-in.** Still needs OAuth credentials.
+- The **odds offer-and-accept UI** on the challenge screen. The logic is done
+  and tested; the flow is not.
+- **Queued challenges** need a `queuedAfterGameId` column to survive a restart.
+  The rules are implemented and tested; persistence is not.
+- Engine workers are catalogued but the **worker files themselves are not
+  bundled** — only `stockfish-17-lite` exists today, so the others will fall
+  back until their builds are added to `/public/engines`.

@@ -13,6 +13,14 @@ export interface AnalysisMoveResult {
   bestMove: string | null;
   evalBefore: number | null;
   evalAfter: number | null;
+  /**
+   * Moves to mate after this move, when the position is forced.
+   *
+   * Carried alongside the centipawn score rather than folded into it: a mate is
+   * not a large advantage, it is a finished game. Clamping it to +/-1000 is what
+   * made the analysis board display "+1000.0" instead of "M3".
+   */
+  mateAfter: number | null;
   cpLoss: number;
 }
 
@@ -23,6 +31,10 @@ export interface EvalPoint {
 }
 
 export interface ClientAnalysisState {
+  /** Candidate lines from the shared engine, for the position on the board. */
+  evaluateMultiPV: (fen: string, numLines?: number, movetimeMs?: number) => Promise<EngineLine[]>;
+  /** Whether that engine has finished loading. */
+  engineReady: boolean;
   /** Non-null when analysis aborted; shown to the user rather than hanging. */
   error: string | null;
   analyse: (
@@ -128,6 +140,7 @@ export function useClientAnalysis(): ClientAnalysisState {
             bestMove: classified.bestMove,
             evalBefore: classified.evalBefore,
             evalAfter: classified.evalAfter,
+            mateAfter: evalAfterResult.mate ?? null,
             cpLoss: classified.cpLoss,
           };
 
@@ -170,6 +183,10 @@ export function useClientAnalysis(): ClientAnalysisState {
   );
 
   return {
+    // Exposed so the page can request candidate lines from the SAME engine.
+    // A second Stockfish would mean a second multi-megabyte download.
+    evaluateMultiPV: stockfish.evaluateMultiPV,
+    engineReady: stockfish.ready,
     analyse,
     cancel,
     analysing,

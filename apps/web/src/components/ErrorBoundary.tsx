@@ -32,7 +32,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           <div className="flex items-center justify-center min-h-[200px] p-8">
             <div className="text-center">
               <p className="text-lg font-medium text-night-300 mb-2">Something went wrong</p>
-              <p className="text-sm text-night-500 mb-4">
+              <p className="text-sm text-night-400 mb-4">
                 An unexpected error occurred. Please try refreshing the page.
               </p>
               <button

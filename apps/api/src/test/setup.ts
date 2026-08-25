@@ -79,6 +79,28 @@ const mockPrismaClient: Record<string, unknown> = {
   },
   // Models added by the moderation and social work. Present here so a route
   // that touches them fails on its own logic rather than on a missing mock.
+  emailToken: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn().mockResolvedValue([]),
+    create: vi.fn().mockResolvedValue({}),
+    update: vi.fn().mockResolvedValue({}),
+    updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+    deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+  },
+  supportTicket: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn().mockResolvedValue([]),
+    create: vi.fn().mockResolvedValue({}),
+    update: vi.fn().mockResolvedValue({}),
+    count: vi.fn().mockResolvedValue(0),
+  },
+  supportMessage: {
+    findMany: vi.fn().mockResolvedValue([]),
+    create: vi.fn().mockResolvedValue({}),
+    count: vi.fn().mockResolvedValue(0),
+  },
   userBadge: {
     findUnique: vi.fn(),
     findFirst: vi.fn(),

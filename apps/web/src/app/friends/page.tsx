@@ -26,13 +26,6 @@ interface FriendRequest {
   createdAt: string;
 }
 
-interface SearchUser {
-  id: string;
-  username: string;
-  rating: number;
-  avatarUrl: string | null;
-}
-
 export default function FriendsPage() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
@@ -42,9 +35,6 @@ export default function FriendsPage() {
   const [filter, setFilter] = useState("");
   const [onlineOnly, setOnlineOnly] = useState(false);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
-  const [searching, setSearching] = useState(false);
   const [message, setMessage] = useState("");
 
   // Filtering people you already know is a different job from searching the
@@ -82,25 +72,6 @@ export default function FriendsPage() {
   useEffect(() => {
     if (user) loadData();
   }, [user, loadData]);
-
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const { data } = await api.get(`/api/v1/users/search?q=${encodeURIComponent(searchQuery)}`);
-        setSearchResults(data.users);
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   async function sendRequest(username: string) {
     try {
@@ -160,49 +131,6 @@ export default function FriendsPage() {
         <h1 className="text-2xl font-bold text-center font-display">Friends</h1>
 
         {message && <p className="text-sm text-center text-yellow-400">{message}</p>}
-
-        {/* Deliberately separated from the friend filter above and labelled
-            differently: one narrows people you already know, the other reaches
-            the whole site. Identical-looking bars side by side is what made
-            them feel like one broken control. */}
-        <div className="rounded-xl bg-night-900 p-4 ring-1 ring-inset ring-aurora-cyan/20">
-          <h2 className="font-display text-lg font-semibold">Find new players</h2>
-          <p className="mb-3 text-xs text-night-400">
-            Searches every account on Aurora, including anyone who has changed their name.
-          </p>
-          <input
-            type="text"
-            placeholder="Search all of Aurora by username..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 bg-night-800 border border-night-700 rounded focus:outline-none focus:border-aurora-cyan"
-          />
-          {searching && <p className="text-night-400 text-sm mt-2">Searching...</p>}
-          {searchResults.length > 0 && (
-            <ul className="mt-3 space-y-2">
-              {searchResults.map((u) => (
-                <li
-                  key={u.id}
-                  className="flex items-center justify-between bg-night-800 rounded p-2"
-                >
-                  <Link
-                    href={`/profile/${u.username}`}
-                    className="hover:text-aurora-cyan transition-colors"
-                  >
-                    <span className="font-medium">{u.username}</span>
-                    <span className="text-night-400 text-sm ml-2">({u.rating})</span>
-                  </Link>
-                  <button
-                    onClick={() => sendRequest(u.username)}
-                    className="text-xs px-2 py-1 bg-aurora-cyan hover:bg-[#3ad2e8] rounded transition-colors"
-                  >
-                    Add
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
 
         {/* Incoming Requests */}
         {requests.length > 0 && (

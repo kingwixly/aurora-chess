@@ -72,7 +72,7 @@ export default function ActivityFeed() {
             <div className="flex items-start gap-2 text-xs">
               <span className="shrink-0 mt-0.5">{ICONS[event.type] || "•"}</span>
               <span className="text-night-300 flex-1">{event.message}</span>
-              <span className="text-night-500 shrink-0 whitespace-nowrap">
+              <span className="text-night-400 shrink-0 whitespace-nowrap">
                 {relativeTime(event.timestamp)}
               </span>
             </div>

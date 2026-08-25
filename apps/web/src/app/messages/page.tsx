@@ -176,7 +176,7 @@ function MessagesInner() {
                         )}
                       </span>
                       {c.preview && (
-                        <span className="mt-0.5 block truncate text-xs text-night-500">
+                        <span className="mt-0.5 block truncate text-xs text-night-400">
                           {c.preview.mine && "You: "}
                           {c.preview.body}
                         </span>
@@ -191,7 +191,7 @@ function MessagesInner() {
           {/* Thread */}
           <section className="flex min-h-[60vh] flex-col rounded-xl bg-night-900 ring-1 ring-inset ring-night-700">
             {!active ? (
-              <p className="m-auto text-sm text-night-500">Pick a conversation.</p>
+              <p className="m-auto text-sm text-night-400">Pick a conversation.</p>
             ) : (
               <>
                 {current?.with && (
@@ -208,7 +208,7 @@ function MessagesInner() {
                     </Link>
                     <button
                       onClick={() => setReporting({ username: current.with!.username })}
-                      className="mt-1 text-xs text-night-500 transition-colors hover:text-red-300"
+                      className="mt-1 text-xs text-night-400 transition-colors hover:text-red-300"
                     >
                       Report
                     </button>
@@ -228,7 +228,7 @@ function MessagesInner() {
                           <p className="whitespace-pre-wrap break-words">{m.body}</p>
                           <p
                             className={`mt-0.5 text-[10px] ${
-                              mine ? "text-night-950/60" : "text-night-500"
+                              mine ? "text-night-950/60" : "text-night-400"
                             }`}
                           >
                             {new Date(m.createdAt).toLocaleTimeString([], {

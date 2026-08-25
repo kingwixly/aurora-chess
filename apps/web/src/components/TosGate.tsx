@@ -55,7 +55,7 @@ export default function TosGate({ children }: { children: React.ReactNode }) {
           <p className="text-night-400 mb-4">
             You declined the Terms of Service. Your account has been deactivated.
           </p>
-          <p className="text-night-500 text-sm">
+          <p className="text-night-400 text-sm">
             Contact the platform administrator if you change your mind.
           </p>
         </div>
@@ -126,7 +126,7 @@ export default function TosGate({ children }: { children: React.ReactNode }) {
             hour) for admin CSRF protection.
           </p>
 
-          <p className="text-xs text-night-500 mt-4">
+          <p className="text-xs text-night-400 mt-4">
             Full versions:{" "}
             <Link href="/legal/terms" className="text-aurora-cyan hover:underline" target="_blank">
               Terms of Service

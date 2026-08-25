@@ -63,15 +63,15 @@ export default function PlayerSearch({ placeholder = "Search players" }: { place
         onChange={(e) => setQ(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="w-full rounded-lg border border-night-700 bg-night-800 px-3.5 py-2.5 text-white placeholder:text-night-500 focus:border-aurora-cyan focus:outline-none"
+        className="w-full rounded-lg border border-night-700 bg-night-800 px-3.5 py-2.5 text-white placeholder:text-night-400 focus:border-aurora-cyan focus:outline-none"
       />
 
       {q.trim().length >= 2 && (
         <div className="mt-2 overflow-hidden rounded-lg bg-night-900 ring-1 ring-inset ring-night-700">
           {loading ? (
-            <p className="px-4 py-3 text-sm text-night-500">Searching...</p>
+            <p className="px-4 py-3 text-sm text-night-400">Searching...</p>
           ) : results.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-night-500">No players found.</p>
+            <p className="px-4 py-3 text-sm text-night-400">No players found.</p>
           ) : (
             <ul className="divide-y divide-night-700">
               {results.map((u) => (
@@ -91,7 +91,7 @@ export default function PlayerSearch({ placeholder = "Search players" }: { place
                     />
                     <span className="flex shrink-0 items-center gap-2">
                       {u.formerlyKnownAs && (
-                        <span className="text-xs text-night-500" title="Previously known as">
+                        <span className="text-xs text-night-400" title="Previously known as">
                           was {u.formerlyKnownAs}
                         </span>
                       )}

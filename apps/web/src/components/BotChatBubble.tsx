@@ -28,7 +28,7 @@ export default function BotChatBubble({ message }: BotChatBubbleProps) {
     <div
       className={`
         z-20 ml-2 px-3 py-2 rounded-xl bg-aurora-cyan border border-aurora-cyan
-        text-sm text-white max-w-[240px] shadow-lg transition-all duration-300
+        text-sm text-night-950 max-w-[240px] shadow-lg transition-all duration-300
         ${visible ? "opacity-100 scale-100" : "opacity-0 scale-90"}
       `}
     >

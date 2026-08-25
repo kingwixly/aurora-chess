@@ -16,8 +16,6 @@ import ErrorBoundary from "../../components/ErrorBoundary";
 import MiniBoard from "../../components/MiniBoard";
 import TimeControlPanel, { type TimeControlChoice } from "../../components/TimeControlPanel";
 import RatingPools from "../../components/RatingPools";
-import PlayerSearch from "../../components/PlayerSearch";
-import FriendsStrip from "../../components/FriendsStrip";
 import MobileNav from "../../components/MobileNav";
 
 /**
@@ -120,6 +118,8 @@ export default function PlayPage() {
               { href: "/puzzles", label: "Puzzles" },
               { href: "/analysis", label: "Analysis" },
               { href: "/leaderboard", label: "Leaderboard" },
+              { href: "/events", label: "Events" },
+              { href: "/search", label: "Search" },
               { href: "/friends", label: "Friends" },
               { href: "/messages", label: "Messages" },
             ].map((l) => (

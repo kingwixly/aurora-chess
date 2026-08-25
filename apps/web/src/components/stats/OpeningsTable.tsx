@@ -19,7 +19,7 @@ export interface OpeningsTableProps {
  */
 export default function OpeningsTable({ openings }: OpeningsTableProps) {
   if (openings.length === 0) {
-    return <p className="text-night-500 text-sm">No opening data yet</p>;
+    return <p className="text-night-400 text-sm">No opening data yet</p>;
   }
   return (
     <div className="bg-night-800 rounded-lg p-4">

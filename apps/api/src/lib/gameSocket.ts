@@ -159,6 +159,12 @@ export function setupGameSocket(io: SocketServer) {
   io.on("connection", (socket: Socket) => {
     const userId = socket.data.userId as string;
 
+    // A room per person, so a challenge can be delivered to ONE user.
+    // Challenge notifications were sent with io.emit, which broadcasts to every
+    // connected client — so everyone on the site saw every challenge, complete
+    // with the game id.
+    if (userId) socket.join(`user:${userId}`);
+
     // Random-opponent matchmaking.
     registerQueueHandlers(io, socket, userId);
 

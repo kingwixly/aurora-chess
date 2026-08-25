@@ -45,10 +45,15 @@ function LoginForm() {
       // where nothing works and nothing explains why.
       router.push(result?.banned ? "/standing" : next);
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
-        "Login failed";
-      setError(msg);
+      const res = (err as { response?: { status?: number; data?: { error?: string } } })?.response;
+      // 401 almost always means "no account here" rather than a typo, and
+      // "Login failed" leaves someone re-entering the same details. The signup
+      // link is deliberately part of the message rather than a hint below it.
+      setError(
+        res?.status === 401
+          ? "NO_ACCOUNT"
+          : res?.data?.error || "Something went wrong. Try again in a moment."
+      );
     } finally {
       setLoading(false);
     }
@@ -62,11 +67,19 @@ function LoginForm() {
         </div>
         <h1 className="text-center font-display text-3xl tracking-tight">Welcome back</h1>
         <p className="mb-6 mt-2 text-center text-sm text-night-400">Sign in to keep playing.</p>
-        {error && (
+        {error === "NO_ACCOUNT" ? (
+          <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300 ring-1 ring-inset ring-red-500/30">
+            Invalid credentials. Don&apos;t have an account?{" "}
+            <Link href="/register" className="font-medium text-aurora-cyan hover:underline">
+              Sign up here
+            </Link>
+            .
+          </p>
+        ) : error ? (
           <p className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-center text-sm text-red-300 ring-1 ring-inset ring-red-500/30">
             {error}
           </p>
-        )}
+        ) : null}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="mb-1.5 block text-sm font-medium">Email</label>

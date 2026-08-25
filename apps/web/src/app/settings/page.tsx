@@ -55,7 +55,7 @@ function ThemeSwatch({ light, dark }: { light: string; dark: string }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="rounded-xl bg-night-900 p-5 ring-1 ring-inset ring-night-700">
-      <h2 className="mb-4 text-xs uppercase tracking-wider text-night-500">{title}</h2>
+      <h2 className="mb-4 text-xs uppercase tracking-wider text-night-400">{title}</h2>
       {children}
     </section>
   );
@@ -84,13 +84,21 @@ function Toggle({
         aria-checked={checked}
         aria-label={label}
         onClick={() => onChange(!checked)}
-        className={`relative mt-1 h-6 w-11 shrink-0 rounded-full transition-colors ${
+        className={`relative mt-1 h-6 w-11 shrink-0 overflow-hidden rounded-full p-0 transition-colors ${
           checked ? "bg-aurora-cyan" : "bg-night-700"
         }`}
       >
+        {/* `left-0.5` stated explicitly.
+            
+            Without a `left`, an absolutely positioned element falls back to its
+            static position — which shifts with any padding the button inherits
+            from a global style. The knob was therefore starting somewhere other
+            than the track's left edge, and the transform carried it past the
+            right edge. Anchoring it removes the guesswork: track 44, knob 20,
+            2px inset, so travel is exactly 20px. */}
         <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-            checked ? "translate-x-[22px]" : "translate-x-0.5"
+          className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+            checked ? "translate-x-[20px]" : "translate-x-0"
           }`}
         />
       </button>
@@ -238,7 +246,6 @@ export default function SettingsPage() {
                       &#9819;
                     </span>
                   ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={`/piece-sets/${p.key}/wQ.png`}
                       alt=""
@@ -289,7 +296,7 @@ export default function SettingsPage() {
           </Section>
         </div>
 
-        <p className="mt-6 text-center text-xs text-night-500">
+        <p className="mt-6 text-center text-xs text-night-400">
           Piece sets have been removed for now — the old control only applied a colour filter rather
           than changing the pieces.
         </p>

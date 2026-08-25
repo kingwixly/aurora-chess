@@ -19,6 +19,7 @@ import leaderboardRoutes from "./routes/leaderboard.js";
 import messageRoutes from "./routes/messages.js";
 import standingRoutes from "./routes/standing.js";
 import reportRoutes from "./routes/reports.js";
+import { publicSupportRoutes, staffSupportRoutes } from "./routes/support.js";
 import { startStrikeJob } from "./lib/strikes.js";
 import { validateEnv } from "./lib/env.js";
 import { adminRoutes } from "./routes/admin.js";
@@ -231,6 +232,7 @@ async function main() {
       // must be able to reach its own standing and appeal.
       await v1.register(standingRoutes);
       await v1.register(reportRoutes);
+      await v1.register(publicSupportRoutes);
       await v1.register(adminRoutes);
       await v1.register(collectionRoutes);
       await v1.register(inviteRoutes);

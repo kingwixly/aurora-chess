@@ -105,7 +105,7 @@ export default function FairPlayPage() {
           </p>
         </section>
 
-        <p className="mt-12 text-center text-sm text-night-500">
+        <p className="mt-12 text-center text-sm text-night-400">
           <Link href="/standing" className="text-aurora-cyan hover:underline">
             Your standing
           </Link>

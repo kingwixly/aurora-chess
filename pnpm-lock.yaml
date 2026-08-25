@@ -8,15 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@changesets/cli':
-        specifier: ^2.29.4
-        version: 2.30.0(@types/node@22.19.15)
-      '@commitlint/cli':
-        specifier: ^20.5.0
-        version: 20.5.0(@types/node@22.19.15)(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.3.0)(typescript@5.9.3)
-      '@commitlint/config-conventional':
-        specifier: ^20.5.0
-        version: 20.5.0
       '@aurora/eslint-config':
         specifier: workspace:*
         version: link:tooling/eslint-config
@@ -26,6 +17,15 @@ importers:
       '@aurora/typescript-config':
         specifier: workspace:*
         version: link:tooling/typescript-config
+      '@changesets/cli':
+        specifier: ^2.29.4
+        version: 2.30.0(@types/node@22.19.15)
+      '@commitlint/cli':
+        specifier: ^20.5.0
+        version: 20.5.0(@types/node@22.19.15)(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.3.0)(typescript@5.9.3)
+      '@commitlint/config-conventional':
+        specifier: ^20.5.0
+        version: 20.5.0
       eslint:
         specifier: ^9.39.4
         version: 9.39.4(jiti@2.6.1)
@@ -141,6 +141,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
+      nodemailer:
+        specifier: ^6.9.16
+        version: 6.10.1
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -169,6 +172,9 @@ importers:
       '@types/node':
         specifier: ^22
         version: 22.19.15
+      '@types/nodemailer':
+        specifier: ^6.4.17
+        version: 6.4.24
       '@types/supertest':
         specifier: ^7.2.0
         version: 7.2.0
@@ -1875,6 +1881,9 @@ packages:
 
   '@types/node@22.19.15':
     resolution: {integrity: sha512-F0R/h2+dsy5wJAUe3tAU6oqa2qbWY5TpNfL/RGmo1y38hiyO1w3x2jPtt76wmuaJI4DQnOBu21cNXQ2STIUUWg==}
+
+  '@types/nodemailer@6.4.24':
+    resolution: {integrity: sha512-Ww4u0rT9wQNXh4JiQaIwx3QWdcOFXzOjQA2zc+jtFYNmQiT4mIUqcDin51bDFdkzKubFnQCZNK7FIHlPKQ/q9w==}
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
@@ -3884,6 +3893,10 @@ packages:
 
   node-releases@2.0.36:
     resolution: {integrity: sha512-TdC8FSgHz8Mwtw9g5L4gR/Sh9XhSP/0DEkQxfEFXOpiul5IiHgHan2VhYYb6agDSfp4KuvltmGApc8HMgUrIkA==}
+
+  nodemailer@6.10.1:
+    resolution: {integrity: sha512-Z+iLaBGVaSjbIzQ4pX6XV41HrooLsQ10ZWPUehGmuantvzWoDVBnmsdUcOIDM1t+yPor5pDhVlDESgOMEGxhHA==}
+    engines: {node: '>=6.0.0'}
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
@@ -6855,6 +6868,10 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/nodemailer@6.4.24':
+    dependencies:
+      '@types/node': 22.19.15
+
   '@types/prop-types@15.7.15': {}
 
   '@types/react-dom@18.3.7(@types/react@18.3.28)':
@@ -9010,6 +9027,8 @@ snapshots:
   node-gyp-build@4.8.4: {}
 
   node-releases@2.0.36: {}
+
+  nodemailer@6.10.1: {}
 
   normalize-path@3.0.0: {}
 

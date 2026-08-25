@@ -29,6 +29,7 @@ import {
 } from "@aurora/chess";
 import { updatePeakAndAutoTitle } from "../lib/titles.js";
 import { linkedAccounts } from "../lib/bans.js";
+import { staffSupportRoutes } from "./support.js";
 import { parsePagination } from "../lib/pagination.js";
 import {
   apiError,
@@ -49,6 +50,11 @@ import { loadBotsFromYaml, type BotDef } from "../../prisma/seed-bots.js";
 
 /** Register admin routes (user management, site settings, CSRF tokens). */
 export async function adminRoutes(app: FastifyInstance) {
+  // Registered inside this plugin so the staff support terminal inherits the
+  // SAME admin guard as everything else here. A separately mounted route would
+  // be one forgotten preHandler away from public.
+  await app.register(staffSupportRoutes);
+
   // All admin routes require auth + admin role + rate limiting
   app.addHook("preHandler", authMiddleware);
   app.addHook("preHandler", adminMiddleware);

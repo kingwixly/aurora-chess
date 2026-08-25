@@ -75,7 +75,7 @@ export default function PlayerClock({ timeMs, isActive, isRunning }: PlayerClock
             : isLow
               ? "bg-red-900 text-red-300"
               : "bg-night-800 text-white"
-          : "bg-night-800 text-night-500"
+          : "bg-night-800 text-night-400"
       }`}
     >
       {formatClock(display)}

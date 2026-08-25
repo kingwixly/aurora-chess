@@ -139,7 +139,7 @@ export default function ChallengeFriendPage() {
             Select Opponent
           </h2>
           {friends.length === 0 ? (
-            <p className="text-night-500 text-sm">
+            <p className="text-night-400 text-sm">
               No friends yet.{" "}
               <Link href="/friends" className="text-aurora-cyan hover:underline">
                 Add some!
@@ -151,7 +151,7 @@ export default function ChallengeFriendPage() {
                 <button
                   key={f.id}
                   onClick={() => setSelectedFriend(f)}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors ${selectedFriend?.id === f.id ? "bg-aurora-cyan" : "bg-night-800 hover:bg-night-700"} text-night-950`}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors ${selectedFriend?.id === f.id ? "bg-aurora-cyan" : "bg-night-800 hover:bg-night-700"}`}
                 >
                   <span
                     className={`w-2.5 h-2.5 rounded-full shrink-0 ${f.isOnline ? "bg-green-400" : "bg-night-700"}`}

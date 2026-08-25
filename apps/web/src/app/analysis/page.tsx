@@ -314,7 +314,7 @@ export default function AnalysisBoardPage() {
               {mode === "vs-engine" && (
                 <div className="mt-3 space-y-3">
                   <div>
-                    <span className="mb-1.5 block text-xs uppercase tracking-wider text-night-500">
+                    <span className="mb-1.5 block text-xs uppercase tracking-wider text-night-400">
                       Engine plays
                     </span>
                     <div className="flex gap-1">
@@ -334,7 +334,7 @@ export default function AnalysisBoardPage() {
                     </div>
                   </div>
                   <label className="block">
-                    <span className="mb-1 block text-xs uppercase tracking-wider text-night-500">
+                    <span className="mb-1 block text-xs uppercase tracking-wider text-night-400">
                       Strength: <span className="font-mono text-night-300">{engineElo}</span>
                     </span>
                     <input
@@ -370,14 +370,14 @@ export default function AnalysisBoardPage() {
                   />
                   Engine
                 </label>
-                <span className="font-mono text-[11px] text-night-500">
+                <span className="font-mono text-[11px] text-night-400">
                   {lines[0] ? `depth ${lines[0].depth}` : "\u2014"} &middot; Stockfish
                 </span>
               </div>
 
               {showEngine ? (
                 lines.length === 0 ? (
-                  <p className="px-4 py-3 text-sm text-night-500">Analysing...</p>
+                  <p className="px-4 py-3 text-sm text-night-400">Analysing...</p>
                 ) : (
                   <ul className="divide-y divide-night-700">
                     {lines.map((l, i) => (
@@ -401,13 +401,13 @@ export default function AnalysisBoardPage() {
                   </ul>
                 )
               ) : (
-                <p className="px-4 py-3 text-sm text-night-500">Engine off.</p>
+                <p className="px-4 py-3 text-sm text-night-400">Engine off.</p>
               )}
 
               {opening && (
                 <div className="border-t border-night-700 px-4 py-2.5">
                   <p className="text-sm">
-                    <span className="font-mono text-xs text-night-500">{opening.eco}</span>{" "}
+                    <span className="font-mono text-xs text-night-400">{opening.eco}</span>{" "}
                     {opening.name}
                   </p>
                 </div>
@@ -427,7 +427,7 @@ export default function AnalysisBoardPage() {
 
             <section className="rounded-xl bg-night-900 p-4 ring-1 ring-inset ring-night-700">
               <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-xs uppercase tracking-wider text-night-500">Moves</h2>
+                <h2 className="text-xs uppercase tracking-wider text-night-400">Moves</h2>
                 <button
                   onClick={() => setShowImport((v) => !v)}
                   className="text-xs font-medium text-aurora-cyan hover:underline"
@@ -456,12 +456,12 @@ export default function AnalysisBoardPage() {
               )}
 
               {history.length === 0 ? (
-                <p className="text-sm text-night-500">No moves yet.</p>
+                <p className="text-sm text-night-400">No moves yet.</p>
               ) : (
                 <ol className="grid max-h-64 grid-cols-[auto_1fr_1fr] gap-x-2 gap-y-0.5 overflow-y-auto font-mono text-sm">
                   {Array.from({ length: Math.ceil(history.length / 2) }).map((_, i) => (
                     <li key={i} className="contents">
-                      <span className="text-night-500">{i + 1}.</span>
+                      <span className="text-night-400">{i + 1}.</span>
                       {[0, 1].map((j) => {
                         const idx = i * 2 + j;
                         if (idx >= history.length) return <span key={j} />;
@@ -485,7 +485,7 @@ export default function AnalysisBoardPage() {
 
             {showFeedback && bestMove && cursor > 0 && (
               <section className="rounded-xl bg-night-900 p-4 ring-1 ring-inset ring-night-700">
-                <h2 className="mb-1.5 text-xs uppercase tracking-wider text-night-500">Feedback</h2>
+                <h2 className="mb-1.5 text-xs uppercase tracking-wider text-night-400">Feedback</h2>
                 <p className="text-sm text-night-300">
                   Engine prefers{" "}
                   <span className="font-mono text-aurora-cyan">{lines[0]?.san[0] ?? "\u2014"}</span>
@@ -497,7 +497,7 @@ export default function AnalysisBoardPage() {
             )}
 
             <section className="rounded-xl bg-night-900 p-4 ring-1 ring-inset ring-night-700">
-              <h2 className="mb-1.5 text-xs uppercase tracking-wider text-night-500">Position</h2>
+              <h2 className="mb-1.5 text-xs uppercase tracking-wider text-night-400">Position</h2>
               <code className="block break-all font-mono text-[11px] leading-relaxed text-night-400">
                 {current.fen()}
               </code>

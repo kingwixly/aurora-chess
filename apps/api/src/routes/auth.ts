@@ -9,6 +9,14 @@ import { getSiteSettings } from "../lib/settings.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { checkBan, clientIp, deviceId, recordSighting } from "../lib/bans.js";
 import { checkSignupVelocity, releaseSignupAttempt } from "../lib/signupVelocity.js";
+import {
+  consumeToken,
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  sendSecurityNotice,
+  logCodeRequest,
+} from "../lib/emailTokens.js";
+import { redis } from "../lib/redis.js";
 import { sanitizeString } from "../middleware/admin.js";
 import { registerBodySchema, loginBodySchema, preferencesBodySchema } from "../lib/schemas.js";
 import {
@@ -175,6 +183,11 @@ export async function authRoutes(app: FastifyInstance) {
 
     // Founder for the first 50 accounts. Done here rather than by a trigger so
     // the rule lives with the rest of the signup logic and is easy to find.
+    // Fire and forget, deliberately. If mail is down, registration still
+    // succeeds and the account exists — the person can request another link.
+    // Blocking here would mean an email outage stops signups entirely.
+    void sendVerificationEmail(user.id, user.email, user.username);
+
     if (user.accountNumber <= FOUNDER_CUTOFF) {
       await prisma.userBadge
         .create({
@@ -303,6 +316,141 @@ export async function authRoutes(app: FastifyInstance) {
         : null,
     };
   });
+
+  /**
+   * Confirm an email address.
+   *
+   * Deliberately a POST rather than a GET on the link: mail scanners and
+   * link-preview bots fetch GET URLs, which would silently consume the token
+   * before the user clicked. The emailed link opens a page that posts this.
+   */
+  app.post<{ Body: { token: string } }>("/auth/verify", async (request, reply) => {
+    const token = request.body?.token;
+    if (!token || typeof token !== "string" || token.length > 200) {
+      return apiError(reply, 400, VALIDATION_FAILED, "Invalid link");
+    }
+
+    const result = await consumeToken(token, "VERIFY_EMAIL");
+    if (!result.userId) {
+      // One message for every failure mode. Saying "expired" versus "not found"
+      // tells someone probing whether a token ever existed.
+      return apiError(
+        reply,
+        400,
+        VALIDATION_FAILED,
+        "That link is no longer valid. Request a new one."
+      );
+    }
+
+    await prisma.user.update({
+      where: { id: result.userId },
+      data: { verified: true },
+    });
+    return { verified: true };
+  });
+
+  /** Send another verification email. */
+  app.post("/auth/verify/resend", { preHandler: authMiddleware }, async (request, reply) => {
+    const userId = request.user.userId;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, username: true, verified: true },
+    });
+    if (!user) return apiError(reply, 404, NOT_FOUND, "Account not found");
+    if (user.verified) return { sent: false, alreadyVerified: true };
+
+    // Per-account limit. The global mailer cap is a backstop, not this.
+    const key = `verify:resend:${userId}`;
+    const count = await redis.incr(key).catch(() => 0);
+    if (count === 1) await redis.expire(key, 3600).catch(() => {});
+    if (count > 3) {
+      return apiError(reply, 429, VALIDATION_FAILED, "Too many requests. Try again in an hour.");
+    }
+
+    void logCodeRequest(user.username, "VERIFY_EMAIL");
+    const sent = await sendVerificationEmail(userId, user.email, user.username);
+    return { sent };
+  });
+
+  /**
+   * Begin a password reset.
+   *
+   * Always reports success. Reporting "no such account" turns this endpoint
+   * into a way to test which email addresses are registered.
+   */
+  app.post<{ Body: { email: string } }>("/auth/forgot-password", async (request, reply) => {
+    const email = String(request.body?.email ?? "")
+      .trim()
+      .toLowerCase();
+    if (!email || email.length > 254) {
+      return apiError(reply, 400, VALIDATION_FAILED, "Enter your email address");
+    }
+
+    // Rate limited by address AND by caller, so this cannot be used to mail-bomb
+    // one person or to enumerate many.
+    const ip = clientIp(request);
+    for (const [key, limit, ttl] of [
+      [`reset:email:${email}`, 3, 3600],
+      [`reset:ip:${ip}`, 10, 3600],
+    ] as const) {
+      const n = await redis.incr(key).catch(() => 0);
+      if (n === 1) await redis.expire(key, ttl).catch(() => {});
+      if (n > limit) {
+        // Still a success response: the limit must not leak either.
+        return { sent: true };
+      }
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, username: true, active: true },
+    });
+
+    if (user && user.active) {
+      void logCodeRequest(user.username, "PASSWORD_RESET");
+      await sendPasswordResetEmail(user.id, user.email, user.username);
+    }
+
+    return { sent: true };
+  });
+
+  /** Finish a password reset. */
+  app.post<{ Body: { token: string; password: string } }>(
+    "/auth/reset-password",
+    async (request, reply) => {
+      const { token, password } = request.body ?? {};
+      if (!token || typeof token !== "string" || token.length > 200) {
+        return apiError(reply, 400, VALIDATION_FAILED, "Invalid link");
+      }
+      if (!password || password.length < 8 || password.length > 200) {
+        return apiError(reply, 400, VALIDATION_FAILED, "Password must be at least 8 characters");
+      }
+
+      const result = await consumeToken(token, "PASSWORD_RESET");
+      if (!result.userId) {
+        return apiError(
+          reply,
+          400,
+          VALIDATION_FAILED,
+          "That link is no longer valid. Request a new one."
+        );
+      }
+
+      const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+      const user = await prisma.user.update({
+        where: { id: result.userId },
+        data: { passwordHash },
+        select: { email: true, username: true },
+      });
+
+      // Every existing session dies. A reset is often a response to a
+      // compromise, so leaving the intruder signed in would defeat it.
+      await prisma.refreshToken.deleteMany({ where: { userId: result.userId } });
+
+      void sendSecurityNotice(user.email, user.username, "Your password was reset.");
+      return { reset: true };
+    }
+  );
 
   // ── Refresh ───────────────────────────────────────
   app.post("/auth/refresh", async (request, reply) => {
@@ -554,10 +702,15 @@ export async function authRoutes(app: FastifyInstance) {
         return apiError(reply, 403, VALIDATION_FAILED, "Current password is incorrect");
       }
 
-      await prisma.user.update({
+      const changed = await prisma.user.update({
         where: { id: userId },
         data: { passwordHash: await bcrypt.hash(newPassword, 10) },
+        select: { email: true, username: true },
       });
+
+      // Sent after the fact, to the address on file. This is what surfaces an
+      // account takeover to the real owner.
+      void sendSecurityNotice(changed.email, changed.username, "Your password was changed.");
 
       // Revoke every refresh token, including this session's.
       await prisma.refreshToken.deleteMany({ where: { userId } });

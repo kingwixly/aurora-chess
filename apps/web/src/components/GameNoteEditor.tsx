@@ -65,7 +65,7 @@ export default function GameNoteEditor({ gameId, compact = false }: GameNoteEdit
       return (
         <button
           onClick={() => setExpanded(true)}
-          className="text-night-500 hover:text-night-300 text-xs transition-colors"
+          className="text-night-400 hover:text-night-300 text-xs transition-colors"
           title="Add note"
         >
           +note
@@ -97,13 +97,13 @@ export default function GameNoteEditor({ gameId, compact = false }: GameNoteEdit
       <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-medium text-night-400">Note</span>
         <div className="flex items-center gap-2">
-          {saving && <span className="text-xs text-night-500">Saving...</span>}
+          {saving && <span className="text-xs text-night-400">Saving...</span>}
           {saved && <span className="text-xs text-emerald-400">Saved</span>}
-          <span className="text-xs text-night-500">{text.length}/2000</span>
+          <span className="text-xs text-night-400">{text.length}/2000</span>
           {compact && (
             <button
               onClick={() => setExpanded(false)}
-              className="text-xs text-night-500 hover:text-night-300"
+              className="text-xs text-night-400 hover:text-night-300"
             >
               Close
             </button>

@@ -97,10 +97,10 @@ export default function GameChat({ gameId }: { gameId: string }) {
   return (
     <div className="flex max-h-64 flex-col rounded-xl bg-night-900 ring-1 ring-inset ring-night-700">
       <div className="flex items-center justify-between border-b border-night-700 px-4 py-2">
-        <h3 className="text-xs uppercase tracking-wider text-night-500">Chat</h3>
+        <h3 className="text-xs uppercase tracking-wider text-night-400">Chat</h3>
         <button
           onClick={() => setChatEnabled(false)}
-          className="text-xs text-night-500 transition-colors hover:text-white"
+          className="text-xs text-night-400 transition-colors hover:text-white"
         >
           Turn off
         </button>
@@ -108,7 +108,7 @@ export default function GameChat({ gameId }: { gameId: string }) {
 
       <div className="flex-1 space-y-1.5 overflow-y-auto px-4 py-3">
         {messages.length === 0 ? (
-          <p className="text-xs text-night-500">No messages.</p>
+          <p className="text-xs text-night-400">No messages.</p>
         ) : (
           messages.map((m) => (
             <p key={m.id} className="text-sm">

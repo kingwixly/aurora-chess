@@ -109,6 +109,7 @@ async function analyzeGame(gameId: string, engine: StockfishEngine) {
         bestMove: classified.bestMove,
         evalBefore: classified.evalBefore,
         evalAfter: classified.evalAfter,
+        mateAfter: evalAfterResult.mate ?? null,
       },
     });
 

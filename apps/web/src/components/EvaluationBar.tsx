@@ -51,6 +51,7 @@ export default function EvaluationBar({ evalCP, mate }: EvaluationBarProps) {
       {/* Score label */}
       <div
         className={`absolute left-1/2 -translate-x-1/2 text-[10px] font-bold px-0.5 ${
+          /* contrast-ok: sits on the WHITE half of the bar, drawn by the parent */
           isWhiteBetter ? "bottom-1 text-night-950" : "top-1 text-night-300"
         }`}
         style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}

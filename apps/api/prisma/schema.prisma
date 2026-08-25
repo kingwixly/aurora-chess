@@ -161,8 +161,15 @@ model User {
   /// should always see what they are accused of, even having lost the right
   /// to argue about it.
   appealBanned    Boolean      @default(false)
+  /// Verification tokens, password resets, and support threads.
+  emailTokens     EmailToken[]
+  supportTickets  SupportTicket[]
   cheatReports    CheatReport[]
   usernameHistory UsernameHistory[]
+  emailTokens     EmailToken[]
+  supportTickets  SupportTicket[]   @relation("TicketAuthor")
+  authTokens      AuthToken[]
+  supportTickets  SupportTicket[]   @relation("TicketOpener")
   messagesSent    Message[]         @relation("MessageAuthor")
   conversations   ConversationMember[]
 
@@ -338,6 +345,12 @@ model MoveFeedback {
   bestMove       String?
   evalBefore     Int?
   evalAfter      Int?
+  /// Moves to mate after this move, from the mover's point of view.
+  ///
+  /// Stored separately because a forced mate is not a centipawn score. Without
+  /// it the analysis board clamped mate to +/-1000 and displayed "+1000.0",
+  /// which reads as an enormous material edge rather than "this is over".
+  mateAfter      Int?
 
   analysis GameAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
   move     Move         @relation(fields: [moveId], references: [id], onDelete: Cascade)
@@ -457,7 +470,6 @@ model BotProfile {
   @@index([category])
 }
 
-
 /// Per-time-control rating.
 ///
 /// Replaces the single `User.rating` as the source of truth for competitive
@@ -516,7 +528,6 @@ model SiteStat {
   updatedAt DateTime @updatedAt
 }
 
-
 /// Staff-maintained FIDE details, shown as a panel on a player's profile.
 ///
 /// Deliberately a separate table rather than columns on User: it is optional,
@@ -548,7 +559,6 @@ model FideProfile {
   updatedAt DateTime @updatedAt
   updatedBy String?
 }
-
 
 /// A tactics puzzle.
 ///
@@ -599,7 +609,6 @@ model PuzzleAttempt {
   @@index([userId, createdAt])
   @@index([puzzleId])
 }
-
 
 /// What a ban applies to.
 enum BanScope {
@@ -767,7 +776,6 @@ model CheatReport {
   @@index([userId])
 }
 
-
 /// A username this account used to hold.
 ///
 /// Kept so that searching an old name still finds the person. Someone who
@@ -785,7 +793,6 @@ model UsernameHistory {
   @@index([username])
   @@index([userId, changedAt])
 }
-
 
 /// A direct conversation between two people.
 ///
@@ -837,7 +844,6 @@ model Message {
   @@index([conversationId, createdAt])
 }
 
-
 /// A message sent during a game.
 ///
 /// Separate from direct messages: these belong to the game, are visible to
@@ -854,3 +860,101 @@ model GameChatMessage {
 
   @@index([gameId, createdAt])
 }
+
+/// What a one-time email token is for.
+enum EmailTokenKind {
+  VERIFY_EMAIL
+  PASSWORD_RESET
+}
+
+/// A single-use token delivered by email.
+///
+/// Only a HASH is stored. A leaked database must not hand someone the ability
+/// to reset every account, and a token is a bearer credential exactly like a
+/// password.
+model EmailToken {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      EmailTokenKind
+  /// SHA-256 of the token that was emailed. The plaintext is never persisted.
+  tokenHash String         @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime       @default(now())
+
+  @@index([userId, kind])
+  @@index([expiresAt])
+}
+
+enum TicketStatus {
+  OPEN
+  ANSWERED
+  CLOSED
+}
+
+/// A support conversation.
+///
+/// The requester's address is stored HERE and staff replies always go to this
+/// stored value — never to an address supplied in the reply request. That is
+/// the difference between a support inbox and an open mail relay.
+model SupportTicket {
+  id      String       @id @default(cuid())
+  /// Set when the sender was a signed-in account.
+  userId  String?
+  user    User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// Where replies go. Immutable after creation.
+  email   String
+  subject String
+  status  TicketStatus @default(OPEN)
+
+  messages SupportMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, updatedAt])
+  @@index([email])
+}
+
+model SupportMessage {
+  id       String        @id @default(cuid())
+  ticketId String
+  ticket   SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  /// True when written by staff, false when from the requester.
+  fromStaff Boolean
+  /// Staff account that wrote it, for the audit trail.
+  authorId  String?
+  body      String
+  /// Whether the outbound send actually succeeded.
+  emailed   Boolean       @default(false)
+  createdAt DateTime      @default(now())
+
+  @@index([ticketId, createdAt])
+}
+
+/// What a one-time token is for.
+enum AuthTokenKind {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+/// A single-use token for email verification or password reset.
+///
+/// Only a HASH is stored. A leaked database must not hand over working reset
+/// links, and the same reasoning applies here as to session tokens.
+model AuthToken {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      AuthTokenKind
+  /// SHA-256 of the token that was emailed. The plaintext is never stored.
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  @@index([userId, kind])
+  @@index([expiresAt])
+}
+

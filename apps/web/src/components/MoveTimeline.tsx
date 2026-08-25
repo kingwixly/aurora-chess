@@ -54,18 +54,18 @@ export default function MoveTimeline({
       </button>
       <div className="flex-1 flex items-center justify-center gap-0.5 min-w-0 text-xs font-mono overflow-hidden">
         {visibleMoves.length === 0 ? (
-          <span className="text-night-500">No moves</span>
+          <span className="text-night-400">No moves</span>
         ) : (
           visibleMoves.map((m) => {
             const isActive = m.ply === currentPly;
             const showNum = m.ply % 2 === 1;
             return (
               <span key={m.ply} className="flex items-center shrink-0">
-                {showNum && <span className="text-night-500 mr-0.5">{Math.ceil(m.ply / 2)}.</span>}
+                {showNum && <span className="text-night-400 mr-0.5">{Math.ceil(m.ply / 2)}.</span>}
                 <button
                   onClick={() => onGoToPly(m.ply)}
                   className={`px-1 py-0.5 rounded ${
-                    isActive ? "bg-aurora-cyan text-white" : "text-night-400"
+                    isActive ? "bg-aurora-cyan text-night-950" : "text-night-400"
                   }`}
                 >
                   {m.san}

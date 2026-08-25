@@ -78,7 +78,7 @@ export default function BotSelector({ selected, onSelect, bots }: BotSelectorPro
             >
               <span className="flex items-center gap-2">
                 <span className={bandColor.text}>{label.name}</span>
-                <span className="text-xs text-night-500">{label.eloRange}</span>
+                <span className="text-xs text-night-400">{label.eloRange}</span>
                 {hasSelected && <span className={`w-1.5 h-1.5 rounded-full ${bandColor.bg}`} />}
               </span>
               <svg

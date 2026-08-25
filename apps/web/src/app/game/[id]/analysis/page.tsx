@@ -25,6 +25,9 @@ const EvalGraph = dynamic(() => import("../../../../components/EvalGraph"), {
 import type { Player } from "@aurora/chess";
 import { CLASSIFICATION_COLORS, CLASSIFICATION_SYMBOLS } from "@aurora/chess";
 import { useClientAnalysis } from "../../../../lib/useClientAnalysis";
+import EngineLines from "../../../../components/EngineLines";
+import { identifyOpening } from "@aurora/chess";
+import type { EngineLine } from "../../../../lib/useStockfish";
 import { useOnlineStatus } from "../../../../lib/useOnlineStatus";
 import AnalysisProgress from "../../../../components/AnalysisProgress";
 import MoveTimeline from "../../../../components/MoveTimeline";
@@ -38,6 +41,8 @@ interface FeedbackEntry {
   bestMove: string | null;
   evalBefore: number | null;
   evalAfter: number | null;
+  /** Moves to mate, when the position is forced. */
+  mateAfter: number | null;
 }
 
 interface Analysis {
@@ -65,6 +70,8 @@ export default function AnalysisPage() {
     { ply: number; san: string; uci: string; fen: string }[]
   >([]);
   const clientAnalysis = useClientAnalysis();
+  const [candidateLines, setCandidateLines] = useState<EngineLine[]>([]);
+  const [linesLoading, setLinesLoading] = useState(false);
   const [currentPly, setCurrentPly] = useState(0);
   const [startingFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -118,10 +125,14 @@ export default function AnalysisPage() {
     loadAnalysis();
   }, [loadAnalysis]);
 
-  // Poll if queued or processing
+  // Poll while the job is anywhere short of finished.
+  //
+  // "none" is included deliberately: there is a window between enqueueing and
+  // the worker picking the job up where no status exists yet. Treating that as
+  // terminal is what left the page frozen until a manual refresh.
   useEffect(() => {
-    if (status !== "queued" && status !== "processing") return;
-    const interval = setInterval(loadAnalysis, 3000);
+    if (status === "done" || status === "error") return;
+    const interval = setInterval(loadAnalysis, 2000);
     return () => clearInterval(interval);
   }, [status, loadAnalysis]);
 
@@ -141,6 +152,7 @@ export default function AnalysisPage() {
           bestMove: r.bestMove,
           evalBefore: r.evalBefore,
           evalAfter: r.evalAfter,
+          mateAfter: r.mateAfter ?? null,
         })),
       });
       setStatus("done");
@@ -162,11 +174,41 @@ export default function AnalysisPage() {
       ? startingFen
       : analysis?.feedback.find((f) => f.ply === currentPly)?.fen || startingFen;
 
+  useEffect(() => {
+    if (!clientAnalysis.engineReady || !currentFen) return;
+    let cancelled = false;
+    setLinesLoading(true);
+    clientAnalysis
+      .evaluateMultiPV(currentFen, 3, 1200)
+      .then((r) => {
+        // The board may have moved on while the engine was thinking.
+        if (!cancelled) setCandidateLines(r);
+      })
+      .catch(() => {
+        if (!cancelled) setCandidateLines([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLinesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentFen, clientAnalysis.engineReady]);
+
   // Current eval
   const currentFeedback = analysis?.feedback.find((f) => f.ply === currentPly);
   const currentEval = currentFeedback?.evalAfter ?? 0;
+  // Passed through rather than hardcoded to null, which is why every forced
+  // mate displayed as "+1000.0".
+  const currentMate = currentFeedback?.mateAfter ?? null;
 
   // Last move
+  // Opening name for the position currently shown, so it updates as you step
+  // through rather than only naming the game as a whole.
+  const openingHere = identifyOpening(
+    gameMoves.filter((m) => m.ply <= currentPly).map((m) => m.san)
+  );
+
   const lastMoveFeedback = analysis?.feedback.find((f) => f.ply === currentPly);
   const lastMove = lastMoveFeedback?.uci
     ? ([lastMoveFeedback.uci.slice(0, 2), lastMoveFeedback.uci.slice(2, 4)] as [string, string])
@@ -295,7 +337,7 @@ export default function AnalysisPage() {
             onCancel={() => setStatus("none")}
           />
           {status === "queued" && (
-            <p className="text-night-500 text-sm text-center mt-2">Waiting in queue...</p>
+            <p className="text-night-400 text-sm text-center mt-2">Waiting in queue...</p>
           )}
         </div>
       </main>
@@ -344,6 +386,15 @@ export default function AnalysisPage() {
         <div className="flex flex-col lg:flex-row gap-1 lg:gap-6 items-start flex-1 min-h-0">
           {/* ── LEFT: Board area ── */}
           <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full justify-center lg:justify-start">
+            {openingHere.opening && (
+              <div className="mb-1 flex items-baseline gap-2 px-1">
+                <span className="rounded bg-night-800 px-1.5 py-0.5 font-mono text-[10px] text-night-400">
+                  {openingHere.opening.eco}
+                </span>
+                <span className="truncate text-sm text-night-300">{openingHere.opening.name}</span>
+              </div>
+            )}
+
             {/* Accuracy summary (compact on mobile) */}
             <div className="flex items-center justify-between px-1 py-0.5 text-xs">
               <span className="text-night-400">
@@ -358,13 +409,13 @@ export default function AnalysisPage() {
 
             {/* Mobile: horizontal eval bar */}
             <div className="lg:hidden h-3 w-full">
-              <EvaluationBar evalCP={currentEval} mate={null} />
+              <EvaluationBar evalCP={currentEval} mate={currentMate} />
             </div>
 
             {/* Eval bar + board (desktop: side by side) */}
             <div className="flex gap-2 items-stretch">
               <div className="hidden lg:flex">
-                <EvaluationBar evalCP={currentEval} mate={null} />
+                <EvaluationBar evalCP={currentEval} mate={currentMate} />
               </div>
               <div className="flex flex-col min-w-0 flex-1">
                 <div className="relative w-full lg:max-w-[480px]">
@@ -422,24 +473,43 @@ export default function AnalysisPage() {
 
           {/* ── RIGHT: Desktop panel ── */}
           <div className="hidden lg:block flex-1 space-y-4 min-w-0">
-            {analysis.opening && (
-              <div className="bg-night-900 rounded-lg px-4 py-2">
-                <span className="text-night-400 text-xs">{analysis.opening.eco}</span>{" "}
-                <span className="text-sm font-medium">{analysis.opening.name}</span>
+            {/* Tracks the position on the board rather than naming the game
+                once, so stepping back through the opening renames as you go. */}
+            {(openingHere.opening ?? analysis.opening) && (
+              <div className="rounded-lg bg-night-900 px-4 py-2">
+                <span className="text-xs text-night-400">
+                  {(openingHere.opening ?? analysis.opening)!.eco}
+                </span>{" "}
+                <span className="text-sm font-medium">
+                  {(openingHere.opening ?? analysis.opening)!.name}
+                </span>
+                {openingHere.bookDepth > 0 && currentPly > openingHere.bookDepth && (
+                  <span className="ml-2 text-xs text-night-400">
+                    out of book after {Math.ceil(openingHere.bookDepth / 2)}
+                  </span>
+                )}
               </div>
             )}
 
             <EvalGraph points={evalPoints} currentPly={currentPly} onClickPly={setCurrentPly} />
 
+            <section className="rounded-lg bg-night-900 p-3">
+              <div className="mb-2 flex items-baseline justify-between">
+                <h2 className="text-sm font-semibold">Engine lines</h2>
+                {linesLoading && <span className="text-xs text-night-400">thinking...</span>}
+              </div>
+              <EngineLines fen={currentFen} lines={candidateLines} loading={linesLoading} />
+            </section>
+
             <div className="bg-night-900 rounded-lg p-3 overflow-y-auto max-h-72">
               <div className="space-y-0.5">
                 {pairs.map((pair) => (
                   <div key={pair.num} className="flex items-center text-sm">
-                    <span className="w-8 text-night-500 text-right mr-2 shrink-0">{pair.num}.</span>
+                    <span className="w-8 text-night-400 text-right mr-2 shrink-0">{pair.num}.</span>
                     {pair.white && (
                       <button
                         onClick={() => setCurrentPly(pair.white!.ply)}
-                        className={`px-2 py-0.5 rounded mr-1 min-w-[5rem] text-left font-mono transition-colors ${pair.white.ply === currentPly ? "bg-aurora-cyan text-white" : "hover:bg-night-800 text-night-300"}`}
+                        className={`px-2 py-0.5 rounded mr-1 min-w-[5rem] text-left font-mono transition-colors ${pair.white.ply === currentPly ? "bg-aurora-cyan text-night-950" : "hover:bg-night-800 text-night-300"}`}
                       >
                         {pair.white.san}{" "}
                         <span
@@ -452,7 +522,7 @@ export default function AnalysisPage() {
                     {pair.black && (
                       <button
                         onClick={() => setCurrentPly(pair.black!.ply)}
-                        className={`px-2 py-0.5 rounded min-w-[5rem] text-left font-mono transition-colors ${pair.black.ply === currentPly ? "bg-aurora-cyan text-white" : "hover:bg-night-800 text-night-300"}`}
+                        className={`px-2 py-0.5 rounded min-w-[5rem] text-left font-mono transition-colors ${pair.black.ply === currentPly ? "bg-aurora-cyan text-night-950" : "hover:bg-night-800 text-night-300"}`}
                       >
                         {pair.black.san}{" "}
                         <span

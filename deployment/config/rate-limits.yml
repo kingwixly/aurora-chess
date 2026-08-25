@@ -64,8 +64,16 @@ routes:
     timeWindow: "1 minute"
 
   # Admin — already has its own rate limiter, but cap globally too
+  # Staff legitimately make many requests: the moderation page loads four
+  # endpoints at once and reloads all four after every action, so a reviewer
+  # working through a queue hit 60/minute in about a dozen decisions. Being
+  # rate limited then surfaced as "failed to load" and, once /auth/me was
+  # caught by it, as being signed out.
+  #
+  # These routes sit behind an ADMIN role check, so a high limit costs nothing:
+  # an attacker cannot reach them at all.
   "/api/v1/admin/*":
-    max: 60
+    max: 600
     timeWindow: "1 minute"
 
   # User profiles — public, unauthenticated

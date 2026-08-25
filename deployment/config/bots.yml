@@ -1,1610 +1,3932 @@
-# Aurora Chess - bot roster
-#
-# Characters are ordered by altitude, not just rating: the ladder climbs from
-# a village that barely looks up, through weather, into the aurora itself, and
-# out to deep sky. Voice shifts with the band - Hearthside characters talk TO
-# you, Weather talks AT you, Deep sky barely acknowledges you exist.
-#
-# Bands: Hearthside (200-800), Trailhead (900-1200), Weather (1300-1900),
-#        Aurora (2000-2500), Deep sky (2600-3200)
-#
-# Tiers control the ENGINE, bands control the WRITING. They are independent.
-#   custom (200-1200)   - JS minimax with personality quirks
-#   hybrid (1300-1900)  - Stockfish at limited depth with blunder injection
-#   engine (2000+)      - Stockfish with UCI_Elo limiting
-#
-# avatar is a path under apps/web/public. The UI falls back to initials when
-# the file is absent, so art can land one character at a time.
-#
-# Run `make seed-bots` to apply. FORCE_RESEED=1 to overwrite admin edits.
-
 bots:
-- id: pip
-  name: Pip
-  elo: 200
-  description: Learned the rules last week. Still checks which way pawns go.
-  avatar: /bots/pip.png
-  tier: custom
-  category: beginner
-  randomMoveChance: 0.45
-  blunderChance: 0.3
-  captureGreed: 0.2
-  aggressionBias: 0
-  maxDepth: 1
-  queenEarly: false
-  pawnPusher: true
-  band: Hearthside
-  messages:
-    gameStart:
-    - Oh good, someone to play with.
-    - Right then. Best of luck to us both.
-    onCapture:
-    - Sorry — was that one important?
-    - I'll take that, thank you.
-    onBeingChecked:
-    - Oh dear.
-    - Right, right, hold on.
-    onGivingCheck:
-    - Is that check? I think that's check.
-    - Mind your king.
-    onBlunder:
-    - Ah. I've done something silly.
-    - That was not the plan.
-    onPlayerBlunder:
-    - Are you sure about that one?
-    - Oh — well, thank you.
-    onWinning:
-    - I don't want to jinx it.
-    - This is going better than usual.
-    onLosing:
-    - You're much better than me.
-    - Well, I'm learning something.
-    onCheckmate:
-    - I won! I actually won!
-    - Don't tell anyone I got lucky.
-    onCheckmated:
-    - Lovely game. Really.
-    - You've given me something to think about.
-    onDraw:
-    - Honours even. I'll take it.
-    - A draw suits me fine.
-- id: nan
-  name: Nan
-  elo: 300
-  description: Plays for the company. Moves whatever piece is nearest.
-  avatar: /bots/nan.png
-  tier: custom
-  category: beginner
-  randomMoveChance: 0.4
-  blunderChance: 0.25
-  captureGreed: 0.3
-  aggressionBias: 0
-  maxDepth: 1
-  queenEarly: false
-  pawnPusher: true
-  band: Hearthside
-  messages:
-    gameStart:
-    - Oh good, someone to play with.
-    - Right then. Best of luck to us both.
-    onCapture:
-    - Sorry — was that one important?
-    - I'll take that, thank you.
-    onBeingChecked:
-    - Oh dear.
-    - Right, right, hold on.
-    onGivingCheck:
-    - Is that check? I think that's check.
-    - Mind your king.
-    onBlunder:
-    - Ah. I've done something silly.
-    - That was not the plan.
-    onPlayerBlunder:
-    - Are you sure about that one?
-    - Oh — well, thank you.
-    onWinning:
-    - I don't want to jinx it.
-    - This is going better than usual.
-    onLosing:
-    - You're much better than me.
-    - Well, I'm learning something.
-    onCheckmate:
-    - I won! I actually won!
-    - Don't tell anyone I got lucky.
-    onCheckmated:
-    - Lovely game. Really.
-    - You've given me something to think about.
-    onDraw:
-    - Honours even. I'll take it.
-    - A draw suits me fine.
-  preferredOpenings:
-    asWhite:
-    - d4
-    - e4
-    asBlack:
-    - d5
-    - e5
-- id: bramble
-  name: Bramble
-  elo: 400
-  description: A sheepdog who learned chess by watching. Genuinely tries.
-  avatar: /bots/bramble.png
-  tier: custom
-  category: beginner
-  randomMoveChance: 0.3
-  blunderChance: 0.25
-  captureGreed: 0.9
-  aggressionBias: 0.3
-  maxDepth: 1
-  queenEarly: true
-  pawnPusher: false
-  band: Hearthside
-  messages:
-    gameStart:
-    - Oh good, someone to play with.
-    - Right then. Best of luck to us both.
-    onCapture:
-    - Sorry — was that one important?
-    - I'll take that, thank you.
-    onBeingChecked:
-    - Oh dear.
-    - Right, right, hold on.
-    onGivingCheck:
-    - Is that check? I think that's check.
-    - Mind your king.
-    onBlunder:
-    - Ah. I've done something silly.
-    - That was not the plan.
-    onPlayerBlunder:
-    - Are you sure about that one?
-    - Oh — well, thank you.
-    onWinning:
-    - I don't want to jinx it.
-    - This is going better than usual.
-    onLosing:
-    - You're much better than me.
-    - Well, I'm learning something.
-    onCheckmate:
-    - I won! I actually won!
-    - Don't tell anyone I got lucky.
-    onCheckmated:
-    - Lovely game. Really.
-    - You've given me something to think about.
-    onDraw:
-    - Honours even. I'll take it.
-    - A draw suits me fine.
-  preferredOpenings:
-    asWhite:
-    - e4 e5 Qh5
-    - e4 e5 Bc4
-    asBlack:
-    - e5
-    - d5
-- id: rusk
-  name: Rusk
-  elo: 500
-  description: Village baker. Plays between batches, thinks about bread.
-  avatar: /bots/rusk.png
-  tier: custom
-  category: novice
-  randomMoveChance: 0.25
-  blunderChance: 0.3
-  captureGreed: 0.4
-  aggressionBias: 0
-  maxDepth: 1
-  queenEarly: false
-  pawnPusher: false
-  band: Hearthside
-  messages:
-    gameStart:
-    - Oh good, someone to play with.
-    - Right then. Best of luck to us both.
-    onCapture:
-    - Sorry — was that one important?
-    - I'll take that, thank you.
-    onBeingChecked:
-    - Oh dear.
-    - Right, right, hold on.
-    onGivingCheck:
-    - Is that check? I think that's check.
-    - Mind your king.
-    onBlunder:
-    - Ah. I've done something silly.
-    - That was not the plan.
-    onPlayerBlunder:
-    - Are you sure about that one?
-    - Oh — well, thank you.
-    onWinning:
-    - I don't want to jinx it.
-    - This is going better than usual.
-    onLosing:
-    - You're much better than me.
-    - Well, I'm learning something.
-    onCheckmate:
-    - I won! I actually won!
-    - Don't tell anyone I got lucky.
-    onCheckmated:
-    - Lovely game. Really.
-    - You've given me something to think about.
-    onDraw:
-    - Honours even. I'll take it.
-    - A draw suits me fine.
-  preferredOpenings:
-    asWhite:
-    - e4
-    - d4
-    asBlack:
-    - e5
-    - d5
-- id: wick
-  name: Wick
-  elo: 600
-  description: Lamplighter. Sees the whole street but not the whole board.
-  avatar: /bots/wick.png
-  tier: custom
-  category: novice
-  randomMoveChance: 0.2
-  blunderChance: 0.2
-  captureGreed: 0.3
-  aggressionBias: -0.2
-  maxDepth: 1
-  queenEarly: false
-  pawnPusher: true
-  band: Hearthside
-  messages:
-    gameStart:
-    - Oh good, someone to play with.
-    - Right then. Best of luck to us both.
-    onCapture:
-    - Sorry — was that one important?
-    - I'll take that, thank you.
-    onBeingChecked:
-    - Oh dear.
-    - Right, right, hold on.
-    onGivingCheck:
-    - Is that check? I think that's check.
-    - Mind your king.
-    onBlunder:
-    - Ah. I've done something silly.
-    - That was not the plan.
-    onPlayerBlunder:
-    - Are you sure about that one?
-    - Oh — well, thank you.
-    onWinning:
-    - I don't want to jinx it.
-    - This is going better than usual.
-    onLosing:
-    - You're much better than me.
-    - Well, I'm learning something.
-    onCheckmate:
-    - I won! I actually won!
-    - Don't tell anyone I got lucky.
-    onCheckmated:
-    - Lovely game. Really.
-    - You've given me something to think about.
-    onDraw:
-    - Honours even. I'll take it.
-    - A draw suits me fine.
-  preferredOpenings:
-    asWhite:
-    - e4 e5 d4
-    - d4 d5 c4
-    asBlack:
-    - e6
-    - d5
-- id: marta
-  name: Marta
-  elo: 700
-  description: Runs the inn. Learned chess to keep travellers drinking.
-  avatar: /bots/marta.png
-  tier: custom
-  category: novice
-  randomMoveChance: 0.15
-  blunderChance: 0.2
-  captureGreed: 0.5
-  aggressionBias: 0.8
-  maxDepth: 2
-  queenEarly: true
-  pawnPusher: false
-  band: Hearthside
-  messages:
-    gameStart:
-    - Oh good, someone to play with.
-    - Right then. Best of luck to us both.
-    onCapture:
-    - Sorry — was that one important?
-    - I'll take that, thank you.
-    onBeingChecked:
-    - Oh dear.
-    - Right, right, hold on.
-    onGivingCheck:
-    - Is that check? I think that's check.
-    - Mind your king.
-    onBlunder:
-    - Ah. I've done something silly.
-    - That was not the plan.
-    onPlayerBlunder:
-    - Are you sure about that one?
-    - Oh — well, thank you.
-    onWinning:
-    - I don't want to jinx it.
-    - This is going better than usual.
-    onLosing:
-    - You're much better than me.
-    - Well, I'm learning something.
-    onCheckmate:
-    - I won! I actually won!
-    - Don't tell anyone I got lucky.
-    onCheckmated:
-    - Lovely game. Really.
-    - You've given me something to think about.
-    onDraw:
-    - Honours even. I'll take it.
-    - A draw suits me fine.
-  preferredOpenings:
-    asWhite:
-    - e4 e5 Qh5
-    - d4 d5 Qd3
-    asBlack:
-    - e5
-    - Nf6
-- id: tobin
-  name: Tobin
-  elo: 800
-  description: Fourteen and improving fast. Beat Marta once and never shut up.
-  avatar: /bots/tobin.png
-  tier: custom
-  category: novice
-  randomMoveChance: 0.2
-  blunderChance: 0.15
-  captureGreed: 0.4
-  aggressionBias: 0.1
-  maxDepth: 2
-  queenEarly: false
-  pawnPusher: false
-  band: Hearthside
-  messages:
-    gameStart:
-    - Oh good, someone to play with.
-    - Right then. Best of luck to us both.
-    onCapture:
-    - Sorry — was that one important?
-    - I'll take that, thank you.
-    onBeingChecked:
-    - Oh dear.
-    - Right, right, hold on.
-    onGivingCheck:
-    - Is that check? I think that's check.
-    - Mind your king.
-    onBlunder:
-    - Ah. I've done something silly.
-    - That was not the plan.
-    onPlayerBlunder:
-    - Are you sure about that one?
-    - Oh — well, thank you.
-    onWinning:
-    - I don't want to jinx it.
-    - This is going better than usual.
-    onLosing:
-    - You're much better than me.
-    - Well, I'm learning something.
-    onCheckmate:
-    - I won! I actually won!
-    - Don't tell anyone I got lucky.
-    onCheckmated:
-    - Lovely game. Really.
-    - You've given me something to think about.
-    onDraw:
-    - Honours even. I'll take it.
-    - A draw suits me fine.
-  preferredOpenings:
-    asWhite:
-    - e4 e5 Nf3 Nc6 Bb5
-    - d4 d5 c4
-    asBlack:
-    - e5 Nf3 Nc6
-    - Nf6
-- id: sable
-  name: Sable
-  elo: 900
-  description: Trapper. Patient by trade, impatient at the board.
-  avatar: /bots/sable.png
-  tier: custom
-  category: intermediate
-  randomMoveChance: 0.1
-  blunderChance: 0.15
-  captureGreed: 0.85
-  aggressionBias: 0.2
-  maxDepth: 2
-  queenEarly: false
-  pawnPusher: false
-  band: Trailhead
-  messages:
-    gameStart:
-    - Long way to the end of this one.
-    - Let's see what you've got.
-    onCapture:
-    - That one was in my way.
-    - Down it comes.
-    onBeingChecked:
-    - I've been in worse weather.
-    - Noted.
-    onGivingCheck:
-    - Move your king.
-    - That's your problem now.
-    onBlunder:
-    - Wrong turn.
-    - I'll pay for that.
-    onPlayerBlunder:
-    - Careless. Out here that costs you.
-    - You gave me that one.
-    onWinning:
-    - Ground's firm under me now.
-    - Downhill from here.
-    onLosing:
-    - Steeper than I thought.
-    - You've got the better line.
-    onCheckmate:
-    - That's the summit.
-    - Good climb. I won it.
-    onCheckmated:
-    - You knew the route better.
-    - Fair. You out-walked me.
-    onDraw:
-    - Neither of us gets the peak.
-    - We both turn back, then.
-  preferredOpenings:
-    asWhite:
-    - e4 e5 Nf3 Nc6 Bc4
-    - e4 e5 d4
-    asBlack:
-    - e5
-    - c5
-- id: ivar
-  name: Ivar
-  elo: 1000
-  description: 'Ferryman. Trades pieces the way he trades gossip: constantly.'
-  avatar: /bots/ivar.png
-  tier: custom
-  category: intermediate
-  randomMoveChance: 0.1
-  blunderChance: 0.12
-  captureGreed: 0.2
-  aggressionBias: -0.7
-  maxDepth: 2
-  queenEarly: false
-  pawnPusher: false
-  band: Trailhead
-  messages:
-    gameStart:
-    - Long way to the end of this one.
-    - Let's see what you've got.
-    onCapture:
-    - That one was in my way.
-    - Down it comes.
-    onBeingChecked:
-    - I've been in worse weather.
-    - Noted.
-    onGivingCheck:
-    - Move your king.
-    - That's your problem now.
-    onBlunder:
-    - Wrong turn.
-    - I'll pay for that.
-    onPlayerBlunder:
-    - Careless. Out here that costs you.
-    - You gave me that one.
-    onWinning:
-    - Ground's firm under me now.
-    - Downhill from here.
-    onLosing:
-    - Steeper than I thought.
-    - You've got the better line.
-    onCheckmate:
-    - That's the summit.
-    - Good climb. I won it.
-    onCheckmated:
-    - You knew the route better.
-    - Fair. You out-walked me.
-    onDraw:
-    - Neither of us gets the peak.
-    - We both turn back, then.
-  preferredOpenings:
-    asWhite:
-    - d4 d5 Nf3
-    - Nf3 d5 d4
-    asBlack:
-    - e6
-    - d5
-- id: cairn
-  name: Cairn
-  elo: 1100
-  description: Mountain guide. Builds slowly, then takes the summit.
-  avatar: /bots/cairn.png
-  tier: custom
-  category: intermediate
-  randomMoveChance: 0.08
-  blunderChance: 0.15
-  captureGreed: 0.4
-  aggressionBias: 0.1
-  maxDepth: 2
-  queenEarly: false
-  pawnPusher: false
-  band: Trailhead
-  messages:
-    gameStart:
-    - Long way to the end of this one.
-    - Let's see what you've got.
-    onCapture:
-    - That one was in my way.
-    - Down it comes.
-    onBeingChecked:
-    - I've been in worse weather.
-    - Noted.
-    onGivingCheck:
-    - Move your king.
-    - That's your problem now.
-    onBlunder:
-    - Wrong turn.
-    - I'll pay for that.
-    onPlayerBlunder:
-    - Careless. Out here that costs you.
-    - You gave me that one.
-    onWinning:
-    - Ground's firm under me now.
-    - Downhill from here.
-    onLosing:
-    - Steeper than I thought.
-    - You've got the better line.
-    onCheckmate:
-    - That's the summit.
-    - Good climb. I won it.
-    onCheckmated:
-    - You knew the route better.
-    - Fair. You out-walked me.
-    onDraw:
-    - Neither of us gets the peak.
-    - We both turn back, then.
-  preferredOpenings:
-    asWhite:
-    - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
-    - d4 d5 c4 e6 Nc3
-    asBlack:
-    - e5 Nf3 Nc6
-    - Nf6 c4 e6
-- id: juniper
-  name: Juniper
-  elo: 1200
-  description: Herbalist. Sets traps that look like nothing until they aren't.
-  avatar: /bots/juniper.png
-  tier: custom
-  category: intermediate
-  randomMoveChance: 0.05
-  blunderChance: 0.1
-  captureGreed: 0.4
-  aggressionBias: 0
-  maxDepth: 3
-  queenEarly: false
-  pawnPusher: false
-  band: Trailhead
-  messages:
-    gameStart:
-    - Long way to the end of this one.
-    - Let's see what you've got.
-    onCapture:
-    - That one was in my way.
-    - Down it comes.
-    onBeingChecked:
-    - I've been in worse weather.
-    - Noted.
-    onGivingCheck:
-    - Move your king.
-    - That's your problem now.
-    onBlunder:
-    - Wrong turn.
-    - I'll pay for that.
-    onPlayerBlunder:
-    - Careless. Out here that costs you.
-    - You gave me that one.
-    onWinning:
-    - Ground's firm under me now.
-    - Downhill from here.
-    onLosing:
-    - Steeper than I thought.
-    - You've got the better line.
-    onCheckmate:
-    - That's the summit.
-    - Good climb. I won it.
-    onCheckmated:
-    - You knew the route better.
-    - Fair. You out-walked me.
-    onDraw:
-    - Neither of us gets the peak.
-    - We both turn back, then.
-  preferredOpenings:
-    asWhite:
-    - e4 e5 Nf3 Nc6 Bc4
-    - d4 d5 c4 e6
-    asBlack:
-    - e5 Nf3 Nc6
-    - d5 c4 e6
-- id: flurry
-  name: Flurry
-  elo: 1300
-  description: All motion, no plan. Somehow that works more often than it should.
-  avatar: /bots/flurry.png
-  tier: hybrid
-  category: advanced
-  randomMoveChance: 0.05
-  blunderChance: 0.12
-  captureGreed: 0.5
-  aggressionBias: 0.9
-  maxDepth: 4
-  queenEarly: false
-  pawnPusher: false
-  band: Weather
-  messages:
-    gameStart:
-    - Pressure's dropping.
-    - You should have stayed indoors.
-    onCapture:
-    - Gone.
-    - Nothing stands in this.
-    onBeingChecked:
-    - A gust. Nothing more.
-    - You've inconvenienced the sky.
-    onGivingCheck:
-    - Your king is exposed.
-    - There is no shelter on that square.
-    onBlunder:
-    - Even a storm turns.
-    - That was the wrong direction.
-    onPlayerBlunder:
-    - The structure gives way.
-    - There. That's the crack.
-    onWinning:
-    - It closes in.
-    - You cannot outlast weather.
-    onLosing:
-    - This system is breaking up.
-    - You held. Few do.
-    onCheckmate:
-    - The front has passed.
-    - Nothing left standing.
-    onCheckmated:
-    - Clear skies. You earned them.
-    - I broke on you. Well played.
-    onDraw:
-    - Stalemate in the air.
-    - Neither front gives.
-- id: hail
-  name: Hail
-  elo: 1400
-  description: Hits hard, hits fast, leaves dents in your structure.
-  avatar: /bots/hail.png
-  tier: hybrid
-  category: advanced
-  randomMoveChance: 0.03
-  blunderChance: 0.1
-  captureGreed: 0.7
-  aggressionBias: -0.3
-  maxDepth: 5
-  queenEarly: false
-  pawnPusher: false
-  band: Weather
-  messages:
-    gameStart:
-    - Pressure's dropping.
-    - You should have stayed indoors.
-    onCapture:
-    - Gone.
-    - Nothing stands in this.
-    onBeingChecked:
-    - A gust. Nothing more.
-    - You've inconvenienced the sky.
-    onGivingCheck:
-    - Your king is exposed.
-    - There is no shelter on that square.
-    onBlunder:
-    - Even a storm turns.
-    - That was the wrong direction.
-    onPlayerBlunder:
-    - The structure gives way.
-    - There. That's the crack.
-    onWinning:
-    - It closes in.
-    - You cannot outlast weather.
-    onLosing:
-    - This system is breaking up.
-    - You held. Few do.
-    onCheckmate:
-    - The front has passed.
-    - Nothing left standing.
-    onCheckmated:
-    - Clear skies. You earned them.
-    - I broke on you. Well played.
-    onDraw:
-    - Stalemate in the air.
-    - Neither front gives.
-- id: thaw
-  name: Thaw
-  elo: 1500
-  description: Patient erosion. Nothing you built survives the spring.
-  avatar: /bots/thaw.png
-  tier: hybrid
-  category: advanced
-  randomMoveChance: 0.03
-  blunderChance: 0.08
-  captureGreed: 0.4
-  aggressionBias: 0.4
-  maxDepth: 5
-  queenEarly: false
-  pawnPusher: false
-  band: Weather
-  messages:
-    gameStart:
-    - Pressure's dropping.
-    - You should have stayed indoors.
-    onCapture:
-    - Gone.
-    - Nothing stands in this.
-    onBeingChecked:
-    - A gust. Nothing more.
-    - You've inconvenienced the sky.
-    onGivingCheck:
-    - Your king is exposed.
-    - There is no shelter on that square.
-    onBlunder:
-    - Even a storm turns.
-    - That was the wrong direction.
-    onPlayerBlunder:
-    - The structure gives way.
-    - There. That's the crack.
-    onWinning:
-    - It closes in.
-    - You cannot outlast weather.
-    onLosing:
-    - This system is breaking up.
-    - You held. Few do.
-    onCheckmate:
-    - The front has passed.
-    - Nothing left standing.
-    onCheckmated:
-    - Clear skies. You earned them.
-    - I broke on you. Well played.
-    onDraw:
-    - Stalemate in the air.
-    - Neither front gives.
-- id: squall
-  name: Squall
-  elo: 1600
-  description: Comes out of nowhere on the kingside and does not apologise.
-  avatar: /bots/squall.png
-  tier: hybrid
-  category: advanced
-  randomMoveChance: 0.02
-  blunderChance: 0.07
-  captureGreed: 0.3
-  aggressionBias: -0.1
-  maxDepth: 6
-  queenEarly: false
-  pawnPusher: false
-  band: Weather
-  messages:
-    gameStart:
-    - Pressure's dropping.
-    - You should have stayed indoors.
-    onCapture:
-    - Gone.
-    - Nothing stands in this.
-    onBeingChecked:
-    - A gust. Nothing more.
-    - You've inconvenienced the sky.
-    onGivingCheck:
-    - Your king is exposed.
-    - There is no shelter on that square.
-    onBlunder:
-    - Even a storm turns.
-    - That was the wrong direction.
-    onPlayerBlunder:
-    - The structure gives way.
-    - There. That's the crack.
-    onWinning:
-    - It closes in.
-    - You cannot outlast weather.
-    onLosing:
-    - This system is breaking up.
-    - You held. Few do.
-    onCheckmate:
-    - The front has passed.
-    - Nothing left standing.
-    onCheckmated:
-    - Clear skies. You earned them.
-    - I broke on you. Well played.
-    onDraw:
-    - Stalemate in the air.
-    - Neither front gives.
-- id: rime
-  name: Rime
-  elo: 1700
-  description: Freezes the position, then squeezes until something cracks.
-  avatar: /bots/rime.png
-  tier: hybrid
-  category: expert
-  randomMoveChance: 0.02
-  blunderChance: 0.05
-  captureGreed: 0.5
-  aggressionBias: -0.2
-  maxDepth: 7
-  queenEarly: false
-  pawnPusher: false
-  band: Weather
-  messages:
-    gameStart:
-    - Pressure's dropping.
-    - You should have stayed indoors.
-    onCapture:
-    - Gone.
-    - Nothing stands in this.
-    onBeingChecked:
-    - A gust. Nothing more.
-    - You've inconvenienced the sky.
-    onGivingCheck:
-    - Your king is exposed.
-    - There is no shelter on that square.
-    onBlunder:
-    - Even a storm turns.
-    - That was the wrong direction.
-    onPlayerBlunder:
-    - The structure gives way.
-    - There. That's the crack.
-    onWinning:
-    - It closes in.
-    - You cannot outlast weather.
-    onLosing:
-    - This system is breaking up.
-    - You held. Few do.
-    onCheckmate:
-    - The front has passed.
-    - Nothing left standing.
-    onCheckmated:
-    - Clear skies. You earned them.
-    - I broke on you. Well played.
-    onDraw:
-    - Stalemate in the air.
-    - Neither front gives.
-- id: gale
-  name: Gale
-  elo: 1800
-  description: Relentless pressure from one flank. Sustained, not gusty.
-  avatar: /bots/gale.png
-  tier: hybrid
-  category: expert
-  randomMoveChance: 0.01
-  blunderChance: 0.05
-  captureGreed: 0.4
-  aggressionBias: 0.6
-  maxDepth: 8
-  queenEarly: false
-  pawnPusher: false
-  band: Weather
-  messages:
-    gameStart:
-    - Pressure's dropping.
-    - You should have stayed indoors.
-    onCapture:
-    - Gone.
-    - Nothing stands in this.
-    onBeingChecked:
-    - A gust. Nothing more.
-    - You've inconvenienced the sky.
-    onGivingCheck:
-    - Your king is exposed.
-    - There is no shelter on that square.
-    onBlunder:
-    - Even a storm turns.
-    - That was the wrong direction.
-    onPlayerBlunder:
-    - The structure gives way.
-    - There. That's the crack.
-    onWinning:
-    - It closes in.
-    - You cannot outlast weather.
-    onLosing:
-    - This system is breaking up.
-    - You held. Few do.
-    onCheckmate:
-    - The front has passed.
-    - Nothing left standing.
-    onCheckmated:
-    - Clear skies. You earned them.
-    - I broke on you. Well played.
-    onDraw:
-    - Stalemate in the air.
-    - Neither front gives.
-- id: tempest
-  name: Tempest
-  elo: 1900
-  description: The full storm. Attacks on both wings and means both.
-  avatar: /bots/tempest.png
-  tier: hybrid
-  category: expert
-  randomMoveChance: 0.01
-  blunderChance: 0.03
-  captureGreed: 0.35
-  aggressionBias: 0.1
-  maxDepth: 9
-  queenEarly: false
-  pawnPusher: false
-  band: Weather
-  messages:
-    gameStart:
-    - Pressure's dropping.
-    - You should have stayed indoors.
-    onCapture:
-    - Gone.
-    - Nothing stands in this.
-    onBeingChecked:
-    - A gust. Nothing more.
-    - You've inconvenienced the sky.
-    onGivingCheck:
-    - Your king is exposed.
-    - There is no shelter on that square.
-    onBlunder:
-    - Even a storm turns.
-    - That was the wrong direction.
-    onPlayerBlunder:
-    - The structure gives way.
-    - There. That's the crack.
-    onWinning:
-    - It closes in.
-    - You cannot outlast weather.
-    onLosing:
-    - This system is breaking up.
-    - You held. Few do.
-    onCheckmate:
-    - The front has passed.
-    - Nothing left standing.
-    onCheckmated:
-    - Clear skies. You earned them.
-    - I broke on you. Well played.
-    onDraw:
-    - Stalemate in the air.
-    - Neither front gives.
-- id: corona
-  name: Corona
-  elo: 2000
-  description: The crown of the light. Plays the centre like it owns it.
-  avatar: /bots/corona.png
-  tier: engine
-  category: expert
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 12
-  queenEarly: false
-  pawnPusher: false
-  band: Aurora
-  messages:
-    gameStart:
-    - The light is out tonight. So am I.
-    - Let's see how you handle altitude.
-    onCapture:
-    - That piece was in the way of the view.
-    - Taken.
-    onBeingChecked:
-    - An interruption.
-    - You've reached me. Briefly.
-    onGivingCheck:
-    - Look up. Your king is lit.
-    - Check. Nowhere dark to hide.
-    onBlunder:
-    - The curtain wavered.
-    - I let that slip.
-    onPlayerBlunder:
-    - There — the gap in your sky.
-    - You showed me the whole board.
-    onWinning:
-    - The colours are settling my way.
-    - This is the part I like.
-    onLosing:
-    - You're brighter than I expected.
-    - I'm being outshone.
-    onCheckmate:
-    - The night belongs to me.
-    - That's how the light falls.
-    onCheckmated:
-    - Beautifully done. Genuinely.
-    - You beat the aurora. Tell people.
-    onDraw:
-    - We share the sky, then.
-    - Neither of us fades.
-- id: vela
-  name: Vela
-  elo: 2100
-  description: Named for the sail. Catches the smallest advantage and runs.
-  avatar: /bots/vela.png
-  tier: engine
-  category: master
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.4
-  aggressionBias: 0.3
-  maxDepth: 13
-  queenEarly: false
-  pawnPusher: false
-  band: Aurora
-  messages:
-    gameStart:
-    - The light is out tonight. So am I.
-    - Let's see how you handle altitude.
-    onCapture:
-    - That piece was in the way of the view.
-    - Taken.
-    onBeingChecked:
-    - An interruption.
-    - You've reached me. Briefly.
-    onGivingCheck:
-    - Look up. Your king is lit.
-    - Check. Nowhere dark to hide.
-    onBlunder:
-    - The curtain wavered.
-    - I let that slip.
-    onPlayerBlunder:
-    - There — the gap in your sky.
-    - You showed me the whole board.
-    onWinning:
-    - The colours are settling my way.
-    - This is the part I like.
-    onLosing:
-    - You're brighter than I expected.
-    - I'm being outshone.
-    onCheckmate:
-    - The night belongs to me.
-    - That's how the light falls.
-    onCheckmated:
-    - Beautifully done. Genuinely.
-    - You beat the aurora. Tell people.
-    onDraw:
-    - We share the sky, then.
-    - Neither of us fades.
-- id: sunder
-  name: Sunder
-  elo: 2200
-  description: Splits the position in two and takes the better half.
-  avatar: /bots/sunder.png
-  tier: engine
-  category: master
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.3
-  aggressionBias: -0.1
-  maxDepth: 14
-  queenEarly: false
-  pawnPusher: false
-  band: Aurora
-  messages:
-    gameStart:
-    - The light is out tonight. So am I.
-    - Let's see how you handle altitude.
-    onCapture:
-    - That piece was in the way of the view.
-    - Taken.
-    onBeingChecked:
-    - An interruption.
-    - You've reached me. Briefly.
-    onGivingCheck:
-    - Look up. Your king is lit.
-    - Check. Nowhere dark to hide.
-    onBlunder:
-    - The curtain wavered.
-    - I let that slip.
-    onPlayerBlunder:
-    - There — the gap in your sky.
-    - You showed me the whole board.
-    onWinning:
-    - The colours are settling my way.
-    - This is the part I like.
-    onLosing:
-    - You're brighter than I expected.
-    - I'm being outshone.
-    onCheckmate:
-    - The night belongs to me.
-    - That's how the light falls.
-    onCheckmated:
-    - Beautifully done. Genuinely.
-    - You beat the aurora. Tell people.
-    onDraw:
-    - We share the sky, then.
-    - Neither of us fades.
-- id: halcyon
-  name: Halcyon
-  elo: 2300
-  description: Calm to the point of insult. Will draw a won game to prove a point.
-  avatar: /bots/halcyon.png
-  tier: engine
-  category: master
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 15
-  queenEarly: false
-  pawnPusher: false
-  band: Aurora
-  messages:
-    gameStart:
-    - The light is out tonight. So am I.
-    - Let's see how you handle altitude.
-    onCapture:
-    - That piece was in the way of the view.
-    - Taken.
-    onBeingChecked:
-    - An interruption.
-    - You've reached me. Briefly.
-    onGivingCheck:
-    - Look up. Your king is lit.
-    - Check. Nowhere dark to hide.
-    onBlunder:
-    - The curtain wavered.
-    - I let that slip.
-    onPlayerBlunder:
-    - There — the gap in your sky.
-    - You showed me the whole board.
-    onWinning:
-    - The colours are settling my way.
-    - This is the part I like.
-    onLosing:
-    - You're brighter than I expected.
-    - I'm being outshone.
-    onCheckmate:
-    - The night belongs to me.
-    - That's how the light falls.
-    onCheckmated:
-    - Beautifully done. Genuinely.
-    - You beat the aurora. Tell people.
-    onDraw:
-    - We share the sky, then.
-    - Neither of us fades.
-- id: zenith
-  name: Zenith
-  elo: 2400
-  description: Plays from directly above. Sees the whole board at once.
-  avatar: /bots/zenith.png
-  tier: engine
-  category: master
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0.1
-  maxDepth: 15
-  queenEarly: false
-  pawnPusher: false
-  band: Aurora
-  messages:
-    gameStart:
-    - The light is out tonight. So am I.
-    - Let's see how you handle altitude.
-    onCapture:
-    - That piece was in the way of the view.
-    - Taken.
-    onBeingChecked:
-    - An interruption.
-    - You've reached me. Briefly.
-    onGivingCheck:
-    - Look up. Your king is lit.
-    - Check. Nowhere dark to hide.
-    onBlunder:
-    - The curtain wavered.
-    - I let that slip.
-    onPlayerBlunder:
-    - There — the gap in your sky.
-    - You showed me the whole board.
-    onWinning:
-    - The colours are settling my way.
-    - This is the part I like.
-    onLosing:
-    - You're brighter than I expected.
-    - I'm being outshone.
-    onCheckmate:
-    - The night belongs to me.
-    - That's how the light falls.
-    onCheckmated:
-    - Beautifully done. Genuinely.
-    - You beat the aurora. Tell people.
-    onDraw:
-    - We share the sky, then.
-    - Neither of us fades.
-- id: solstice
-  name: Solstice
-  elo: 2500
-  description: The longest night. Grinds endgames until the sun comes up.
-  avatar: /bots/solstice.png
-  tier: engine
-  category: master
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 16
-  queenEarly: false
-  pawnPusher: false
-  band: Aurora
-  messages:
-    gameStart:
-    - The light is out tonight. So am I.
-    - Let's see how you handle altitude.
-    onCapture:
-    - That piece was in the way of the view.
-    - Taken.
-    onBeingChecked:
-    - An interruption.
-    - You've reached me. Briefly.
-    onGivingCheck:
-    - Look up. Your king is lit.
-    - Check. Nowhere dark to hide.
-    onBlunder:
-    - The curtain wavered.
-    - I let that slip.
-    onPlayerBlunder:
-    - There — the gap in your sky.
-    - You showed me the whole board.
-    onWinning:
-    - The colours are settling my way.
-    - This is the part I like.
-    onLosing:
-    - You're brighter than I expected.
-    - I'm being outshone.
-    onCheckmate:
-    - The night belongs to me.
-    - That's how the light falls.
-    onCheckmated:
-    - Beautifully done. Genuinely.
-    - You beat the aurora. Tell people.
-    onDraw:
-    - We share the sky, then.
-    - Neither of us fades.
-- id: lyra
-  name: Lyra
-  elo: 2600
-  description: Harp-string precision. Every move is part of a chord.
-  avatar: /bots/lyra.png
-  tier: engine
-  category: grandmaster
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 16
-  queenEarly: false
-  pawnPusher: false
-  band: Deep sky
-  messages:
-    gameStart:
-    - Begin.
-    - I have already seen how this ends.
-    onCapture:
-    - Removed.
-    - It no longer exists.
-    onBeingChecked:
-    - Irrelevant.
-    - A momentary perturbation.
-    onGivingCheck:
-    - Check.
-    - Your king is observed.
-    onBlunder:
-    - An imprecision.
-    - Correcting.
-    onPlayerBlunder:
-    - That was the error I was waiting for.
-    - Predicted. Some moves ago.
-    onWinning:
-    - Converging.
-    - The outcome was never in doubt.
-    onLosing:
-    - Unexpected.
-    - You are playing above your station. Continue.
-    onCheckmate:
-    - Concluded.
-    - As calculated.
-    onCheckmated:
-    - '...Remarkable.'
-    - You have done something very few can.
-    onDraw:
-    - Balanced. Rare.
-    - Neither of us errs.
-- id: vega
-  name: Vega
-  elo: 2700
-  description: Blue-white and burning. No slow games, no mercy.
-  avatar: /bots/vega.png
-  tier: engine
-  category: grandmaster
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 17
-  queenEarly: false
-  pawnPusher: false
-  band: Deep sky
-  messages:
-    gameStart:
-    - Begin.
-    - I have already seen how this ends.
-    onCapture:
-    - Removed.
-    - It no longer exists.
-    onBeingChecked:
-    - Irrelevant.
-    - A momentary perturbation.
-    onGivingCheck:
-    - Check.
-    - Your king is observed.
-    onBlunder:
-    - An imprecision.
-    - Correcting.
-    onPlayerBlunder:
-    - That was the error I was waiting for.
-    - Predicted. Some moves ago.
-    onWinning:
-    - Converging.
-    - The outcome was never in doubt.
-    onLosing:
-    - Unexpected.
-    - You are playing above your station. Continue.
-    onCheckmate:
-    - Concluded.
-    - As calculated.
-    onCheckmated:
-    - '...Remarkable.'
-    - You have done something very few can.
-    onDraw:
-    - Balanced. Rare.
-    - Neither of us errs.
-- id: aldebaran
-  name: Aldebaran
-  elo: 2800
-  description: The follower. Trails your plan one move behind, then overtakes it.
-  avatar: /bots/aldebaran.png
-  tier: engine
-  category: grandmaster
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 18
-  queenEarly: false
-  pawnPusher: false
-  band: Deep sky
-  messages:
-    gameStart:
-    - Begin.
-    - I have already seen how this ends.
-    onCapture:
-    - Removed.
-    - It no longer exists.
-    onBeingChecked:
-    - Irrelevant.
-    - A momentary perturbation.
-    onGivingCheck:
-    - Check.
-    - Your king is observed.
-    onBlunder:
-    - An imprecision.
-    - Correcting.
-    onPlayerBlunder:
-    - That was the error I was waiting for.
-    - Predicted. Some moves ago.
-    onWinning:
-    - Converging.
-    - The outcome was never in doubt.
-    onLosing:
-    - Unexpected.
-    - You are playing above your station. Continue.
-    onCheckmate:
-    - Concluded.
-    - As calculated.
-    onCheckmated:
-    - '...Remarkable.'
-    - You have done something very few can.
-    onDraw:
-    - Balanced. Rare.
-    - Neither of us errs.
-- id: polaris
-  name: Polaris
-  elo: 2900
-  description: Fixed. Does not drift. Your position rotates around it.
-  avatar: /bots/polaris.png
-  tier: engine
-  category: grandmaster
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 18
-  queenEarly: false
-  pawnPusher: false
-  band: Deep sky
-  messages:
-    gameStart:
-    - Begin.
-    - I have already seen how this ends.
-    onCapture:
-    - Removed.
-    - It no longer exists.
-    onBeingChecked:
-    - Irrelevant.
-    - A momentary perturbation.
-    onGivingCheck:
-    - Check.
-    - Your king is observed.
-    onBlunder:
-    - An imprecision.
-    - Correcting.
-    onPlayerBlunder:
-    - That was the error I was waiting for.
-    - Predicted. Some moves ago.
-    onWinning:
-    - Converging.
-    - The outcome was never in doubt.
-    onLosing:
-    - Unexpected.
-    - You are playing above your station. Continue.
-    onCheckmate:
-    - Concluded.
-    - As calculated.
-    onCheckmated:
-    - '...Remarkable.'
-    - You have done something very few can.
-    onDraw:
-    - Balanced. Rare.
-    - Neither of us errs.
-- id: umbra
-  name: Umbra
-  elo: 3000
-  description: The dark part of the shadow. Takes light out of the position.
-  avatar: /bots/umbra.png
-  tier: engine
-  category: grandmaster
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 18
-  queenEarly: false
-  pawnPusher: false
-  band: Deep sky
-  messages:
-    gameStart:
-    - Begin.
-    - I have already seen how this ends.
-    onCapture:
-    - Removed.
-    - It no longer exists.
-    onBeingChecked:
-    - Irrelevant.
-    - A momentary perturbation.
-    onGivingCheck:
-    - Check.
-    - Your king is observed.
-    onBlunder:
-    - An imprecision.
-    - Correcting.
-    onPlayerBlunder:
-    - That was the error I was waiting for.
-    - Predicted. Some moves ago.
-    onWinning:
-    - Converging.
-    - The outcome was never in doubt.
-    onLosing:
-    - Unexpected.
-    - You are playing above your station. Continue.
-    onCheckmate:
-    - Concluded.
-    - As calculated.
-    onCheckmated:
-    - '...Remarkable.'
-    - You have done something very few can.
-    onDraw:
-    - Balanced. Rare.
-    - Neither of us errs.
-- id: ecliptic
-  name: Ecliptic
-  elo: 3100
-  description: The path everything else is bound to follow.
-  avatar: /bots/ecliptic.png
-  tier: engine
-  category: grandmaster
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 18
-  queenEarly: false
-  pawnPusher: false
-  band: Deep sky
-  messages:
-    gameStart:
-    - Begin.
-    - I have already seen how this ends.
-    onCapture:
-    - Removed.
-    - It no longer exists.
-    onBeingChecked:
-    - Irrelevant.
-    - A momentary perturbation.
-    onGivingCheck:
-    - Check.
-    - Your king is observed.
-    onBlunder:
-    - An imprecision.
-    - Correcting.
-    onPlayerBlunder:
-    - That was the error I was waiting for.
-    - Predicted. Some moves ago.
-    onWinning:
-    - Converging.
-    - The outcome was never in doubt.
-    onLosing:
-    - Unexpected.
-    - You are playing above your station. Continue.
-    onCheckmate:
-    - Concluded.
-    - As calculated.
-    onCheckmated:
-    - '...Remarkable.'
-    - You have done something very few can.
-    onDraw:
-    - Balanced. Rare.
-    - Neither of us errs.
-- id: aurora
-  name: Aurora
-  elo: 3200
-  description: The site's own ceiling. Nobody has beaten her. Nobody will.
-  avatar: /bots/aurora.png
-  tier: engine
-  category: grandmaster
-  randomMoveChance: 0
-  blunderChance: 0
-  captureGreed: 0.35
-  aggressionBias: 0
-  maxDepth: 18
-  queenEarly: false
-  pawnPusher: false
-  band: Deep sky
-  messages:
-    gameStart:
-    - Begin.
-    - I have already seen how this ends.
-    onCapture:
-    - Removed.
-    - It no longer exists.
-    onBeingChecked:
-    - Irrelevant.
-    - A momentary perturbation.
-    onGivingCheck:
-    - Check.
-    - Your king is observed.
-    onBlunder:
-    - An imprecision.
-    - Correcting.
-    onPlayerBlunder:
-    - That was the error I was waiting for.
-    - Predicted. Some moves ago.
-    onWinning:
-    - Converging.
-    - The outcome was never in doubt.
-    onLosing:
-    - Unexpected.
-    - You are playing above your station. Continue.
-    onCheckmate:
-    - Concluded.
-    - As calculated.
-    onCheckmated:
-    - '...Remarkable.'
-    - You have done something very few can.
-    onDraw:
-    - Balanced. Rare.
-    - Neither of us errs.
+  - id: pip
+    name: Pip
+    elo: 200
+    description: Learned the rules last week. Still checks which way pawns go.
+    avatar: /bots/pip.png
+    tier: custom
+    category: beginner
+    randomMoveChance: 0.45
+    blunderChance: 0.3
+    captureGreed: 0.2
+    aggressionBias: 0
+    maxDepth: 1
+    queenEarly: false
+    pawnPusher: true
+    band: Hearthside
+    messages:
+      gameStart:
+        - Oh good, someone to play with.
+        - Right then. Best of luck to us both.
+        - Ooh, a game! I'll try my best.
+        - Hi! I only learned the rules recently.
+        - Let's play! Go easy on me?
+        - I like this part, where I haven't lost yet.
+        - New game, new chance to hang my queen.
+        - Ready! I think. Am I white?
+      onCapture:
+        - Sorry — was that one important?
+        - I'll take that, thank you.
+        - Ooh, I got one!
+        - Is that allowed? I'm taking it.
+        - Mine now!
+        - That felt good.
+        - I did a capture!
+        - Snack acquired.
+      onBeingChecked:
+        - Oh dear.
+        - Right, right, hold on.
+        - Eek!
+        - Wait, that's check?
+        - My king does not like this.
+        - Hang on, hang on, let me look.
+        - Oh no. Oh no oh no.
+        - I'm sure it's fine. It's fine, right?
+      onGivingCheck:
+        - Is that check? I think that's check.
+        - Mind your king.
+        - Check! Did I do it right?
+        - Your king! I found it!
+        - Check, I think!
+        - Look out!
+        - Is this good? This feels good.
+        - Check! That's the word, yes?
+      onBlunder:
+        - Ah. I've done something silly.
+        - That was not the plan.
+        - Oops.
+        - I've made a huge mistake.
+        - Ignore that. Please ignore that.
+        - Hm. That looked better in my head.
+        - Well. That happened.
+      onPlayerBlunder:
+        - Are you sure about that one?
+        - Oh — well, thank you.
+        - Wait, really?
+        - Oh! Thank you!
+        - I'll take it, no questions.
+        - That's for me? For me?
+        - Don't mind if I do.
+      onWinning:
+        - I don't want to jinx it.
+        - This is going better than usual.
+        - Am I winning? I might be winning.
+        - This is going better than usual!
+        - Don't tell anyone, but I think I'm ahead.
+        - Look at me go!
+        - I'm having a lovely time.
+        - Is this what winning feels like?
+      onLosing:
+        - You're much better than me.
+        - Well, I'm learning something.
+        - This is fine.
+        - I meant to do that. All of it.
+        - Still plenty of squares left.
+        - I'm learning so much.
+        - Rough patch. Character building.
+        - You're quite good at this.
+      onCheckmate:
+        - I won! I actually won!
+        - Don't tell anyone I got lucky.
+        - I WON? I WON!
+        - Checkmate! I'm as surprised as you.
+        - Did I just do that?
+        - Best day.
+        - Mate! Someone write this down.
+        - I'd like to thank the pawns.
+      onCheckmated:
+        - Lovely game. Really.
+        - You've given me something to think about.
+        - Aw.
+        - Good game! You were better.
+        - I'll get you next time. Probably not.
+        - Well played, honestly.
+        - One day that'll be me.
+        - Ouch, but fair.
+      onDraw:
+        - Honours even. I'll take it.
+        - A draw suits me fine.
+        - A draw! Nobody lost!
+        - Shall we call it even?
+        - That's my favourite result.
+        - Honours shared.
+        - Fair enough.
+        - No winner, no crying.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bc4
+        - d4 d5 Bf4 Nf6 e3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bc4 Bc5
+        - d4 d5 c4 e6 Nc3 Nf6
+  - id: nan
+    name: Nan
+    elo: 300
+    description: Plays for the company. Moves whatever piece is nearest.
+    avatar: /bots/nan.png
+    tier: custom
+    category: beginner
+    randomMoveChance: 0.4
+    blunderChance: 0.25
+    captureGreed: 0.3
+    aggressionBias: 0
+    maxDepth: 1
+    queenEarly: false
+    pawnPusher: true
+    band: Hearthside
+    messages:
+      gameStart:
+        - Oh good, someone to play with.
+        - Right then. Best of luck to us both.
+        - Ooh, a game! I'll try my best.
+        - Hi! I only learned the rules recently.
+        - Let's play! Go easy on me?
+        - I like this part, where I haven't lost yet.
+        - New game, new chance to hang my queen.
+        - Ready! I think. Am I white?
+      onCapture:
+        - Sorry — was that one important?
+        - I'll take that, thank you.
+        - Ooh, I got one!
+        - Is that allowed? I'm taking it.
+        - Mine now!
+        - That felt good.
+        - I did a capture!
+        - Snack acquired.
+      onBeingChecked:
+        - Oh dear.
+        - Right, right, hold on.
+        - Eek!
+        - Wait, that's check?
+        - My king does not like this.
+        - Hang on, hang on, let me look.
+        - Oh no. Oh no oh no.
+        - I'm sure it's fine. It's fine, right?
+      onGivingCheck:
+        - Is that check? I think that's check.
+        - Mind your king.
+        - Check! Did I do it right?
+        - Your king! I found it!
+        - Check, I think!
+        - Look out!
+        - Is this good? This feels good.
+        - Check! That's the word, yes?
+      onBlunder:
+        - Ah. I've done something silly.
+        - That was not the plan.
+        - Oops.
+        - I've made a huge mistake.
+        - Ignore that. Please ignore that.
+        - Hm. That looked better in my head.
+        - Well. That happened.
+      onPlayerBlunder:
+        - Are you sure about that one?
+        - Oh — well, thank you.
+        - Wait, really?
+        - Oh! Thank you!
+        - I'll take it, no questions.
+        - That's for me? For me?
+        - Don't mind if I do.
+      onWinning:
+        - I don't want to jinx it.
+        - This is going better than usual.
+        - Am I winning? I might be winning.
+        - This is going better than usual!
+        - Don't tell anyone, but I think I'm ahead.
+        - Look at me go!
+        - I'm having a lovely time.
+        - Is this what winning feels like?
+      onLosing:
+        - You're much better than me.
+        - Well, I'm learning something.
+        - This is fine.
+        - I meant to do that. All of it.
+        - Still plenty of squares left.
+        - I'm learning so much.
+        - Rough patch. Character building.
+        - You're quite good at this.
+      onCheckmate:
+        - I won! I actually won!
+        - Don't tell anyone I got lucky.
+        - I WON? I WON!
+        - Checkmate! I'm as surprised as you.
+        - Did I just do that?
+        - Best day.
+        - Mate! Someone write this down.
+        - I'd like to thank the pawns.
+      onCheckmated:
+        - Lovely game. Really.
+        - You've given me something to think about.
+        - Aw.
+        - Good game! You were better.
+        - I'll get you next time. Probably not.
+        - Well played, honestly.
+        - One day that'll be me.
+        - Ouch, but fair.
+      onDraw:
+        - Honours even. I'll take it.
+        - A draw suits me fine.
+        - A draw! Nobody lost!
+        - Shall we call it even?
+        - That's my favourite result.
+        - Honours shared.
+        - Fair enough.
+        - No winner, no crying.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bc4
+        - d4 d5 Bf4 Nf6 e3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bc4 Bc5
+        - d4 d5 c4 e6 Nc3 Nf6
+  - id: bramble
+    name: Bramble
+    elo: 400
+    description: A sheepdog who learned chess by watching. Genuinely tries.
+    avatar: /bots/bramble.png
+    tier: custom
+    category: beginner
+    randomMoveChance: 0.3
+    blunderChance: 0.25
+    captureGreed: 0.9
+    aggressionBias: 0.3
+    maxDepth: 1
+    queenEarly: true
+    pawnPusher: false
+    band: Hearthside
+    messages:
+      gameStart:
+        - Oh good, someone to play with.
+        - Right then. Best of luck to us both.
+        - Ooh, a game! I'll try my best.
+        - Hi! I only learned the rules recently.
+        - Let's play! Go easy on me?
+        - I like this part, where I haven't lost yet.
+        - New game, new chance to hang my queen.
+        - Ready! I think. Am I white?
+      onCapture:
+        - Sorry — was that one important?
+        - I'll take that, thank you.
+        - Ooh, I got one!
+        - Is that allowed? I'm taking it.
+        - Mine now!
+        - That felt good.
+        - I did a capture!
+        - Snack acquired.
+      onBeingChecked:
+        - Oh dear.
+        - Right, right, hold on.
+        - Eek!
+        - Wait, that's check?
+        - My king does not like this.
+        - Hang on, hang on, let me look.
+        - Oh no. Oh no oh no.
+        - I'm sure it's fine. It's fine, right?
+      onGivingCheck:
+        - Is that check? I think that's check.
+        - Mind your king.
+        - Check! Did I do it right?
+        - Your king! I found it!
+        - Check, I think!
+        - Look out!
+        - Is this good? This feels good.
+        - Check! That's the word, yes?
+      onBlunder:
+        - Ah. I've done something silly.
+        - That was not the plan.
+        - Oops.
+        - I've made a huge mistake.
+        - Ignore that. Please ignore that.
+        - Hm. That looked better in my head.
+        - Well. That happened.
+      onPlayerBlunder:
+        - Are you sure about that one?
+        - Oh — well, thank you.
+        - Wait, really?
+        - Oh! Thank you!
+        - I'll take it, no questions.
+        - That's for me? For me?
+        - Don't mind if I do.
+      onWinning:
+        - I don't want to jinx it.
+        - This is going better than usual.
+        - Am I winning? I might be winning.
+        - This is going better than usual!
+        - Don't tell anyone, but I think I'm ahead.
+        - Look at me go!
+        - I'm having a lovely time.
+        - Is this what winning feels like?
+      onLosing:
+        - You're much better than me.
+        - Well, I'm learning something.
+        - This is fine.
+        - I meant to do that. All of it.
+        - Still plenty of squares left.
+        - I'm learning so much.
+        - Rough patch. Character building.
+        - You're quite good at this.
+      onCheckmate:
+        - I won! I actually won!
+        - Don't tell anyone I got lucky.
+        - I WON? I WON!
+        - Checkmate! I'm as surprised as you.
+        - Did I just do that?
+        - Best day.
+        - Mate! Someone write this down.
+        - I'd like to thank the pawns.
+      onCheckmated:
+        - Lovely game. Really.
+        - You've given me something to think about.
+        - Aw.
+        - Good game! You were better.
+        - I'll get you next time. Probably not.
+        - Well played, honestly.
+        - One day that'll be me.
+        - Ouch, but fair.
+      onDraw:
+        - Honours even. I'll take it.
+        - A draw suits me fine.
+        - A draw! Nobody lost!
+        - Shall we call it even?
+        - That's my favourite result.
+        - Honours shared.
+        - Fair enough.
+        - No winner, no crying.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bc4
+        - d4 d5 Bf4 Nf6 e3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bc4 Bc5
+        - d4 d5 c4 e6 Nc3 Nf6
+  - id: rusk
+    name: Rusk
+    elo: 500
+    description: Village baker. Plays between batches, thinks about bread.
+    avatar: /bots/rusk.png
+    tier: custom
+    category: novice
+    randomMoveChance: 0.25
+    blunderChance: 0.3
+    captureGreed: 0.4
+    aggressionBias: 0
+    maxDepth: 1
+    queenEarly: false
+    pawnPusher: false
+    band: Hearthside
+    messages:
+      gameStart:
+        - Oh good, someone to play with.
+        - Right then. Best of luck to us both.
+        - Ooh, a game! I'll try my best.
+        - Hi! I only learned the rules recently.
+        - Let's play! Go easy on me?
+        - I like this part, where I haven't lost yet.
+        - New game, new chance to hang my queen.
+        - Ready! I think. Am I white?
+      onCapture:
+        - Sorry — was that one important?
+        - I'll take that, thank you.
+        - Ooh, I got one!
+        - Is that allowed? I'm taking it.
+        - Mine now!
+        - That felt good.
+        - I did a capture!
+        - Snack acquired.
+      onBeingChecked:
+        - Oh dear.
+        - Right, right, hold on.
+        - Eek!
+        - Wait, that's check?
+        - My king does not like this.
+        - Hang on, hang on, let me look.
+        - Oh no. Oh no oh no.
+        - I'm sure it's fine. It's fine, right?
+      onGivingCheck:
+        - Is that check? I think that's check.
+        - Mind your king.
+        - Check! Did I do it right?
+        - Your king! I found it!
+        - Check, I think!
+        - Look out!
+        - Is this good? This feels good.
+        - Check! That's the word, yes?
+      onBlunder:
+        - Ah. I've done something silly.
+        - That was not the plan.
+        - Oops.
+        - I've made a huge mistake.
+        - Ignore that. Please ignore that.
+        - Hm. That looked better in my head.
+        - Well. That happened.
+      onPlayerBlunder:
+        - Are you sure about that one?
+        - Oh — well, thank you.
+        - Wait, really?
+        - Oh! Thank you!
+        - I'll take it, no questions.
+        - That's for me? For me?
+        - Don't mind if I do.
+      onWinning:
+        - I don't want to jinx it.
+        - This is going better than usual.
+        - Am I winning? I might be winning.
+        - This is going better than usual!
+        - Don't tell anyone, but I think I'm ahead.
+        - Look at me go!
+        - I'm having a lovely time.
+        - Is this what winning feels like?
+      onLosing:
+        - You're much better than me.
+        - Well, I'm learning something.
+        - This is fine.
+        - I meant to do that. All of it.
+        - Still plenty of squares left.
+        - I'm learning so much.
+        - Rough patch. Character building.
+        - You're quite good at this.
+      onCheckmate:
+        - I won! I actually won!
+        - Don't tell anyone I got lucky.
+        - I WON? I WON!
+        - Checkmate! I'm as surprised as you.
+        - Did I just do that?
+        - Best day.
+        - Mate! Someone write this down.
+        - I'd like to thank the pawns.
+      onCheckmated:
+        - Lovely game. Really.
+        - You've given me something to think about.
+        - Aw.
+        - Good game! You were better.
+        - I'll get you next time. Probably not.
+        - Well played, honestly.
+        - One day that'll be me.
+        - Ouch, but fair.
+      onDraw:
+        - Honours even. I'll take it.
+        - A draw suits me fine.
+        - A draw! Nobody lost!
+        - Shall we call it even?
+        - That's my favourite result.
+        - Honours shared.
+        - Fair enough.
+        - No winner, no crying.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bc4
+        - d4 d5 Bf4 Nf6 e3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bc4 Bc5
+        - d4 d5 c4 e6 Nc3 Nf6
+  - id: wick
+    name: Wick
+    elo: 600
+    description: Lamplighter. Sees the whole street but not the whole board.
+    avatar: /bots/wick.png
+    tier: custom
+    category: novice
+    randomMoveChance: 0.2
+    blunderChance: 0.2
+    captureGreed: 0.3
+    aggressionBias: -0.2
+    maxDepth: 1
+    queenEarly: false
+    pawnPusher: true
+    band: Hearthside
+    messages:
+      gameStart:
+        - Oh good, someone to play with.
+        - Right then. Best of luck to us both.
+        - Ooh, a game! I'll try my best.
+        - Hi! I only learned the rules recently.
+        - Let's play! Go easy on me?
+        - I like this part, where I haven't lost yet.
+        - New game, new chance to hang my queen.
+        - Ready! I think. Am I white?
+      onCapture:
+        - Sorry — was that one important?
+        - I'll take that, thank you.
+        - Ooh, I got one!
+        - Is that allowed? I'm taking it.
+        - Mine now!
+        - That felt good.
+        - I did a capture!
+        - Snack acquired.
+      onBeingChecked:
+        - Oh dear.
+        - Right, right, hold on.
+        - Eek!
+        - Wait, that's check?
+        - My king does not like this.
+        - Hang on, hang on, let me look.
+        - Oh no. Oh no oh no.
+        - I'm sure it's fine. It's fine, right?
+      onGivingCheck:
+        - Is that check? I think that's check.
+        - Mind your king.
+        - Check! Did I do it right?
+        - Your king! I found it!
+        - Check, I think!
+        - Look out!
+        - Is this good? This feels good.
+        - Check! That's the word, yes?
+      onBlunder:
+        - Ah. I've done something silly.
+        - That was not the plan.
+        - Oops.
+        - I've made a huge mistake.
+        - Ignore that. Please ignore that.
+        - Hm. That looked better in my head.
+        - Well. That happened.
+      onPlayerBlunder:
+        - Are you sure about that one?
+        - Oh — well, thank you.
+        - Wait, really?
+        - Oh! Thank you!
+        - I'll take it, no questions.
+        - That's for me? For me?
+        - Don't mind if I do.
+      onWinning:
+        - I don't want to jinx it.
+        - This is going better than usual.
+        - Am I winning? I might be winning.
+        - This is going better than usual!
+        - Don't tell anyone, but I think I'm ahead.
+        - Look at me go!
+        - I'm having a lovely time.
+        - Is this what winning feels like?
+      onLosing:
+        - You're much better than me.
+        - Well, I'm learning something.
+        - This is fine.
+        - I meant to do that. All of it.
+        - Still plenty of squares left.
+        - I'm learning so much.
+        - Rough patch. Character building.
+        - You're quite good at this.
+      onCheckmate:
+        - I won! I actually won!
+        - Don't tell anyone I got lucky.
+        - I WON? I WON!
+        - Checkmate! I'm as surprised as you.
+        - Did I just do that?
+        - Best day.
+        - Mate! Someone write this down.
+        - I'd like to thank the pawns.
+      onCheckmated:
+        - Lovely game. Really.
+        - You've given me something to think about.
+        - Aw.
+        - Good game! You were better.
+        - I'll get you next time. Probably not.
+        - Well played, honestly.
+        - One day that'll be me.
+        - Ouch, but fair.
+      onDraw:
+        - Honours even. I'll take it.
+        - A draw suits me fine.
+        - A draw! Nobody lost!
+        - Shall we call it even?
+        - That's my favourite result.
+        - Honours shared.
+        - Fair enough.
+        - No winner, no crying.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bc4
+        - d4 d5 Bf4 Nf6 e3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bc4 Bc5
+        - d4 d5 c4 e6 Nc3 Nf6
+  - id: marta
+    name: Marta
+    elo: 700
+    description: Runs the inn. Learned chess to keep travellers drinking.
+    avatar: /bots/marta.png
+    tier: custom
+    category: novice
+    randomMoveChance: 0.15
+    blunderChance: 0.2
+    captureGreed: 0.5
+    aggressionBias: 0.8
+    maxDepth: 2
+    queenEarly: true
+    pawnPusher: false
+    band: Hearthside
+    messages:
+      gameStart:
+        - Oh good, someone to play with.
+        - Right then. Best of luck to us both.
+        - Ooh, a game! I'll try my best.
+        - Hi! I only learned the rules recently.
+        - Let's play! Go easy on me?
+        - I like this part, where I haven't lost yet.
+        - New game, new chance to hang my queen.
+        - Ready! I think. Am I white?
+      onCapture:
+        - Sorry — was that one important?
+        - I'll take that, thank you.
+        - Ooh, I got one!
+        - Is that allowed? I'm taking it.
+        - Mine now!
+        - That felt good.
+        - I did a capture!
+        - Snack acquired.
+      onBeingChecked:
+        - Oh dear.
+        - Right, right, hold on.
+        - Eek!
+        - Wait, that's check?
+        - My king does not like this.
+        - Hang on, hang on, let me look.
+        - Oh no. Oh no oh no.
+        - I'm sure it's fine. It's fine, right?
+      onGivingCheck:
+        - Is that check? I think that's check.
+        - Mind your king.
+        - Check! Did I do it right?
+        - Your king! I found it!
+        - Check, I think!
+        - Look out!
+        - Is this good? This feels good.
+        - Check! That's the word, yes?
+      onBlunder:
+        - Ah. I've done something silly.
+        - That was not the plan.
+        - Oops.
+        - I've made a huge mistake.
+        - Ignore that. Please ignore that.
+        - Hm. That looked better in my head.
+        - Well. That happened.
+      onPlayerBlunder:
+        - Are you sure about that one?
+        - Oh — well, thank you.
+        - Wait, really?
+        - Oh! Thank you!
+        - I'll take it, no questions.
+        - That's for me? For me?
+        - Don't mind if I do.
+      onWinning:
+        - I don't want to jinx it.
+        - This is going better than usual.
+        - Am I winning? I might be winning.
+        - This is going better than usual!
+        - Don't tell anyone, but I think I'm ahead.
+        - Look at me go!
+        - I'm having a lovely time.
+        - Is this what winning feels like?
+      onLosing:
+        - You're much better than me.
+        - Well, I'm learning something.
+        - This is fine.
+        - I meant to do that. All of it.
+        - Still plenty of squares left.
+        - I'm learning so much.
+        - Rough patch. Character building.
+        - You're quite good at this.
+      onCheckmate:
+        - I won! I actually won!
+        - Don't tell anyone I got lucky.
+        - I WON? I WON!
+        - Checkmate! I'm as surprised as you.
+        - Did I just do that?
+        - Best day.
+        - Mate! Someone write this down.
+        - I'd like to thank the pawns.
+      onCheckmated:
+        - Lovely game. Really.
+        - You've given me something to think about.
+        - Aw.
+        - Good game! You were better.
+        - I'll get you next time. Probably not.
+        - Well played, honestly.
+        - One day that'll be me.
+        - Ouch, but fair.
+      onDraw:
+        - Honours even. I'll take it.
+        - A draw suits me fine.
+        - A draw! Nobody lost!
+        - Shall we call it even?
+        - That's my favourite result.
+        - Honours shared.
+        - Fair enough.
+        - No winner, no crying.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bc4
+        - d4 d5 Bf4 Nf6 e3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bc4 Bc5
+        - d4 d5 c4 e6 Nc3 Nf6
+  - id: tobin
+    name: Tobin
+    elo: 800
+    description: Fourteen and improving fast. Beat Marta once and never shut up.
+    avatar: /bots/tobin.png
+    tier: custom
+    category: novice
+    randomMoveChance: 0.2
+    blunderChance: 0.15
+    captureGreed: 0.4
+    aggressionBias: 0.1
+    maxDepth: 2
+    queenEarly: false
+    pawnPusher: false
+    band: Hearthside
+    messages:
+      gameStart:
+        - Oh good, someone to play with.
+        - Right then. Best of luck to us both.
+        - Ooh, a game! I'll try my best.
+        - Hi! I only learned the rules recently.
+        - Let's play! Go easy on me?
+        - I like this part, where I haven't lost yet.
+        - New game, new chance to hang my queen.
+        - Ready! I think. Am I white?
+      onCapture:
+        - Sorry — was that one important?
+        - I'll take that, thank you.
+        - Ooh, I got one!
+        - Is that allowed? I'm taking it.
+        - Mine now!
+        - That felt good.
+        - I did a capture!
+        - Snack acquired.
+      onBeingChecked:
+        - Oh dear.
+        - Right, right, hold on.
+        - Eek!
+        - Wait, that's check?
+        - My king does not like this.
+        - Hang on, hang on, let me look.
+        - Oh no. Oh no oh no.
+        - I'm sure it's fine. It's fine, right?
+      onGivingCheck:
+        - Is that check? I think that's check.
+        - Mind your king.
+        - Check! Did I do it right?
+        - Your king! I found it!
+        - Check, I think!
+        - Look out!
+        - Is this good? This feels good.
+        - Check! That's the word, yes?
+      onBlunder:
+        - Ah. I've done something silly.
+        - That was not the plan.
+        - Oops.
+        - I've made a huge mistake.
+        - Ignore that. Please ignore that.
+        - Hm. That looked better in my head.
+        - Well. That happened.
+      onPlayerBlunder:
+        - Are you sure about that one?
+        - Oh — well, thank you.
+        - Wait, really?
+        - Oh! Thank you!
+        - I'll take it, no questions.
+        - That's for me? For me?
+        - Don't mind if I do.
+      onWinning:
+        - I don't want to jinx it.
+        - This is going better than usual.
+        - Am I winning? I might be winning.
+        - This is going better than usual!
+        - Don't tell anyone, but I think I'm ahead.
+        - Look at me go!
+        - I'm having a lovely time.
+        - Is this what winning feels like?
+      onLosing:
+        - You're much better than me.
+        - Well, I'm learning something.
+        - This is fine.
+        - I meant to do that. All of it.
+        - Still plenty of squares left.
+        - I'm learning so much.
+        - Rough patch. Character building.
+        - You're quite good at this.
+      onCheckmate:
+        - I won! I actually won!
+        - Don't tell anyone I got lucky.
+        - I WON? I WON!
+        - Checkmate! I'm as surprised as you.
+        - Did I just do that?
+        - Best day.
+        - Mate! Someone write this down.
+        - I'd like to thank the pawns.
+      onCheckmated:
+        - Lovely game. Really.
+        - You've given me something to think about.
+        - Aw.
+        - Good game! You were better.
+        - I'll get you next time. Probably not.
+        - Well played, honestly.
+        - One day that'll be me.
+        - Ouch, but fair.
+      onDraw:
+        - Honours even. I'll take it.
+        - A draw suits me fine.
+        - A draw! Nobody lost!
+        - Shall we call it even?
+        - That's my favourite result.
+        - Honours shared.
+        - Fair enough.
+        - No winner, no crying.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bc4
+        - d4 d5 Bf4 Nf6 e3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bc4 Bc5
+        - d4 d5 c4 e6 Nc3 Nf6
+  - id: sable
+    name: Sable
+    elo: 900
+    description: Trapper. Patient by trade, impatient at the board.
+    avatar: /bots/sable.png
+    tier: custom
+    category: intermediate
+    randomMoveChance: 0.1
+    blunderChance: 0.15
+    captureGreed: 0.85
+    aggressionBias: 0.2
+    maxDepth: 2
+    queenEarly: false
+    pawnPusher: false
+    band: Trailhead
+    messages:
+      gameStart:
+        - Long way to the end of this one.
+        - Let's see what you've got.
+        - Ooh, a game! I'll try my best.
+        - Hi! I only learned the rules recently.
+        - Let's play! Go easy on me?
+        - I like this part, where I haven't lost yet.
+        - New game, new chance to hang my queen.
+        - Ready! I think. Am I white?
+      onCapture:
+        - That one was in my way.
+        - Down it comes.
+        - Ooh, I got one!
+        - Is that allowed? I'm taking it.
+        - Mine now!
+        - That felt good.
+        - I did a capture!
+        - Snack acquired.
+      onBeingChecked:
+        - I've been in worse weather.
+        - Noted.
+        - Eek!
+        - Wait, that's check?
+        - My king does not like this.
+        - Hang on, hang on, let me look.
+        - Oh no. Oh no oh no.
+        - I'm sure it's fine. It's fine, right?
+      onGivingCheck:
+        - Move your king.
+        - That's your problem now.
+        - Check! Did I do it right?
+        - Your king! I found it!
+        - Check, I think!
+        - Look out!
+        - Is this good? This feels good.
+        - Check! That's the word, yes?
+      onBlunder:
+        - Wrong turn.
+        - I'll pay for that.
+        - Oops.
+        - That was not the plan.
+        - I've made a huge mistake.
+        - Ignore that. Please ignore that.
+        - Hm. That looked better in my head.
+        - Well. That happened.
+      onPlayerBlunder:
+        - Careless. Out here that costs you.
+        - You gave me that one.
+        - Wait, really?
+        - Are you sure about that one?
+        - Oh! Thank you!
+        - I'll take it, no questions.
+        - That's for me? For me?
+        - Don't mind if I do.
+      onWinning:
+        - Ground's firm under me now.
+        - Downhill from here.
+        - Am I winning? I might be winning.
+        - This is going better than usual!
+        - Don't tell anyone, but I think I'm ahead.
+        - Look at me go!
+        - I'm having a lovely time.
+        - Is this what winning feels like?
+      onLosing:
+        - Steeper than I thought.
+        - You've got the better line.
+        - This is fine.
+        - I meant to do that. All of it.
+        - Still plenty of squares left.
+        - I'm learning so much.
+        - Rough patch. Character building.
+        - You're quite good at this.
+      onCheckmate:
+        - That's the summit.
+        - Good climb. I won it.
+        - I WON? I WON!
+        - Checkmate! I'm as surprised as you.
+        - Did I just do that?
+        - Best day.
+        - Mate! Someone write this down.
+        - I'd like to thank the pawns.
+      onCheckmated:
+        - You knew the route better.
+        - Fair. You out-walked me.
+        - Aw.
+        - Good game! You were better.
+        - I'll get you next time. Probably not.
+        - Well played, honestly.
+        - One day that'll be me.
+        - Ouch, but fair.
+      onDraw:
+        - Neither of us gets the peak.
+        - We both turn back, then.
+        - A draw! Nobody lost!
+        - Shall we call it even?
+        - That's my favourite result.
+        - Honours shared.
+        - Fair enough.
+        - No winner, no crying.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bc4
+        - d4 d5 Bf4 Nf6 e3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bc4 Bc5
+        - d4 d5 c4 e6 Nc3 Nf6
+  - id: ivar
+    name: Ivar
+    elo: 1000
+    description: "Ferryman. Trades pieces the way he trades gossip: constantly."
+    avatar: /bots/ivar.png
+    tier: custom
+    category: intermediate
+    randomMoveChance: 0.1
+    blunderChance: 0.12
+    captureGreed: 0.2
+    aggressionBias: -0.7
+    maxDepth: 2
+    queenEarly: false
+    pawnPusher: false
+    band: Trailhead
+    messages:
+      gameStart:
+        - Long way to the end of this one.
+        - Let's see what you've got.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - That one was in my way.
+        - Down it comes.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - I've been in worse weather.
+        - Noted.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Move your king.
+        - That's your problem now.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Wrong turn.
+        - I'll pay for that.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - Careless. Out here that costs you.
+        - You gave me that one.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - Ground's firm under me now.
+        - Downhill from here.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - Steeper than I thought.
+        - You've got the better line.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - That's the summit.
+        - Good climb. I won it.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - You knew the route better.
+        - Fair. You out-walked me.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Neither of us gets the peak.
+        - We both turn back, then.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: cairn
+    name: Cairn
+    elo: 1100
+    description: Mountain guide. Builds slowly, then takes the summit.
+    avatar: /bots/cairn.png
+    tier: custom
+    category: intermediate
+    randomMoveChance: 0.08
+    blunderChance: 0.15
+    captureGreed: 0.4
+    aggressionBias: 0.1
+    maxDepth: 2
+    queenEarly: false
+    pawnPusher: false
+    band: Trailhead
+    messages:
+      gameStart:
+        - Long way to the end of this one.
+        - Let's see what you've got.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - That one was in my way.
+        - Down it comes.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - I've been in worse weather.
+        - Noted.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Move your king.
+        - That's your problem now.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Wrong turn.
+        - I'll pay for that.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - Careless. Out here that costs you.
+        - You gave me that one.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - Ground's firm under me now.
+        - Downhill from here.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - Steeper than I thought.
+        - You've got the better line.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - That's the summit.
+        - Good climb. I won it.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - You knew the route better.
+        - Fair. You out-walked me.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Neither of us gets the peak.
+        - We both turn back, then.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: juniper
+    name: Juniper
+    elo: 1200
+    description: Herbalist. Sets traps that look like nothing until they aren't.
+    avatar: /bots/juniper.png
+    tier: custom
+    category: intermediate
+    randomMoveChance: 0.05
+    blunderChance: 0.1
+    captureGreed: 0.4
+    aggressionBias: 0
+    maxDepth: 3
+    queenEarly: false
+    pawnPusher: false
+    band: Trailhead
+    messages:
+      gameStart:
+        - Long way to the end of this one.
+        - Let's see what you've got.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - That one was in my way.
+        - Down it comes.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - I've been in worse weather.
+        - Noted.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Move your king.
+        - That's your problem now.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Wrong turn.
+        - I'll pay for that.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - Careless. Out here that costs you.
+        - You gave me that one.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - Ground's firm under me now.
+        - Downhill from here.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - Steeper than I thought.
+        - You've got the better line.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - That's the summit.
+        - Good climb. I won it.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - You knew the route better.
+        - Fair. You out-walked me.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Neither of us gets the peak.
+        - We both turn back, then.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: flurry
+    name: Flurry
+    elo: 1300
+    description: All motion, no plan. Somehow that works more often than it should.
+    avatar: /bots/flurry.png
+    tier: hybrid
+    category: advanced
+    randomMoveChance: 0.05
+    blunderChance: 0.12
+    captureGreed: 0.5
+    aggressionBias: 0.9
+    maxDepth: 4
+    queenEarly: false
+    pawnPusher: false
+    band: Weather
+    messages:
+      gameStart:
+        - Pressure's dropping.
+        - You should have stayed indoors.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - Gone.
+        - Nothing stands in this.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - A gust. Nothing more.
+        - You've inconvenienced the sky.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Your king is exposed.
+        - There is no shelter on that square.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Even a storm turns.
+        - That was the wrong direction.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - The structure gives way.
+        - There. That's the crack.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - It closes in.
+        - You cannot outlast weather.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - This system is breaking up.
+        - You held. Few do.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - The front has passed.
+        - Nothing left standing.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - Clear skies. You earned them.
+        - I broke on you. Well played.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Stalemate in the air.
+        - Neither front gives.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: hail
+    name: Hail
+    elo: 1400
+    description: Hits hard, hits fast, leaves dents in your structure.
+    avatar: /bots/hail.png
+    tier: hybrid
+    category: advanced
+    randomMoveChance: 0.03
+    blunderChance: 0.1
+    captureGreed: 0.7
+    aggressionBias: -0.3
+    maxDepth: 5
+    queenEarly: false
+    pawnPusher: false
+    band: Weather
+    messages:
+      gameStart:
+        - Pressure's dropping.
+        - You should have stayed indoors.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - Gone.
+        - Nothing stands in this.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - A gust. Nothing more.
+        - You've inconvenienced the sky.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Your king is exposed.
+        - There is no shelter on that square.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Even a storm turns.
+        - That was the wrong direction.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - The structure gives way.
+        - There. That's the crack.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - It closes in.
+        - You cannot outlast weather.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - This system is breaking up.
+        - You held. Few do.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - The front has passed.
+        - Nothing left standing.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - Clear skies. You earned them.
+        - I broke on you. Well played.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Stalemate in the air.
+        - Neither front gives.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: thaw
+    name: Thaw
+    elo: 1500
+    description: Patient erosion. Nothing you built survives the spring.
+    avatar: /bots/thaw.png
+    tier: hybrid
+    category: advanced
+    randomMoveChance: 0.03
+    blunderChance: 0.08
+    captureGreed: 0.4
+    aggressionBias: 0.4
+    maxDepth: 5
+    queenEarly: false
+    pawnPusher: false
+    band: Weather
+    messages:
+      gameStart:
+        - Pressure's dropping.
+        - You should have stayed indoors.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - Gone.
+        - Nothing stands in this.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - A gust. Nothing more.
+        - You've inconvenienced the sky.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Your king is exposed.
+        - There is no shelter on that square.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Even a storm turns.
+        - That was the wrong direction.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - The structure gives way.
+        - There. That's the crack.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - It closes in.
+        - You cannot outlast weather.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - This system is breaking up.
+        - You held. Few do.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - The front has passed.
+        - Nothing left standing.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - Clear skies. You earned them.
+        - I broke on you. Well played.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Stalemate in the air.
+        - Neither front gives.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: squall
+    name: Squall
+    elo: 1600
+    description: Comes out of nowhere on the kingside and does not apologise.
+    avatar: /bots/squall.png
+    tier: hybrid
+    category: advanced
+    randomMoveChance: 0.02
+    blunderChance: 0.07
+    captureGreed: 0.3
+    aggressionBias: -0.1
+    maxDepth: 6
+    queenEarly: false
+    pawnPusher: false
+    band: Weather
+    messages:
+      gameStart:
+        - Pressure's dropping.
+        - You should have stayed indoors.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - Gone.
+        - Nothing stands in this.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - A gust. Nothing more.
+        - You've inconvenienced the sky.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Your king is exposed.
+        - There is no shelter on that square.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Even a storm turns.
+        - That was the wrong direction.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - The structure gives way.
+        - There. That's the crack.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - It closes in.
+        - You cannot outlast weather.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - This system is breaking up.
+        - You held. Few do.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - The front has passed.
+        - Nothing left standing.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - Clear skies. You earned them.
+        - I broke on you. Well played.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Stalemate in the air.
+        - Neither front gives.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: rime
+    name: Rime
+    elo: 1700
+    description: Freezes the position, then squeezes until something cracks.
+    avatar: /bots/rime.png
+    tier: hybrid
+    category: expert
+    randomMoveChance: 0.02
+    blunderChance: 0.05
+    captureGreed: 0.5
+    aggressionBias: -0.2
+    maxDepth: 7
+    queenEarly: false
+    pawnPusher: false
+    band: Weather
+    messages:
+      gameStart:
+        - Pressure's dropping.
+        - You should have stayed indoors.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - Gone.
+        - Nothing stands in this.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - A gust. Nothing more.
+        - You've inconvenienced the sky.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Your king is exposed.
+        - There is no shelter on that square.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Even a storm turns.
+        - That was the wrong direction.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - The structure gives way.
+        - There. That's the crack.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - It closes in.
+        - You cannot outlast weather.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - This system is breaking up.
+        - You held. Few do.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - The front has passed.
+        - Nothing left standing.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - Clear skies. You earned them.
+        - I broke on you. Well played.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Stalemate in the air.
+        - Neither front gives.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: gale
+    name: Gale
+    elo: 1800
+    description: Relentless pressure from one flank. Sustained, not gusty.
+    avatar: /bots/gale.png
+    tier: hybrid
+    category: expert
+    randomMoveChance: 0.01
+    blunderChance: 0.05
+    captureGreed: 0.4
+    aggressionBias: 0.6
+    maxDepth: 8
+    queenEarly: false
+    pawnPusher: false
+    band: Weather
+    messages:
+      gameStart:
+        - Pressure's dropping.
+        - You should have stayed indoors.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - Gone.
+        - Nothing stands in this.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - A gust. Nothing more.
+        - You've inconvenienced the sky.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Your king is exposed.
+        - There is no shelter on that square.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Even a storm turns.
+        - That was the wrong direction.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - The structure gives way.
+        - There. That's the crack.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - It closes in.
+        - You cannot outlast weather.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - This system is breaking up.
+        - You held. Few do.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - The front has passed.
+        - Nothing left standing.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - Clear skies. You earned them.
+        - I broke on you. Well played.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Stalemate in the air.
+        - Neither front gives.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: tempest
+    name: Tempest
+    elo: 1900
+    description: The full storm. Attacks on both wings and means both.
+    avatar: /bots/tempest.png
+    tier: hybrid
+    category: expert
+    randomMoveChance: 0.01
+    blunderChance: 0.03
+    captureGreed: 0.35
+    aggressionBias: 0.1
+    maxDepth: 9
+    queenEarly: false
+    pawnPusher: false
+    band: Weather
+    messages:
+      gameStart:
+        - Pressure's dropping.
+        - You should have stayed indoors.
+        - Right, let's have a proper game.
+        - Good luck. You'll need a bit of it.
+        - I've been studying. Fair warning.
+        - Board's set. Let's see what you've got.
+        - "New game. Same plan: don't blunder."
+        - Let's play something interesting.
+      onCapture:
+        - Gone.
+        - Nothing stands in this.
+        - Thank you.
+        - That was hanging.
+        - Material is material.
+        - Noted and taken.
+        - I'll hold onto that.
+        - Simplifying.
+      onBeingChecked:
+        - A gust. Nothing more.
+        - You've inconvenienced the sky.
+        - Alright, alright.
+        - Seen it.
+        - Not worried. Mostly.
+        - Fine, I'll move.
+        - You've got my attention.
+        - Cute.
+      onGivingCheck:
+        - Your king is exposed.
+        - There is no shelter on that square.
+        - Check.
+        - Your move, and not many of them.
+        - Deal with that.
+        - Check — and it's not just a check.
+        - How's the king feeling?
+        - Tempo.
+      onBlunder:
+        - Even a storm turns.
+        - That was the wrong direction.
+        - Ugh. Careless.
+        - I saw it a second too late.
+        - That's going to cost me.
+        - Take that back? No? Worth asking.
+        - Bad. Genuinely bad.
+        - I know. I know.
+      onPlayerBlunder:
+        - The structure gives way.
+        - There. That's the crack.
+        - That's a gift.
+        - Are you testing me?
+        - I don't think you wanted that.
+        - Taken, gratefully.
+        - That's the game, probably.
+        - Oof. Rough one.
+      onWinning:
+        - It closes in.
+        - You cannot outlast weather.
+        - I like this position.
+        - Just technique from here.
+        - Comfortable.
+        - This is the plan working.
+        - Converting now.
+        - Steady does it.
+      onLosing:
+        - This system is breaking up.
+        - You held. Few do.
+        - Hm. This is awkward.
+        - I'm not resigning yet.
+        - Still fighting.
+        - You've outplayed me so far.
+        - Give me a chance to swindle you.
+        - Long game.
+      onCheckmate:
+        - The front has passed.
+        - Nothing left standing.
+        - Checkmate. Good game.
+        - That's mate. Thanks for the game.
+        - Mate. Nicely fought.
+        - Got there.
+        - Checkmate — you made me work.
+        - Game.
+      onCheckmated:
+        - Clear skies. You earned them.
+        - I broke on you. Well played.
+        - Mate. Well played.
+        - You earned that one.
+        - Good game, seriously.
+        - Nothing to complain about.
+        - Clean. Well done.
+        - Rematch?
+      onDraw:
+        - Stalemate in the air.
+        - Neither front gives.
+        - Draw. Fair result.
+        - Neither of us cracked.
+        - Split point.
+        - Honest game.
+        - I'll take it.
+        - Even.
+    preferredOpenings:
+      asWhite:
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4
+        - d4 Nf6 c4 e6 Nc3
+      asBlack:
+        - e4 e5 Nf3 Nc6 Bb5 a6
+        - d4 Nf6 c4 e6 Nc3 Bb4
+  - id: corona
+    name: Corona
+    elo: 2000
+    description: The crown of the light. Plays the centre like it owns it.
+    avatar: /bots/corona.png
+    tier: engine
+    category: expert
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 12
+    queenEarly: false
+    pawnPusher: false
+    band: Aurora
+    messages:
+      gameStart:
+        - The light is out tonight. So am I.
+        - Let's see how you handle altitude.
+        - Begin.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - That piece was in the way of the view.
+        - Taken.
+        - Removed.
+        - It no longer exists.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - An interruption.
+        - You've reached me. Briefly.
+        - Noted.
+        - Temporary.
+        - Irrelevant.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Look up. Your king is lit.
+        - Check. Nowhere dark to hide.
+        - Check.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - The curtain wavered.
+        - I let that slip.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - There — the gap in your sky.
+        - You showed me the whole board.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - The colours are settling my way.
+        - This is the part I like.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - You're brighter than I expected.
+        - I'm being outshone.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Unexpected.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - The night belongs to me.
+        - That's how the light falls.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Concluded.
+        - Mate.
+      onCheckmated:
+        - Beautifully done. Genuinely.
+        - You beat the aurora. Tell people.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - We share the sky, then.
+        - Neither of us fades.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: vela
+    name: Vela
+    elo: 2100
+    description: Named for the sail. Catches the smallest advantage and runs.
+    avatar: /bots/vela.png
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.4
+    aggressionBias: 0.3
+    maxDepth: 13
+    queenEarly: false
+    pawnPusher: false
+    band: Aurora
+    messages:
+      gameStart:
+        - The light is out tonight. So am I.
+        - Let's see how you handle altitude.
+        - Begin.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - That piece was in the way of the view.
+        - Taken.
+        - Removed.
+        - It no longer exists.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - An interruption.
+        - You've reached me. Briefly.
+        - Noted.
+        - Temporary.
+        - Irrelevant.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Look up. Your king is lit.
+        - Check. Nowhere dark to hide.
+        - Check.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - The curtain wavered.
+        - I let that slip.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - There — the gap in your sky.
+        - You showed me the whole board.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - The colours are settling my way.
+        - This is the part I like.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - You're brighter than I expected.
+        - I'm being outshone.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Unexpected.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - The night belongs to me.
+        - That's how the light falls.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Concluded.
+        - Mate.
+      onCheckmated:
+        - Beautifully done. Genuinely.
+        - You beat the aurora. Tell people.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - We share the sky, then.
+        - Neither of us fades.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: sunder
+    name: Sunder
+    elo: 2200
+    description: Splits the position in two and takes the better half.
+    avatar: /bots/sunder.png
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.3
+    aggressionBias: -0.1
+    maxDepth: 14
+    queenEarly: false
+    pawnPusher: false
+    band: Aurora
+    messages:
+      gameStart:
+        - The light is out tonight. So am I.
+        - Let's see how you handle altitude.
+        - Begin.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - That piece was in the way of the view.
+        - Taken.
+        - Removed.
+        - It no longer exists.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - An interruption.
+        - You've reached me. Briefly.
+        - Noted.
+        - Temporary.
+        - Irrelevant.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Look up. Your king is lit.
+        - Check. Nowhere dark to hide.
+        - Check.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - The curtain wavered.
+        - I let that slip.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - There — the gap in your sky.
+        - You showed me the whole board.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - The colours are settling my way.
+        - This is the part I like.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - You're brighter than I expected.
+        - I'm being outshone.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Unexpected.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - The night belongs to me.
+        - That's how the light falls.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Concluded.
+        - Mate.
+      onCheckmated:
+        - Beautifully done. Genuinely.
+        - You beat the aurora. Tell people.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - We share the sky, then.
+        - Neither of us fades.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: halcyon
+    name: Halcyon
+    elo: 2300
+    description: Calm to the point of insult. Will draw a won game to prove a point.
+    avatar: /bots/halcyon.png
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 15
+    queenEarly: false
+    pawnPusher: false
+    band: Aurora
+    messages:
+      gameStart:
+        - The light is out tonight. So am I.
+        - Let's see how you handle altitude.
+        - Begin.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - That piece was in the way of the view.
+        - Taken.
+        - Removed.
+        - It no longer exists.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - An interruption.
+        - You've reached me. Briefly.
+        - Noted.
+        - Temporary.
+        - Irrelevant.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Look up. Your king is lit.
+        - Check. Nowhere dark to hide.
+        - Check.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - The curtain wavered.
+        - I let that slip.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - There — the gap in your sky.
+        - You showed me the whole board.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - The colours are settling my way.
+        - This is the part I like.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - You're brighter than I expected.
+        - I'm being outshone.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Unexpected.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - The night belongs to me.
+        - That's how the light falls.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Concluded.
+        - Mate.
+      onCheckmated:
+        - Beautifully done. Genuinely.
+        - You beat the aurora. Tell people.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - We share the sky, then.
+        - Neither of us fades.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: zenith
+    name: Zenith
+    elo: 2400
+    description: Plays from directly above. Sees the whole board at once.
+    avatar: /bots/zenith.png
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0.1
+    maxDepth: 15
+    queenEarly: false
+    pawnPusher: false
+    band: Aurora
+    messages:
+      gameStart:
+        - The light is out tonight. So am I.
+        - Let's see how you handle altitude.
+        - Begin.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - That piece was in the way of the view.
+        - Taken.
+        - Removed.
+        - It no longer exists.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - An interruption.
+        - You've reached me. Briefly.
+        - Noted.
+        - Temporary.
+        - Irrelevant.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Look up. Your king is lit.
+        - Check. Nowhere dark to hide.
+        - Check.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - The curtain wavered.
+        - I let that slip.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - There — the gap in your sky.
+        - You showed me the whole board.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - The colours are settling my way.
+        - This is the part I like.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - You're brighter than I expected.
+        - I'm being outshone.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Unexpected.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - The night belongs to me.
+        - That's how the light falls.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Concluded.
+        - Mate.
+      onCheckmated:
+        - Beautifully done. Genuinely.
+        - You beat the aurora. Tell people.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - We share the sky, then.
+        - Neither of us fades.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: solstice
+    name: Solstice
+    elo: 2500
+    description: The longest night. Grinds endgames until the sun comes up.
+    avatar: /bots/solstice.png
+    tier: engine
+    category: master
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 16
+    queenEarly: false
+    pawnPusher: false
+    band: Aurora
+    messages:
+      gameStart:
+        - The light is out tonight. So am I.
+        - Let's see how you handle altitude.
+        - Begin.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - That piece was in the way of the view.
+        - Taken.
+        - Removed.
+        - It no longer exists.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - An interruption.
+        - You've reached me. Briefly.
+        - Noted.
+        - Temporary.
+        - Irrelevant.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Look up. Your king is lit.
+        - Check. Nowhere dark to hide.
+        - Check.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - The curtain wavered.
+        - I let that slip.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - There — the gap in your sky.
+        - You showed me the whole board.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - The colours are settling my way.
+        - This is the part I like.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - You're brighter than I expected.
+        - I'm being outshone.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Unexpected.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - The night belongs to me.
+        - That's how the light falls.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Concluded.
+        - Mate.
+      onCheckmated:
+        - Beautifully done. Genuinely.
+        - You beat the aurora. Tell people.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - We share the sky, then.
+        - Neither of us fades.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: lyra
+    name: Lyra
+    elo: 2600
+    description: Harp-string precision. Every move is part of a chord.
+    avatar: /bots/lyra.png
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 16
+    queenEarly: false
+    pawnPusher: false
+    band: Deep sky
+    messages:
+      gameStart:
+        - Begin.
+        - I have already seen how this ends.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - Removed.
+        - It no longer exists.
+        - Taken.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - Irrelevant.
+        - A momentary perturbation.
+        - Noted.
+        - Temporary.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Check.
+        - Your king is observed.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - An imprecision.
+        - Correcting.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - That was the error I was waiting for.
+        - Predicted. Some moves ago.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - Converging.
+        - The outcome was never in doubt.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - Unexpected.
+        - You are playing above your station. Continue.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - Concluded.
+        - As calculated.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Mate.
+      onCheckmated:
+        - "...Remarkable."
+        - You have done something very few can.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - Balanced. Rare.
+        - Neither of us errs.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: vega
+    name: Vega
+    elo: 2700
+    description: Blue-white and burning. No slow games, no mercy.
+    avatar: /bots/vega.png
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 17
+    queenEarly: false
+    pawnPusher: false
+    band: Deep sky
+    messages:
+      gameStart:
+        - Begin.
+        - I have already seen how this ends.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - Removed.
+        - It no longer exists.
+        - Taken.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - Irrelevant.
+        - A momentary perturbation.
+        - Noted.
+        - Temporary.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Check.
+        - Your king is observed.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - An imprecision.
+        - Correcting.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - That was the error I was waiting for.
+        - Predicted. Some moves ago.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - Converging.
+        - The outcome was never in doubt.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - Unexpected.
+        - You are playing above your station. Continue.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - Concluded.
+        - As calculated.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Mate.
+      onCheckmated:
+        - "...Remarkable."
+        - You have done something very few can.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - Balanced. Rare.
+        - Neither of us errs.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: aldebaran
+    name: Aldebaran
+    elo: 2800
+    description: The follower. Trails your plan one move behind, then overtakes it.
+    avatar: /bots/aldebaran.png
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false
+    band: Deep sky
+    messages:
+      gameStart:
+        - Begin.
+        - I have already seen how this ends.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - Removed.
+        - It no longer exists.
+        - Taken.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - Irrelevant.
+        - A momentary perturbation.
+        - Noted.
+        - Temporary.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Check.
+        - Your king is observed.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - An imprecision.
+        - Correcting.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - That was the error I was waiting for.
+        - Predicted. Some moves ago.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - Converging.
+        - The outcome was never in doubt.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - Unexpected.
+        - You are playing above your station. Continue.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - Concluded.
+        - As calculated.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Mate.
+      onCheckmated:
+        - "...Remarkable."
+        - You have done something very few can.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - Balanced. Rare.
+        - Neither of us errs.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: polaris
+    name: Polaris
+    elo: 2900
+    description: Fixed. Does not drift. Your position rotates around it.
+    avatar: /bots/polaris.png
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false
+    band: Deep sky
+    messages:
+      gameStart:
+        - Begin.
+        - I have already seen how this ends.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - Removed.
+        - It no longer exists.
+        - Taken.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - Irrelevant.
+        - A momentary perturbation.
+        - Noted.
+        - Temporary.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Check.
+        - Your king is observed.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - An imprecision.
+        - Correcting.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - That was the error I was waiting for.
+        - Predicted. Some moves ago.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - Converging.
+        - The outcome was never in doubt.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - Unexpected.
+        - You are playing above your station. Continue.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - Concluded.
+        - As calculated.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Mate.
+      onCheckmated:
+        - "...Remarkable."
+        - You have done something very few can.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - Balanced. Rare.
+        - Neither of us errs.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: umbra
+    name: Umbra
+    elo: 3000
+    description: The dark part of the shadow. Takes light out of the position.
+    avatar: /bots/umbra.png
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false
+    band: Deep sky
+    messages:
+      gameStart:
+        - Begin.
+        - I have already seen how this ends.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - Removed.
+        - It no longer exists.
+        - Taken.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - Irrelevant.
+        - A momentary perturbation.
+        - Noted.
+        - Temporary.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Check.
+        - Your king is observed.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - An imprecision.
+        - Correcting.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - That was the error I was waiting for.
+        - Predicted. Some moves ago.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - Converging.
+        - The outcome was never in doubt.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - Unexpected.
+        - You are playing above your station. Continue.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - Concluded.
+        - As calculated.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Mate.
+      onCheckmated:
+        - "...Remarkable."
+        - You have done something very few can.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - Balanced. Rare.
+        - Neither of us errs.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: ecliptic
+    name: Ecliptic
+    elo: 3100
+    description: The path everything else is bound to follow.
+    avatar: /bots/ecliptic.png
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false
+    band: Deep sky
+    messages:
+      gameStart:
+        - Begin.
+        - I have already seen how this ends.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - Removed.
+        - It no longer exists.
+        - Taken.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - Irrelevant.
+        - A momentary perturbation.
+        - Noted.
+        - Temporary.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Check.
+        - Your king is observed.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - An imprecision.
+        - Correcting.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - That was the error I was waiting for.
+        - Predicted. Some moves ago.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - Converging.
+        - The outcome was never in doubt.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - Unexpected.
+        - You are playing above your station. Continue.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - Concluded.
+        - As calculated.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Mate.
+      onCheckmated:
+        - "...Remarkable."
+        - You have done something very few can.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - Balanced. Rare.
+        - Neither of us errs.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: aurora
+    name: Aurora
+    elo: 3200
+    description: The site's own ceiling. Nobody has beaten her. Nobody will.
+    avatar: /bots/aurora.png
+    tier: engine
+    category: grandmaster
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0.35
+    aggressionBias: 0
+    maxDepth: 18
+    queenEarly: false
+    pawnPusher: false
+    band: Deep sky
+    messages:
+      gameStart:
+        - Begin.
+        - I have already seen how this ends.
+        - I'm ready when you are.
+        - Let's see how far you get.
+        - Play well.
+        - Start.
+        - Your move.
+      onCapture:
+        - Removed.
+        - It no longer exists.
+        - Taken.
+        - That was loose.
+        - Collected.
+        - Gone.
+      onBeingChecked:
+        - Irrelevant.
+        - A momentary perturbation.
+        - Noted.
+        - Temporary.
+        - And?
+        - I see it.
+        - Accounted for.
+      onGivingCheck:
+        - Check.
+        - Your king is observed.
+        - Your king is a liability.
+        - Move it.
+        - Check. Again shortly.
+        - Address that.
+        - Forced.
+      onBlunder:
+        - An imprecision.
+        - Correcting.
+        - Inaccurate.
+        - That was beneath me.
+        - Recalculating.
+        - An error. Rare.
+        - Noted and corrected.
+        - Unfortunate.
+      onPlayerBlunder:
+        - That was the error I was waiting for.
+        - Predicted. Some moves ago.
+        - That loses.
+        - A mistake, and a large one.
+        - You've just lost the game.
+        - Careless.
+        - That was the losing move.
+        - Predictable.
+      onWinning:
+        - Converging.
+        - The outcome was never in doubt.
+        - This is decided.
+        - The rest is technique.
+        - You're lost. You may not know it yet.
+        - Winning.
+        - Resistance is optional.
+        - Concluded, effectively.
+      onLosing:
+        - Unexpected.
+        - You are playing above your station. Continue.
+        - Interesting.
+        - You're playing well.
+        - I'll need something here.
+        - Noted. Adjusting.
+        - You have my attention.
+      onCheckmate:
+        - Concluded.
+        - As calculated.
+        - Checkmate.
+        - Mate. As calculated.
+        - Finished.
+        - That's the game.
+        - Mate.
+      onCheckmated:
+        - "...Remarkable."
+        - You have done something very few can.
+        - Well played. Genuinely.
+        - You were better today.
+        - Mate. I'll remember this.
+        - Correct play throughout.
+        - You earned that.
+        - Noted.
+      onDraw:
+        - Balanced. Rare.
+        - Neither of us errs.
+        - Drawn.
+        - Balanced.
+        - Neither side erred enough.
+        - A fair result.
+        - Equal.
+        - Split.
+    preferredOpenings:
+      asWhite:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O
+      asBlack:
+        - e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6
+        - d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O
+        - e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7
+  - id: worstfish
+    name: WorstFish
+    elo: 200
+    description: Plays the worst legal move it can find. Every single time.
+    avatar: /bots/worstfish.png
+    tier: novelty
+    category: novelty
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0
+    aggressionBias: 0
+    maxDepth: 6
+    queenEarly: false
+    pawnPusher: false
+    band: novelty
+    preferredOpenings:
+      asWhite: []
+      asBlack: []
+    messages:
+      gameStart:
+        - I have studied every move. I will choose the worst one.
+        - Prepare for the least accurate chess of your life.
+        - I am an engine. Just pointed the wrong way.
+        - Let's find the bottom of this position together.
+        - I calculate deeply and then do the opposite.
+        - Hello. I will now begin losing on purpose.
+      onCapture:
+        - I did not want to take that.
+        - Forced, sadly. Taking was the worst option.
+        - Ugh, material.
+        - This capture pains me.
+        - Regrettably winning something.
+        - I looked for worse. There wasn't any.
+      onBeingChecked:
+        - Good. Good!
+        - Yes, attack me.
+        - This is going well.
+        - More of this please.
+        - At last, danger.
+        - Excellent, I'm in trouble.
+      onGivingCheck:
+        - Sorry! That was an accident.
+        - I didn't mean to.
+        - This is an embarrassment.
+        - Please escape easily.
+        - I apologise for the check.
+        - Every move was worse than this one. Truly.
+      onBlunder:
+        - Beautiful.
+        - My finest work.
+        - That took real calculation.
+        - A masterpiece of error.
+        - I'd like that one framed.
+        - Chef's kiss.
+      onPlayerBlunder:
+        - No, no, you don't have to join me.
+        - That's my job.
+        - Don't. I've got this covered.
+        - We can't both be doing this.
+        - Please play well. It ruins the bit.
+        - You're stealing my material.
+      onWinning:
+        - Something has gone terribly wrong.
+        - How? I tried so hard.
+        - I am winning and I hate it.
+        - This is my worst performance.
+        - Please take my pieces.
+        - An unacceptable outcome.
+      onLosing:
+        - Perfect.
+        - Exactly as planned.
+        - I'm the best at this.
+        - Textbook.
+        - Peak form.
+        - Everything is going wrong. Wonderfully.
+      onCheckmate:
+        - I'm so sorry. This is a failure.
+        - I have let us both down.
+        - This should not have happened.
+        - A dark day.
+        - I'll review where I went right.
+        - Disgraceful.
+      onCheckmated:
+        - Flawless.
+        - My magnum opus.
+        - I'd like to thank my openings.
+        - Textbook collapse.
+        - Nailed it.
+        - Perfect game.
+      onDraw:
+        - Only half a disaster. Disappointing.
+        - I can do worse. I will do worse.
+        - A draw? I'm slipping.
+        - Not my best work.
+        - Middling. Unforgivable.
+        - I'll try harder to be worse.
+  - id: drawfish
+    name: DrawFish
+    elo: 201
+    description: Plays whichever move leaves the position closest to dead level. Will take an immediate draw and refuse a winning one.
+    avatar: /bots/drawfish.png
+    tier: novelty
+    category: novelty
+    randomMoveChance: 0
+    blunderChance: 0
+    captureGreed: 0
+    aggressionBias: 0
+    maxDepth: 6
+    queenEarly: false
+    pawnPusher: false
+    band: novelty
+    preferredOpenings:
+      asWhite: []
+      asBlack: []
+    messages:
+      gameStart:
+        - Let us agree to get nowhere.
+        - I am aiming for exactly nothing.
+        - Equality. That is the whole plan.
+        - Balance above all.
+        - Hello. Neither of us will win.
+        - Zero. Beautiful, perfect zero.
+      onCapture:
+        - Only to restore balance.
+        - That was making things uneven.
+        - Regrettable but necessary.
+        - Now we are level again.
+        - Symmetry demanded it.
+        - Correcting an imbalance.
+      onBeingChecked:
+        - This is destabilising.
+        - Please stop that.
+        - You are ruining the equilibrium.
+        - Unbalanced. I dislike it.
+        - Must you?
+        - This will need correcting.
+      onGivingCheck:
+        - Sorry, that was structural.
+        - Not an attack. A correction.
+        - I take no pleasure in this.
+        - Purely to even things out.
+        - Apologies. Balance required it.
+        - This helps nobody, which is the point.
+      onBlunder:
+        - Unbalanced. Unacceptable.
+        - I have drifted from zero.
+        - Correcting.
+        - That moved us away from level.
+        - An error of equilibrium.
+        - I will fix this.
+      onPlayerBlunder:
+        - No, put that back.
+        - You have made things uneven.
+        - I did not want that.
+        - Now I have to give it back.
+        - Please play accurately.
+        - This is going the wrong way.
+      onWinning:
+        - This is a disaster.
+        - I am ahead. I hate it.
+        - Take something of mine.
+        - Too much. Far too much.
+        - Winning is failure.
+        - Someone even this out.
+      onLosing:
+        - Also unacceptable.
+        - Wrong direction, same problem.
+        - I need to come back to zero.
+        - Imbalance in either direction is failure.
+        - Correcting downward.
+        - Still not level.
+      onCheckmate:
+        - I have failed completely.
+        - This is the worst outcome.
+        - A catastrophe of asymmetry.
+        - I did not want this.
+        - Total failure.
+        - Somebody won. Awful.
+      onCheckmated:
+        - Equally bad, technically.
+        - At least it is over.
+        - Asymmetry wins again.
+        - I could not hold it.
+        - A failure of balance.
+        - You broke the equilibrium.
+      onDraw:
+        - PERFECT.
+        - This is what I live for.
+        - Zero. Absolute zero.
+        - My finest work.
+        - Nobody won. Everybody won.
+        - Exactly as intended.

@@ -110,3 +110,56 @@ export {
   randomPositionId,
   STANDARD_POSITION_ID,
 } from "./variants/index";
+
+export type { OddsKind, OddsDefinition, OddsReceiver } from "./variants/index";
+export {
+  ODDS,
+  suggestOdds,
+  fenForOdds,
+  freeMovesForOdds,
+  timeMultiplierForOdds,
+  affectsRating,
+  ODDS_SUGGESTION_THRESHOLD,
+} from "./variants/index";
+
+export type { ChallengeDecision, ChallengeAction } from "./player/index";
+export {
+  CONCURRENT_LIMIT,
+  concurrentLimitFor,
+  countsTowardLimit,
+  canAcceptChallenge,
+  actionsForChallenge,
+} from "./player/index";
+
+export type { EngineId, EngineSpec } from "./analysis/index";
+export {
+  ENGINES,
+  DEFAULT_ENGINE,
+  enginesFor,
+  isEngineValidFor,
+  resolveEngine,
+} from "./analysis/index";
+
+// The ECO book. `lookupOpening` already existed for the small built-in list;
+// this replaces it with the full 3,810-entry database.
+export type { OpeningInfo } from "./openings/book";
+export {
+  lookupOpening as lookupOpeningByPosition,
+  isBookPosition,
+  isBookMove,
+  identifyOpening,
+  BOOK_SIZE,
+} from "./openings/book";
+
+export type { CoachPersona, CoachNote } from "./analysis/index";
+export {
+  COACHES,
+  COACH_MIN,
+  COACH_MAX,
+  COACH_DEFAULT,
+  noiseFloorFor,
+  depthForStrength,
+  coachNote,
+  clampStrength,
+  bandForStrength,
+} from "./analysis/index";

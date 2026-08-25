@@ -15,7 +15,8 @@ import { authMiddleware } from "../middleware/auth.js";
 import { parsePagination, paginationMeta } from "../lib/pagination.js";
 import { initClocks, onMove as clockOnMove } from "../lib/gameClock.js";
 import { getIO } from "../lib/socket.js";
-import { getBotMove } from "../lib/botEngine.js";
+import { getBotMove, type OpeningPrefs } from "../lib/botEngine.js";
+import { canAcceptChallenge } from "@aurora/chess";
 import {
   type TimeControl,
   type GameResult,
@@ -38,6 +39,7 @@ import {
   GAME_INVALID_MOVE,
   GAME_INVALID_PRESET,
   GAME_BOT_ERROR,
+  VALIDATION_FAILED,
 } from "../lib/errorCodes.js";
 import { z } from "zod";
 import {
@@ -98,6 +100,35 @@ export async function gameRoutes(app: FastifyInstance) {
         return apiError(reply, 403, GAME_NOT_FRIENDS, "Must be friends to challenge");
       }
 
+      // Concurrency limit, enforced here rather than only in the UI. A client
+      // that skips the check must not be able to open unlimited games.
+      const [challengerRow, activeCount] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { titleManual: true, titleAuto: true },
+        }),
+        prisma.game.count({
+          where: {
+            status: { in: ["WAITING", "IN_PROGRESS"] },
+            timeControl: { notIn: ["UNLIMITED"] },
+            OR: [{ whiteId: userId }, { blackId: userId }],
+          },
+        }),
+      ]);
+
+      const decision = canAcceptChallenge({
+        activeRealtimeGames: activeCount,
+        title: challengerRow?.titleManual ?? challengerRow?.titleAuto ?? null,
+      });
+      if (!decision.allowed && decision.reason === "at-limit") {
+        return apiError(
+          reply,
+          429,
+          VALIDATION_FAILED,
+          `You already have ${decision.current} games running. Finish one first, or play a correspondence game.`
+        );
+      }
+
       // Resolve time control
       let timeControl: TimeControl;
       let initialTime: number;
@@ -140,7 +171,8 @@ export async function gameRoutes(app: FastifyInstance) {
       // Notify the challenged friend via socket
       const io = getIO();
       if (io) {
-        io.emit("challenge:incoming", {
+        // To the challenged player only. io.emit here told the entire site.
+        io.to(`user:${friendId}`).emit("challenge:incoming", {
           gameId: game.id,
           challenger: game.whiteId === userId ? game.white : game.black,
           timeControl,
@@ -186,7 +218,7 @@ export async function gameRoutes(app: FastifyInstance) {
 
       const io = getIO();
       if (io) {
-        io.emit("challenge:accepted", { gameId });
+        io.to(`game:${gameId}`).emit("challenge:accepted", { gameId });
       }
 
       return { success: true, gameId };
@@ -214,11 +246,15 @@ export async function gameRoutes(app: FastifyInstance) {
         return apiError(reply, 403, GAME_NOT_PARTICIPANT, "Not part of this challenge");
       }
 
+      // Capture the other player BEFORE deleting, or there is nobody to tell.
+      const otherId = game.whiteId === userId ? game.blackId : game.whiteId;
+
       await prisma.game.delete({ where: { id: gameId } });
 
       const io = getIO();
-      if (io) {
-        io.emit("challenge:declined", { gameId });
+      if (io && otherId) {
+        // The challenger only. Broadcasting a decline told the whole site.
+        io.to(`user:${otherId}`).emit("challenge:declined", { gameId });
       }
 
       return { success: true };
@@ -466,7 +502,16 @@ export async function gameRoutes(app: FastifyInstance) {
         // having moved yet is recoverable; the client asks for a move once the
         // socket connects.
         try {
-          const botMoveUci = await getBotMove(game.fen, botElo);
+          const profile = await prisma.botProfile.findFirst({
+            where: { elo: botElo, enabled: true },
+            select: { preferredOpenings: true },
+          });
+          const botMoveUci = await getBotMove(
+            game.fen,
+            botElo,
+            2000,
+            (profile?.preferredOpenings as OpeningPrefs | null) ?? undefined
+          );
           const chess = new Chess(game.fen);
           const from = botMoveUci.slice(0, 2);
           const to = botMoveUci.slice(2, 4);
@@ -588,7 +633,16 @@ export async function gameRoutes(app: FastifyInstance) {
       });
 
       // Get bot response
-      const botMoveUci = await getBotMove(chess.fen(), game.botElo!);
+      const botProfile = await prisma.botProfile.findFirst({
+        where: { elo: game.botElo!, enabled: true },
+        select: { preferredOpenings: true },
+      });
+      const botMoveUci = await getBotMove(
+        chess.fen(),
+        game.botElo!,
+        2000,
+        (botProfile?.preferredOpenings as OpeningPrefs | null) ?? undefined
+      );
       const botFrom = botMoveUci.slice(0, 2);
       const botTo = botMoveUci.slice(2, 4);
       const botPromotion = botMoveUci[4] || undefined;

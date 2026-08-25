@@ -96,10 +96,17 @@ describe("GameOverModal", () => {
     expect(screen.getByText("Waiting for your opponent")).toBeInTheDocument();
   });
 
-  it("Back button calls onClose", () => {
+  it("dismissing the modal calls onClose", () => {
     const onClose = vi.fn();
     renderModal({ onClose });
-    fireEvent.click(screen.getByText("Back to the board"));
+    fireEvent.click(screen.getByText("Stay on the board"));
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("offers a route back to the menu, not just a dismiss", () => {
+    // Dismissing left you on a finished position with no way out, which is
+    // why there was no path back to the menu from the result screen.
+    renderModal({});
+    expect(screen.getByText("Back to the menu").closest("a")).toHaveAttribute("href", "/play");
   });
 });

@@ -17,7 +17,7 @@ export default function RecordBar({ label, wins, losses, draws }: RecordBarProps
     return (
       <div className="text-sm">
         <span className="text-night-400">{label}:</span>{" "}
-        <span className="text-night-500">No games</span>
+        <span className="text-night-400">No games</span>
       </div>
     );
   }

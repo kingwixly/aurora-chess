@@ -37,8 +37,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { data } = await api.get("/api/v1/auth/me");
       set({ user: data.user, isLoading: false });
-    } catch {
-      set({ user: null, isLoading: false });
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      // Only a real authentication failure clears the session. A 429 or a 5xx
+      // means the request did not get through — treating that as "signed out"
+      // is what threw a moderator back to the login page mid-review after the
+      // panel tripped the rate limit.
+      if (status === 401 || status === 403) {
+        set({ user: null, isLoading: false });
+      } else {
+        set({ isLoading: false });
+      }
     }
   },
 }));

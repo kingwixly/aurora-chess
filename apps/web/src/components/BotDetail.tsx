@@ -46,7 +46,7 @@ export default function BotDetail({ bot }: { bot: BotPersonality | null }) {
       </div>
 
       <div className="border-t border-night-700 px-5 py-3">
-        <p className="text-xs uppercase tracking-wider text-night-500">{band.name}</p>
+        <p className="text-xs uppercase tracking-wider text-night-400">{band.name}</p>
         <p className="mt-0.5 text-sm text-night-400">{band.blurb}</p>
       </div>
     </div>

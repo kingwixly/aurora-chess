@@ -268,7 +268,7 @@ export default function ProfilePage() {
         {/* Ratings by time control. The pooled figure alone hid the fact that
             a player can be a very different strength at bullet and classical. */}
         <section>
-          <h2 className="mb-2 text-xs uppercase tracking-wider text-night-500">
+          <h2 className="mb-2 text-xs uppercase tracking-wider text-night-400">
             Ratings by time control
           </h2>
           <RatingPools ratings={profile.ratings} />
@@ -276,7 +276,7 @@ export default function ProfilePage() {
 
         {/* Badges: profile only, never beside a username elsewhere. */}
         <section>
-          <h2 className="mb-2 text-xs uppercase tracking-wider text-night-500">Badges</h2>
+          <h2 className="mb-2 text-xs uppercase tracking-wider text-night-400">Badges</h2>
           <BadgeShelf badges={profile.badges ?? []} />
         </section>
 
@@ -399,7 +399,7 @@ export default function ProfilePage() {
                         "?"
                       )}
                     </p>
-                    <p className="text-xs text-night-500">
+                    <p className="text-xs text-night-400">
                       {g.result || "—"} &middot; {g.timeControl} &middot;{" "}
                       {new Date(g.createdAt).toLocaleDateString()}
                     </p>
@@ -435,7 +435,7 @@ export default function ProfilePage() {
           {currentUser && currentUser.username !== profile.username && (
             <button
               onClick={() => setReporting(true)}
-              className="ml-4 text-xs text-night-500 transition-colors hover:text-red-300"
+              className="ml-4 text-xs text-night-400 transition-colors hover:text-red-300"
             >
               Report this player
             </button>

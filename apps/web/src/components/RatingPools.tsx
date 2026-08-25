@@ -58,23 +58,23 @@ export default function RatingPools({
 
         return (
           <div key={pool} className="bg-night-900 px-4 py-3">
-            <dt className="text-xs uppercase tracking-wider text-night-500">{LABELS[pool]}</dt>
+            <dt className="text-xs uppercase tracking-wider text-night-400">{LABELS[pool]}</dt>
             <dd
               className={`mt-1 font-mono text-2xl font-bold tracking-tight ${
-                played ? "text-white" : "text-night-500"
+                played ? "text-white" : "text-night-400"
               }`}
             >
               {rating}
               {provisional && (
                 <span
                   title="Provisional — not enough games for a settled rating"
-                  className="ml-0.5 align-super text-xs font-normal text-night-500"
+                  className="ml-0.5 align-super text-xs font-normal text-night-400"
                 >
                   ?
                 </span>
               )}
             </dd>
-            <dd className="mt-0.5 text-xs text-night-500">
+            <dd className="mt-0.5 text-xs text-night-400">
               {played ? (
                 <>
                   peak <span className="font-mono text-night-400">{peak}</span> &middot; {r!.games}{" "}

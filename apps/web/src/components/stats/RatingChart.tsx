@@ -17,7 +17,7 @@ export interface RatingChartProps {
 export default function RatingChart({ history }: RatingChartProps) {
   if (history.length < 2) {
     return (
-      <div className="bg-night-800 rounded-lg p-4 flex items-center justify-center h-48 text-night-500 text-sm">
+      <div className="bg-night-800 rounded-lg p-4 flex items-center justify-center h-48 text-night-400 text-sm">
         Play more rated games to see your rating chart
       </div>
     );

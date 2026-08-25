@@ -13,6 +13,15 @@ interface ChessBoardProps {
   fen: string;
   orientation: "white" | "black";
   movable: boolean;
+  /**
+   * Which colour this person plays. Defaults to `orientation`, which is right
+   * for a normal game where the board faces you.
+   *
+   * Needed separately from `movable` because Chessground decides "move now" vs
+   * "premove" by comparing this against whose turn it is. Analysis boards where
+   * both sides are movable should leave it undefined.
+   */
+  playerColor?: "white" | "black";
   premovable?: boolean;
   /** Called when a premove is set or cleared, for UI feedback. */
   onPremoveSet?: (from: string | null, to: string | null) => void;
@@ -95,6 +104,7 @@ export default function ChessBoard({
   fen,
   orientation,
   movable,
+  playerColor,
   premovable,
   onPremoveSet,
   coordinates: showCoords = true,
@@ -148,7 +158,15 @@ export default function ChessBoard({
       coordinates: showCoords,
       movable: {
         free: false,
-        color: movable ? turnColor : undefined,
+        // The PLAYER's colour, not whose turn it is.
+        //
+        // Chessground works out whether a drag is a move or a premove by
+        // comparing movable.color against turnColor. Setting it to turnColor
+        // meant the two were always equal, so nothing was ever a premove — and
+        // when it was the opponent's turn the prop was false and the colour was
+        // undefined, so the board did not know which pieces you could even
+        // pick up. Premoves could not be set at all.
+        color: premovable ? (playerColor ?? orientation) : movable ? turnColor : undefined,
         dests: movable ? getLegalDests(fen) : new Map(),
         showDests: true,
       },
@@ -215,7 +233,15 @@ export default function ChessBoard({
       coordinates: showCoords,
       movable: {
         free: false,
-        color: movable ? turnColor : undefined,
+        // The PLAYER's colour, not whose turn it is.
+        //
+        // Chessground works out whether a drag is a move or a premove by
+        // comparing movable.color against turnColor. Setting it to turnColor
+        // meant the two were always equal, so nothing was ever a premove — and
+        // when it was the opponent's turn the prop was false and the colour was
+        // undefined, so the board did not know which pieces you could even
+        // pick up. Premoves could not be set at all.
+        color: premovable ? (playerColor ?? orientation) : movable ? turnColor : undefined,
         dests: movable ? getLegalDests(fen) : new Map(),
         showDests: true,
       },
@@ -223,6 +249,10 @@ export default function ChessBoard({
       check: check || false,
       premovable: {
         enabled: !!premovable,
+        showDests: true,
+        // Keep the premove drawn after the opponent moves, so it is visible
+        // for the instant before it plays.
+        castle: true,
       },
       draggable: {
         enabled: movable || !!premovable,
@@ -248,7 +278,7 @@ export default function ChessBoard({
     // Chessground stores a premove but never plays it on its own. Without this,
     // a premove is drawn on the board, survives the opponent's move, and then
     // silently does nothing — which is worse than having no premove at all.
-    if (movable && premovable) {
+    if (premovable) {
       // Deferred a tick so the new position is committed before the premove is
       // validated against it.
       const t = setTimeout(() => apiRef.current?.playPremove(), 0);
@@ -265,6 +295,7 @@ export default function ChessBoard({
     highlightedSquares,
     arrows,
     handleMove,
+    playerColor,
   ]);
 
   function selectPromotion(piece: string) {

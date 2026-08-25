@@ -10,7 +10,9 @@ export type MoveClassification =
   | "INACCURACY"
   | "MISTAKE"
   | "BLUNDER"
-  | "FORCED";
+  | "FORCED"
+  /** Established opening theory. Not judged on evaluation. */
+  | "BOOK";
 
 /**
  * A move with its position in the game.

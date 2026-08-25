@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { Flag, FLAG_COUNTRIES } from "@aurora/ui";
+import { enginesFor } from "@aurora/chess";
 import api from "../lib/api";
 import FlairPicker from "./FlairPicker";
 import { useAuthStore } from "../stores/auth";
+import { useSettingsStore } from "../stores/settings";
 
 const INPUT =
-  "w-full rounded-lg border border-night-700 bg-night-800 px-3.5 py-2.5 text-white placeholder:text-night-500 focus:border-aurora-cyan focus:outline-none";
+  "w-full rounded-lg border border-night-700 bg-night-800 px-3.5 py-2.5 text-white placeholder:text-night-400 focus:border-aurora-cyan focus:outline-none";
 
 function Row({
   label,
@@ -22,7 +24,7 @@ function Row({
     <label className="block">
       <span className="mb-1.5 block text-sm font-medium">{label}</span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-night-500">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-night-400">{hint}</span>}
     </label>
   );
 }
@@ -42,6 +44,10 @@ export default function AccountSettings({ earnedFlairs = [] }: { earnedFlairs?: 
   const [email, setEmail] = useState(user?.email ?? "");
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? "");
   const [hideGames, setHideGames] = useState(false);
+  const playEngine = useSettingsStore((s) => s.playEngine);
+  const setPlayEngine = useSettingsStore((s) => s.setPlayEngine);
+  const analysisEngine = useSettingsStore((s) => s.analysisEngine);
+  const setAnalysisEngine = useSettingsStore((s) => s.setAnalysisEngine);
   const [countryCode, setCountryCode] = useState(user?.countryCode ?? "");
   const [bio, setBio] = useState(user?.bio ?? "");
   const [emailPassword, setEmailPassword] = useState("");
@@ -153,10 +159,41 @@ export default function AccountSettings({ earnedFlairs = [] }: { earnedFlairs?: 
         />
       </Row>
 
+      <Row
+        label="Engine for bot games"
+        hint="Runs in your browser. Bigger is stronger; smaller downloads faster."
+      >
+        <select
+          value={playEngine}
+          onChange={(e) => setPlayEngine(e.target.value)}
+          className={INPUT}
+        >
+          {enginesFor("play").map((eng) => (
+            <option key={eng.id} value={eng.id}>
+              {eng.name} — {eng.sizeMb}MB
+            </option>
+          ))}
+        </select>
+      </Row>
+
+      <Row label="Engine for analysis" hint="Only engines that can evaluate positions.">
+        <select
+          value={analysisEngine}
+          onChange={(e) => setAnalysisEngine(e.target.value)}
+          className={INPUT}
+        >
+          {enginesFor("analyse").map((eng) => (
+            <option key={eng.id} value={eng.id}>
+              {eng.name} — {eng.sizeMb}MB
+            </option>
+          ))}
+        </select>
+      </Row>
+
       <div>
         <span className="mb-1.5 block text-sm font-medium">Flair</span>
         <FlairPicker earned={earnedFlairs} />
-        <span className="mt-1 block text-xs text-night-500">
+        <span className="mt-1 block text-xs text-night-400">
           One badge you have earned, worn beside your name.
         </span>
       </div>

@@ -172,7 +172,7 @@ export default function InvitesPage() {
         {loading ? (
           <p className="text-night-400 text-center">Loading...</p>
         ) : invites.length === 0 ? (
-          <p className="text-night-500 text-center py-8">No invites yet. Generate one above!</p>
+          <p className="text-night-400 text-center py-8">No invites yet. Generate one above!</p>
         ) : (
           <div className="space-y-2">
             {invites.map((inv) => (
@@ -195,7 +195,7 @@ export default function InvitesPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-night-500 mt-1">
+                  <p className="text-xs text-night-400 mt-1">
                     {inv.used
                       ? `Used by ${inv.usedBy} on ${new Date(inv.usedAt!).toLocaleDateString()}`
                       : `Created ${new Date(inv.createdAt).toLocaleDateString()}`}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
+import { identifyOpening } from "@aurora/chess";
 
 interface Move {
   ply: number;
@@ -9,6 +10,13 @@ interface Move {
 
 interface MoveListProps {
   moves: Move[];
+  /**
+   * Show the opening name above the list, updating as the line develops.
+   *
+   * Off by default so the component stays usable in tight panels where a
+   * two-line header would cost more than it gives.
+   */
+  showOpening?: boolean;
   currentPly: number;
   onGoToPly: (ply: number) => void;
   onMoveHover?: (ply: number) => void;
@@ -26,11 +34,16 @@ interface MoveListProps {
  */
 export default function MoveList({
   moves,
+  showOpening = false,
   currentPly,
   onGoToPly,
   onMoveHover,
   onMoveHoverEnd,
 }: MoveListProps) {
+  // Recomputed from the moves themselves rather than passed in, so the name
+  // stays correct when the list updates mid-game.
+  const opening = showOpening ? identifyOpening(moves.map((m) => m.san)) : null;
+
   const currentRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showNewMoves, setShowNewMoves] = useState(false);
@@ -82,7 +95,7 @@ export default function MoveList({
 
   if (moves.length === 0) {
     return (
-      <div className="bg-night-900 rounded-lg p-4 text-night-500 text-sm text-center">
+      <div className="bg-night-900 rounded-lg p-4 text-night-400 text-sm text-center">
         No moves yet
       </div>
     );
@@ -90,11 +103,19 @@ export default function MoveList({
 
   return (
     <div className="relative">
+      {opening?.opening && (
+        <div className="mb-1 flex items-baseline gap-2 rounded-lg bg-night-900 px-3 py-1.5">
+          <span className="shrink-0 rounded bg-night-800 px-1.5 py-0.5 font-mono text-[10px] text-night-400">
+            {opening.opening.eco}
+          </span>
+          <span className="truncate text-xs text-night-300">{opening.opening.name}</span>
+        </div>
+      )}
       <div ref={containerRef} className="bg-night-900 rounded-lg p-3 overflow-y-auto max-h-80">
         <div className="space-y-0.5">
           {pairs.map((pair) => (
             <div key={pair.moveNumber} className="flex items-center text-sm">
-              <span className="w-8 text-night-500 text-right mr-2 shrink-0">
+              <span className="w-8 text-night-400 text-right mr-2 shrink-0">
                 {pair.moveNumber}.
               </span>
               {pair.white && (
@@ -105,7 +126,7 @@ export default function MoveList({
                   onMouseLeave={() => onMoveHoverEnd?.()}
                   className={`px-2 py-0.5 rounded mr-1 min-w-[4rem] text-left font-mono transition-colors ${
                     pair.white.ply === currentPly
-                      ? "bg-aurora-cyan text-white"
+                      ? "bg-aurora-cyan text-night-950"
                       : "hover:bg-night-800 text-night-300"
                   }`}
                 >
@@ -120,7 +141,7 @@ export default function MoveList({
                   onMouseLeave={() => onMoveHoverEnd?.()}
                   className={`px-2 py-0.5 rounded min-w-[4rem] text-left font-mono transition-colors ${
                     pair.black.ply === currentPly
-                      ? "bg-aurora-cyan text-white"
+                      ? "bg-aurora-cyan text-night-950"
                       : "hover:bg-night-800 text-night-300"
                   }`}
                 >

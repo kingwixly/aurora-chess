@@ -15,7 +15,7 @@ const LABELS: Record<string, { text: string; color: string }> = {
   INACCURACY: { text: "Inaccuracy", color: "text-yellow-400" },
   MISTAKE: { text: "Mistake", color: "text-orange-400" },
   BLUNDER: { text: "Blunder!", color: "text-red-400" },
-  FORCED: { text: "Forced", color: "text-night-500" },
+  FORCED: { text: "Forced", color: "text-night-400" },
   BOOK: { text: "Book Move", color: "text-purple-400" },
 };
 

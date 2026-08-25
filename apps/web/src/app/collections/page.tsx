@@ -114,7 +114,7 @@ export default function CollectionsPage() {
             ))}
           </div>
         ) : collections.length === 0 ? (
-          <div className="text-center text-night-500 py-12">
+          <div className="text-center text-night-400 py-12">
             <p>No collections yet.</p>
             <p className="text-sm mt-1">Create one above to organize your games!</p>
           </div>

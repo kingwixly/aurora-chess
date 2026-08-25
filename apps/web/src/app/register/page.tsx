@@ -121,7 +121,7 @@ function RegisterForm() {
               minLength={8}
               className="w-full rounded-lg border border-night-700 bg-night-800 px-3.5 py-2.5 text-white placeholder:text-night-400 focus:border-aurora-cyan focus:outline-none focus:ring-1 focus:ring-aurora-cyan"
             />
-            <p className="text-xs text-night-500 mt-1">Minimum 8 characters</p>
+            <p className="text-xs text-night-400 mt-1">Minimum 8 characters</p>
           </div>
           {/* Optional, and last. Signing up should not begin with a hurdle,
               but an outstanding invite must still work — otherwise every code

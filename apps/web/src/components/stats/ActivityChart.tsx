@@ -13,7 +13,7 @@ export default function ActivityChart({ activity }: ActivityChartProps) {
     return (
       <div className="bg-night-800 rounded-lg p-4">
         <h3 className="text-sm font-semibold text-night-300 mb-2">Activity (30 days)</h3>
-        <p className="text-night-500 text-sm">No recent games</p>
+        <p className="text-night-400 text-sm">No recent games</p>
       </div>
     );
   }

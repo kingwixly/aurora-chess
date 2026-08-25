@@ -13,7 +13,6 @@ import {
   type GameModeSettings,
   type GameModePreset,
   GAME_MODE_PRESETS,
-  GAME_MODE_LABELS,
   DEFAULT_CUSTOM,
 } from "../../../../lib/gameModes";
 import {
@@ -53,17 +52,6 @@ import ReactionOverlay from "../../../../components/ReactionOverlay";
 import Confetti from "../../../../components/Confetti";
 import EngineLines from "../../../../components/EngineLines";
 import type { EngineLine } from "../../../../lib/useStockfish";
-
-function eloLabel(elo: number): string {
-  if (elo < 400) return "Beginner";
-  if (elo < 800) return "Novice";
-  if (elo < 1200) return "Intermediate";
-  if (elo < 1600) return "Advanced";
-  if (elo < 2000) return "Expert";
-  if (elo < 2400) return "Master";
-  if (elo < 2800) return "Grandmaster";
-  return "Engine";
-}
 
 /** Build a fallback BotPersonality from the raw Elo slider value (custom elo mode). */
 function buildFallbackPersonality(elo: number): BotPersonality {
@@ -990,7 +978,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
           <div className="text-4xl mb-4">♟️</div>
           <h1 className="text-xl font-bold text-red-400 mb-2 font-display">Game Error</h1>
           <p className="text-sm text-night-400 mb-2">{error}</p>
-          <p className="text-xs text-night-500 mb-4">
+          <p className="text-xs text-night-400 mb-4">
             Your game progress has been saved automatically.
           </p>
           <div className="flex gap-2 justify-center">
@@ -1183,6 +1171,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
               <EngineLines lines={engineLines} fen={displayFen} loading={thinking} />
             )}
             <MoveList
+              showOpening
               moves={moves}
               currentPly={currentPly}
               onGoToPly={setCurrentPly}
@@ -1236,7 +1225,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
               </button>
               <button
                 onClick={() => setShowCoordinates((c) => !c)}
-                className={`px-3 py-1.5 rounded-lg text-xs ${showCoordinates ? "bg-night-800 hover:bg-night-700" : "bg-night-800 text-night-500"}`}
+                className={`px-3 py-1.5 rounded-lg text-xs ${showCoordinates ? "bg-night-800 hover:bg-night-700" : "bg-night-800 text-night-400"}`}
               >
                 a-h
               </button>
@@ -1275,13 +1264,13 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => setShowShortcuts(true)}
-                className="py-1 text-xs text-night-500 hover:text-night-300"
+                className="py-1 text-xs text-night-400 hover:text-night-300"
               >
                 Shortcuts (?)
               </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className="py-1 text-xs text-night-500 hover:text-night-300"
+                className="py-1 text-xs text-night-400 hover:text-night-300"
                 aria-label="Toggle dark mode"
               >
                 {darkMode ? "\u2600\uFE0F Light" : "\uD83C\uDF19 Dark"}
@@ -1365,6 +1354,15 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
                   className="w-full rounded-lg py-2.5 font-medium ring-1 ring-inset ring-night-700 transition-colors hover:bg-night-800"
                 >
                   Choose a different opponent
+                </button>
+                {/* Every route out of this screen led back into bot play. There
+                    was no way to reach the rest of the site without the browser
+                    back button. */}
+                <button
+                  onClick={() => router.push("/play")}
+                  className="w-full rounded-lg py-2.5 font-medium ring-1 ring-inset ring-night-700 transition-colors hover:bg-night-800"
+                >
+                  Main menu
                 </button>
                 {gameId && isOnline && (
                   <button

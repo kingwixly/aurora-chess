@@ -73,7 +73,7 @@ export default function CollectionDetailPage() {
         {loading ? (
           <p className="text-night-400 text-center">Loading...</p>
         ) : games.length === 0 ? (
-          <p className="text-night-500 text-center py-8">No games in this collection yet.</p>
+          <p className="text-night-400 text-center py-8">No games in this collection yet.</p>
         ) : (
           <div className="space-y-2">
             {games.map((g) => (

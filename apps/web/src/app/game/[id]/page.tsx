@@ -535,6 +535,7 @@ export default function GamePage() {
               </div>
             )}
             <MoveList
+              showOpening
               moves={moves}
               currentPly={currentPly}
               onGoToPly={goToPly}
@@ -599,7 +600,7 @@ export default function GamePage() {
               </button>
               <button
                 onClick={() => setShowCoordinates((c) => !c)}
-                className={`px-3 py-1.5 rounded text-xs ${showCoordinates ? "bg-night-800 hover:bg-night-700" : "bg-night-800 text-night-500"}`}
+                className={`px-3 py-1.5 rounded text-xs ${showCoordinates ? "bg-night-800 hover:bg-night-700" : "bg-night-800 text-night-400"}`}
               >
                 a-h
               </button>
@@ -672,13 +673,13 @@ export default function GamePage() {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => setShowShortcuts(true)}
-                className="py-1 text-xs text-night-500 hover:text-night-300"
+                className="py-1 text-xs text-night-400 hover:text-night-300"
               >
                 Shortcuts (?)
               </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className="py-1 text-xs text-night-500 hover:text-night-300"
+                className="py-1 text-xs text-night-400 hover:text-night-300"
                 aria-label="Toggle dark mode"
               >
                 {darkMode ? "\u2600\uFE0F Light" : "\uD83C\uDF19 Dark"}
@@ -717,7 +718,7 @@ export default function GamePage() {
           {topPlayer && (
             <button
               onClick={() => setReporting(true)}
-              className="text-xs text-night-500 transition-colors hover:text-red-300"
+              className="text-xs text-night-400 transition-colors hover:text-red-300"
             >
               Report {topPlayer.username}
             </button>

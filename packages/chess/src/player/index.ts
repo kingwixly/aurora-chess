@@ -60,3 +60,11 @@ export {
 } from "./fide";
 export type { Country } from "./countries";
 export { COUNTRIES, flagEmoji, getCountry, isValidCountryCode } from "./countries";
+export type { ChallengeDecision, ChallengeAction } from "./concurrency";
+export {
+  CONCURRENT_LIMIT,
+  concurrentLimitFor,
+  countsTowardLimit,
+  canAcceptChallenge,
+  actionsForChallenge,
+} from "./concurrency";

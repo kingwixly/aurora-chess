@@ -14,8 +14,8 @@ const ALL_CLASSIFICATIONS = [
 ];
 
 describe("CLASSIFICATION_COLORS", () => {
-  it("has all 9 classification keys", () => {
-    expect(Object.keys(CLASSIFICATION_COLORS)).toHaveLength(9);
+  it("has a colour and symbol for every classification", () => {
+    expect(Object.keys(CLASSIFICATION_COLORS)).toHaveLength(10);
     for (const key of ALL_CLASSIFICATIONS) {
       expect(CLASSIFICATION_COLORS).toHaveProperty(key);
     }
@@ -36,8 +36,8 @@ describe("CLASSIFICATION_COLORS", () => {
 });
 
 describe("CLASSIFICATION_SYMBOLS", () => {
-  it("has all 9 classification keys", () => {
-    expect(Object.keys(CLASSIFICATION_SYMBOLS)).toHaveLength(9);
+  it("has a colour and symbol for every classification", () => {
+    expect(Object.keys(CLASSIFICATION_SYMBOLS)).toHaveLength(10);
     for (const key of ALL_CLASSIFICATIONS) {
       expect(CLASSIFICATION_SYMBOLS).toHaveProperty(key);
     }

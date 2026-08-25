@@ -30,12 +30,18 @@ interface SettingsState {
   materialStyle: MaterialStyle;
   /** In-game chat. Off by default — most of it is tilt. */
   gameChatEnabled: boolean;
+  /** Engine used for bot games. */
+  playEngine: string;
+  /** Engine used on the analysis board. */
+  analysisEngine: string;
   soundEnabled: boolean;
   setDarkMode: (dark: boolean) => void;
   setBoardTheme: (theme: BoardTheme) => void;
   setPieceSet: (set: PieceSet) => void;
   setMaterialStyle: (style: MaterialStyle) => void;
   setGameChatEnabled: (on: boolean) => void;
+  setPlayEngine: (id: string) => void;
+  setAnalysisEngine: (id: string) => void;
   setSoundEnabled: (enabled: boolean) => void;
   loadFromUser: (prefs: {
     darkMode: boolean;
@@ -63,6 +69,16 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   boardTheme: "classic",
   pieceSet: "fontaine",
   soundEnabled: true,
+  playEngine: ((): string => {
+    if (typeof window === "undefined") return "stockfish-17-lite";
+    return window.localStorage.getItem("aurora-play-engine") ?? "stockfish-17-lite";
+  })(),
+
+  analysisEngine: ((): string => {
+    if (typeof window === "undefined") return "stockfish-17-lite";
+    return window.localStorage.getItem("aurora-analysis-engine") ?? "stockfish-17-lite";
+  })(),
+
   gameChatEnabled: ((): boolean => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("aurora-game-chat") === "on";
@@ -82,6 +98,24 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   setBoardTheme: (theme) => {
     set({ boardTheme: theme });
     savePreference({ boardTheme: theme });
+  },
+
+  setPlayEngine: (playEngine) => {
+    set({ playEngine });
+    try {
+      localStorage.setItem("aurora-play-engine", playEngine);
+    } catch {
+      // Private browsing; the default applies for this session.
+    }
+  },
+
+  setAnalysisEngine: (analysisEngine) => {
+    set({ analysisEngine });
+    try {
+      localStorage.setItem("aurora-analysis-engine", analysisEngine);
+    } catch {
+      // Private browsing; the default applies for this session.
+    }
   },
 
   setGameChatEnabled: (gameChatEnabled) => {

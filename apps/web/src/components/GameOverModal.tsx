@@ -169,11 +169,21 @@ export default function GameOverModal({
               </Link>
             )}
 
+            {/* Two different exits. Dismissing the modal leaves you staring
+                at a finished position with no route out, which is why there
+                was no way back to the menu from here. */}
+            <Link
+              href="/play"
+              className="block w-full rounded-lg py-2.5 text-center font-medium ring-1 ring-inset ring-night-700 transition-colors hover:bg-night-800"
+            >
+              Back to the menu
+            </Link>
+
             <button
               onClick={onClose}
               className="w-full rounded-lg py-2.5 font-medium text-night-400 transition-colors hover:text-white"
             >
-              Back to the board
+              Stay on the board
             </button>
           </div>
         </div>

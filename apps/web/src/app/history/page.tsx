@@ -80,7 +80,7 @@ export default function HistoryPage() {
     win: "text-emerald-400",
     loss: "text-red-400",
     draw: "text-night-400",
-    aborted: "text-night-500",
+    aborted: "text-night-400",
   };
 
   if (isLoading || !user) {
@@ -103,7 +103,7 @@ export default function HistoryPage() {
             ))}
           </div>
         ) : games.length === 0 ? (
-          <div className="text-center text-night-500 py-12">
+          <div className="text-center text-night-400 py-12">
             <p>No games played yet.</p>
             <Link href="/play" className="text-aurora-cyan hover:underline mt-2 inline-block">
               Play a game
@@ -125,7 +125,7 @@ export default function HistoryPage() {
                           {pr === "win" ? "W" : pr === "loss" ? "L" : pr === "draw" ? "D" : "—"}
                         </span>
                         <span className="font-medium text-sm truncate">vs {getOpponent(g)}</span>
-                        <span className="text-xs text-night-500">{g.timeControl}</span>
+                        <span className="text-xs text-night-400">{g.timeControl}</span>
                       </div>
                       <div className="text-xs text-night-400 mt-1">
                         {RESULT_LABELS[g.result || ""] || g.status}

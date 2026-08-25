@@ -4,6 +4,15 @@ import { classifyMove, computeAccuracy } from "./classify.js";
 describe("classifyMove", () => {
   const startingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+  /**
+   * A middlegame position, well out of book.
+   *
+   * The threshold tests below are about centipawn loss, not openings. Run from
+   * the starting position they now return BOOK — which is correct behaviour and
+   * makes them test nothing.
+   */
+  const midgameFen = "r1bq1rk1/pp2bppp/2n1pn2/2pp4/3P1B2/2PBPN2/PP1N1PPP/R2Q1RK1 w - - 0 9";
+
   it("should classify forced move when only one legal move exists", () => {
     // King in check with only one escape
     const fen = "8/8/8/8/8/5k2/4q3/7K w - - 0 1"; // Kh1, only move is Kg1 or similar
@@ -14,11 +23,11 @@ describe("classifyMove", () => {
 
   it("should classify as GREAT for cp loss 0-5", () => {
     const result = classifyMove(
-      startingFen,
-      "e2e4",
+      midgameFen,
+      "f3e5",
       20, // eval before
       18, // eval after (cp loss = 2 for white)
-      "e2e4",
+      "d1c2",
       null
     );
     expect(result.classification).toBe("GREAT");
@@ -26,48 +35,49 @@ describe("classifyMove", () => {
   });
 
   it("should classify as BEST for cp loss 6-10", () => {
-    const result = classifyMove(startingFen, "e2e4", 20, 12, "d2d4", null);
+    const result = classifyMove(midgameFen, "f3e5", 20, 12, "d1c2", null);
     expect(result.classification).toBe("BEST");
     expect(result.cpLoss).toBe(8);
   });
 
   it("should classify as EXCELLENT for cp loss 11-25", () => {
-    const result = classifyMove(startingFen, "e2e4", 30, 10, "d2d4", null);
+    const result = classifyMove(midgameFen, "f3e5", 30, 10, "d1c2", null);
     expect(result.classification).toBe("EXCELLENT");
     expect(result.cpLoss).toBe(20);
   });
 
   it("should classify as GOOD for cp loss 26-50", () => {
-    const result = classifyMove(startingFen, "e2e4", 50, 10, "d2d4", null);
+    const result = classifyMove(midgameFen, "f3e5", 50, 10, "d1c2", null);
     expect(result.classification).toBe("GOOD");
     expect(result.cpLoss).toBe(40);
   });
 
   it("should classify as INACCURACY for cp loss 51-100", () => {
-    const result = classifyMove(startingFen, "e2e4", 100, 25, "d2d4", null);
+    const result = classifyMove(midgameFen, "f3e5", 100, 25, "d1c2", null);
     expect(result.classification).toBe("INACCURACY");
     expect(result.cpLoss).toBe(75);
   });
 
   it("should classify as MISTAKE for cp loss 101-200", () => {
-    const result = classifyMove(startingFen, "e2e4", 200, 50, "d2d4", null);
+    const result = classifyMove(midgameFen, "f3e5", 200, 50, "d1c2", null);
     expect(result.classification).toBe("MISTAKE");
     expect(result.cpLoss).toBe(150);
   });
 
   it("should classify as BLUNDER for cp loss 201+", () => {
-    const result = classifyMove(startingFen, "e2e4", 300, 0, "d2d4", null);
+    const result = classifyMove(midgameFen, "f3e5", 300, 0, "d1c2", null);
     expect(result.classification).toBe("BLUNDER");
     expect(result.cpLoss).toBe(300);
   });
 
   it("should clamp negative cp loss to 0 (move better than expected)", () => {
-    const result = classifyMove(startingFen, "e2e4", 10, 50, "e2e4", null);
+    const result = classifyMove(midgameFen, "f3e5", 10, 50, "e2e4", null);
     expect(result.cpLoss).toBe(0);
   });
 
   it("should handle black's perspective correctly", () => {
-    const blackFen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+    // Black to move, out of book, so the sign handling is what is under test.
+    const blackFen = "r1bq1rk1/pp2bppp/2n1pn2/2pp4/3P1B2/2PBPN2/PP1N1PPP/R2Q1RK1 b - - 0 9";
     // Black eval: before=-30 (good for black), after=20 (bad for black)
     // cpLoss for black = evalAfter - evalBefore = 20 - (-30) = 50
     const result = classifyMove(blackFen, "e7e5", -30, 20, "c7c5", null);
@@ -76,7 +86,7 @@ describe("classifyMove", () => {
   });
 
   it("should return correct evalBefore and evalAfter", () => {
-    const result = classifyMove(startingFen, "e2e4", 15, 25, "e2e4", null);
+    const result = classifyMove(midgameFen, "f3e5", 15, 25, "e2e4", null);
     expect(result.evalBefore).toBe(15);
     expect(result.evalAfter).toBe(25);
   });

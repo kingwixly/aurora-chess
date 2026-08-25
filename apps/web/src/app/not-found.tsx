@@ -7,7 +7,7 @@ export default function NotFound() {
     <main className="min-h-screen bg-night-950">
       <AuroraBand />
       <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="font-mono text-5xl font-bold text-night-700">404</p>
+        <p className="font-mono text-5xl font-bold text-night-400">404</p>
         <h1 className="font-display text-3xl tracking-tight">Nothing here</h1>
         <p className="max-w-sm text-sm text-night-400">
           That page does not exist. It may have moved, or the link may be wrong.

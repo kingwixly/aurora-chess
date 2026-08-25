@@ -20,15 +20,16 @@ export function bandFor(rating: number): CoachingBand {
 }
 
 export type MoveQuality =
-  | "brilliant"
-  | "great"
-  | "best"
-  | "good"
-  | "inaccuracy"
-  | "mistake"
-  | "blunder";
+  /** Established theory. Not judged on evaluation. */
+  "book" | "brilliant" | "great" | "best" | "good" | "inaccuracy" | "mistake" | "blunder";
 
 const TEXT: Record<MoveQuality, Record<CoachingBand, string>> = {
+  book: {
+    beginner: "This is a known opening move — people have played it for centuries.",
+    intermediate: "Book move. This is established theory.",
+    advanced: "Still in book.",
+    expert: "Book.",
+  },
   brilliant: {
     beginner: "A brilliant move. You gave up material and it was worth it.",
     intermediate: "Brilliant — a sacrifice the engine agrees with.",
