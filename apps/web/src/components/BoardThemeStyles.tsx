@@ -41,6 +41,25 @@ const PIECE_ROLES = [
  * with a background image, so a piece set is a stylesheet rather than a
  * component swap. `fontaine` returns nothing, leaving the library default.
  */
+/**
+ * Rotate pieces without rotating the board.
+ *
+ * Chessground positions pieces by transform, so this composes with its own
+ * translation rather than replacing it — hence `rotate(180deg)` applied to the
+ * piece element while Chessground keeps owning placement.
+ */
+const ROTATED_PIECES_CSS = [
+  '[data-rotate-pieces="true"] .cg-wrap piece {',
+  "  transform: rotate(180deg);",
+  "  transform-origin: center;",
+  "}",
+  /* Coordinates and the last-move highlight belong to the board, not the
+     pieces, so they deliberately stay put. */
+  '[data-rotate-pieces="true"] .cg-wrap coords {',
+  "  transform: none;",
+  "}",
+].join("\n");
+
 function pieceSetCss(set: PieceSet): string {
   if (set === "fontaine") return "";
   return PIECE_ROLES.map(([role, code]) =>
@@ -79,6 +98,7 @@ export default function BoardThemeStyles() {
         background-image: ${boardBg} !important;
       }
       ${pieceSetCss(pieceSet)}
+      ${ROTATED_PIECES_CSS}
     `}</style>
   );
 }

@@ -13,7 +13,10 @@ interface Settings {
 }
 
 export default function AdminSettingsPage() {
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -21,9 +24,9 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     adminRequest("get", "/api/v1/admin/settings")
       .then((data) => setSettings(data.settings))
-      .catch(() => toast.show("Failed to load settings", "error"))
+      .catch(() => showToast("Failed to load settings", "error"))
       .finally(() => setLoading(false));
-  }, [toast]);
+  }, [showToast]);
 
   async function save() {
     if (!settings) return;
@@ -31,9 +34,9 @@ export default function AdminSettingsPage() {
     try {
       const data = await adminRequest("put", "/api/v1/admin/settings", settings);
       setSettings(data.settings);
-      toast.show("Settings saved");
+      showToast("Settings saved");
     } catch {
-      toast.show("Failed to save settings", "error");
+      showToast("Failed to save settings", "error");
     } finally {
       setSaving(false);
     }

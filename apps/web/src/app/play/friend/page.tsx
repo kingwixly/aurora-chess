@@ -22,7 +22,10 @@ interface Friend {
 export default function ChallengeFriendPage() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [customMinutes, setCustomMinutes] = useState(10);
@@ -53,7 +56,7 @@ export default function ChallengeFriendPage() {
       const { data } = await api.get("/api/v1/friends");
       setFriends(data.friends);
     } catch {
-      toast.show("Failed to load friends", "error");
+      showToast("Failed to load friends", "error");
     }
   }, []);
 

@@ -66,7 +66,10 @@ function defaultBot(): Partial<Bot> {
 }
 
 export default function AdminBotsPage() {
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [bots, setBots] = useState<Bot[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [search, setSearch] = useState("");
@@ -96,11 +99,11 @@ export default function AdminBotsPage() {
       setBots(data.bots);
       setPagination(data.pagination);
     } catch {
-      toast.show("Failed to load bots", "error");
+      showToast("Failed to load bots", "error");
     } finally {
       setLoading(false);
     }
-  }, [page, search, toast]);
+  }, [page, search, showToast]);
 
   useEffect(() => {
     loadBots();
@@ -149,10 +152,10 @@ export default function AdminBotsPage() {
         if (openingsJson.trim()) data.preferredOpenings = JSON.parse(openingsJson);
 
         await adminRequest("patch", `/api/v1/admin/bots/${editBot.id}`, data);
-        toast.show("Bot updated");
+        showToast("Bot updated");
       } else {
         await adminRequest("post", "/api/v1/admin/bots", data);
-        toast.show("Bot created");
+        showToast("Bot created");
       }
       setEditBot(null);
       setCreateBot(null);
@@ -161,7 +164,7 @@ export default function AdminBotsPage() {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
         "Save failed";
-      toast.show(msg, "error");
+      showToast(msg, "error");
     } finally {
       setActionLoading(false);
     }
@@ -171,13 +174,13 @@ export default function AdminBotsPage() {
     setActionLoading(true);
     try {
       await adminRequest("delete", `/api/v1/admin/bots/${id}`);
-      toast.show("Bot deleted");
+      showToast("Bot deleted");
       await loadBots();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
         "Delete failed";
-      toast.show(msg, "error");
+      showToast(msg, "error");
     } finally {
       setActionLoading(false);
       setConfirm(null);
@@ -188,10 +191,10 @@ export default function AdminBotsPage() {
     setActionLoading(true);
     try {
       await adminRequest("patch", `/api/v1/admin/bots/${bot.id}`, { enabled: !bot.enabled });
-      toast.show(bot.enabled ? "Bot disabled" : "Bot enabled");
+      showToast(bot.enabled ? "Bot disabled" : "Bot enabled");
       await loadBots();
     } catch {
-      toast.show("Toggle failed", "error");
+      showToast("Toggle failed", "error");
     } finally {
       setActionLoading(false);
       setConfirm(null);
@@ -202,10 +205,10 @@ export default function AdminBotsPage() {
     setActionLoading(true);
     try {
       const data = await adminRequest("post", "/api/v1/admin/bots/reseed");
-      toast.show(`Reseed complete: ${data.created} created, ${data.updated} updated`);
+      showToast(`Reseed complete: ${data.created} created, ${data.updated} updated`);
       await loadBots();
     } catch {
-      toast.show("Reseed failed", "error");
+      showToast("Reseed failed", "error");
     } finally {
       setActionLoading(false);
       setConfirm(null);

@@ -68,3 +68,12 @@ export {
   canAcceptChallenge,
   actionsForChallenge,
 } from "./concurrency";
+export type { AltEligibility, AltIndependentSetting } from "./alts";
+export {
+  canCreateAlt,
+  altDenialText,
+  isPerAccount,
+  punishmentApplies,
+  MAX_ALTS,
+  ALT_INDEPENDENT_SETTINGS,
+} from "./alts";

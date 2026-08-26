@@ -70,13 +70,13 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   pieceSet: "fontaine",
   soundEnabled: true,
   playEngine: ((): string => {
-    if (typeof window === "undefined") return "stockfish-17-lite";
-    return window.localStorage.getItem("aurora-play-engine") ?? "stockfish-17-lite";
+    if (typeof window === "undefined") return "stockfish-18";
+    return window.localStorage.getItem("aurora-play-engine") ?? "stockfish-18";
   })(),
 
   analysisEngine: ((): string => {
-    if (typeof window === "undefined") return "stockfish-17-lite";
-    return window.localStorage.getItem("aurora-analysis-engine") ?? "stockfish-17-lite";
+    if (typeof window === "undefined") return "stockfish-18";
+    return window.localStorage.getItem("aurora-analysis-engine") ?? "stockfish-18";
   })(),
 
   gameChatEnabled: ((): boolean => {

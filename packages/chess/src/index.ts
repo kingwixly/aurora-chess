@@ -136,6 +136,7 @@ export {
   ENGINES,
   DEFAULT_ENGINE,
   enginesFor,
+  availableEngines,
   isEngineValidFor,
   resolveEngine,
 } from "./analysis/index";
@@ -163,3 +164,13 @@ export {
   clampStrength,
   bandForStrength,
 } from "./analysis/index";
+
+export type { AltEligibility, AltIndependentSetting } from "./player/index";
+export {
+  canCreateAlt,
+  altDenialText,
+  isPerAccount,
+  punishmentApplies,
+  MAX_ALTS,
+  ALT_INDEPENDENT_SETTINGS,
+} from "./player/index";

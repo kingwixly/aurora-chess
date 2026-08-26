@@ -16,7 +16,10 @@ interface CollectionItem {
 export default function CollectionsPage() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [collections, setCollections] = useState<CollectionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
@@ -36,7 +39,7 @@ export default function CollectionsPage() {
       const { data } = await api.get("/api/v1/collections");
       setCollections(data.collections);
     } catch {
-      toast.show("Failed to load collections", "error");
+      showToast("Failed to load collections", "error");
     } finally {
       setLoading(false);
     }
@@ -67,7 +70,7 @@ export default function CollectionsPage() {
       await api.delete(`/api/v1/collections/${deleteTarget.id}`);
       await loadCollections();
     } catch {
-      toast.show("Failed to delete collection", "error");
+      showToast("Failed to delete collection", "error");
     }
     setDeleteTarget(null);
   }

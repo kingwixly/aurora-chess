@@ -26,7 +26,8 @@ import type { Player } from "@aurora/chess";
 import { CLASSIFICATION_COLORS, CLASSIFICATION_SYMBOLS } from "@aurora/chess";
 import { useClientAnalysis } from "../../../../lib/useClientAnalysis";
 import EngineLines from "../../../../components/EngineLines";
-import { identifyOpening } from "@aurora/chess";
+import { identifyOpening, ENGINES, resolveEngine } from "@aurora/chess";
+import { useSettingsStore } from "../../../../stores/settings";
 import type { EngineLine } from "../../../../lib/useStockfish";
 import { useOnlineStatus } from "../../../../lib/useOnlineStatus";
 import AnalysisProgress from "../../../../components/AnalysisProgress";
@@ -69,6 +70,11 @@ export default function AnalysisPage() {
   const [gameMoves, setGameMoves] = useState<
     { ply: number; san: string; uci: string; fen: string }[]
   >([]);
+  // The engine the player picked, falling back if their stored choice cannot
+  // analyse — Maia predicts human moves rather than best ones.
+  const analysisEngine = useSettingsStore((st) => st.analysisEngine);
+  const chosenEngine = resolveEngine(analysisEngine, "analyse");
+
   const clientAnalysis = useClientAnalysis();
   const [candidateLines, setCandidateLines] = useState<EngineLine[]>([]);
   const [linesLoading, setLinesLoading] = useState(false);
@@ -174,8 +180,15 @@ export default function AnalysisPage() {
       ? startingFen
       : analysis?.feedback.find((f) => f.ply === currentPly)?.fen || startingFen;
 
+  // Candidate lines share ONE Stockfish worker with the bulk analysis run.
+  //
+  // Requesting them while that run is in progress makes the two contend for the
+  // same engine: the bulk pass stalls, never completes, and the board stays
+  // disabled waiting for it. So this waits until the run is finished, which is
+  // also when someone is actually stepping through looking for alternatives.
   useEffect(() => {
     if (!clientAnalysis.engineReady || !currentFen) return;
+    if (clientAnalysis.analysing) return;
     let cancelled = false;
     setLinesLoading(true);
     clientAnalysis
@@ -193,7 +206,7 @@ export default function AnalysisPage() {
     return () => {
       cancelled = true;
     };
-  }, [currentFen, clientAnalysis.engineReady]);
+  }, [currentFen, clientAnalysis.engineReady, clientAnalysis.analysing]);
 
   // Current eval
   const currentFeedback = analysis?.feedback.find((f) => f.ply === currentPly);
@@ -265,7 +278,7 @@ export default function AnalysisPage() {
         <div className="bg-night-900 rounded-lg p-8 max-w-md w-full text-center">
           <h1 className="text-xl font-bold mb-4 font-display">Game Analysis</h1>
           <p className="text-night-400 mb-6">
-            Analyse every move with Stockfish.
+            Analyse every move with {ENGINES[chosenEngine]?.name ?? "the engine"}.
             {isOnline
               ? " Deep analysis (depth 18) saved to your account."
               : " Running in your browser (depth 14)."}

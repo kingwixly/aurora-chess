@@ -29,7 +29,10 @@ interface InviteStats {
 export default function InvitesPage() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [invites, setInvites] = useState<InviteItem[]>([]);
   const [stats, setStats] = useState<InviteStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,13 +69,13 @@ export default function InvitesPage() {
     setGenerating(true);
     try {
       const { data } = await api.post("/api/v1/invites");
-      toast.show(`Invite created: ${data.code.slice(0, 8)}...`);
+      showToast(`Invite created: ${data.code.slice(0, 8)}...`);
       await loadData();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
         "Failed to generate invite";
-      toast.show(msg, "error");
+      showToast(msg, "error");
     } finally {
       setGenerating(false);
     }
@@ -83,18 +86,18 @@ export default function InvitesPage() {
     const link = `${siteUrl}/register?invite=${code}`;
     try {
       await navigator.clipboard.writeText(link);
-      toast.show("Invite link copied");
+      showToast("Invite link copied");
     } catch {
-      toast.show("Failed to copy", "error");
+      showToast("Failed to copy", "error");
     }
   }
 
   async function copyCode(code: string) {
     try {
       await navigator.clipboard.writeText(code);
-      toast.show("Code copied");
+      showToast("Code copied");
     } catch {
-      toast.show("Failed to copy", "error");
+      showToast("Failed to copy", "error");
     }
   }
 

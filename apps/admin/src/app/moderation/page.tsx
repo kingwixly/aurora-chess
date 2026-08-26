@@ -59,7 +59,10 @@ const DURATIONS = [
 ];
 
 export default function ModerationPage() {
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [bans, setBans] = useState<Ban[]>([]);
   const [reports, setReports] = useState<CheatReport[]>([]);
   const [appeals, setAppeals] = useState<Appeal[]>([]);
@@ -87,11 +90,11 @@ export default function ModerationPage() {
       setAppeals(a.data.appeals ?? []);
       setPlayerReports(pr.data.reports ?? []);
     } catch {
-      toast.show("Could not load moderation data", "error");
+      showToast("Could not load moderation data", "error");
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [showToast]);
 
   useEffect(() => {
     load();
@@ -109,12 +112,12 @@ export default function ModerationPage() {
         reason: reason.trim(),
         hours,
       });
-      toast.show("Ban issued");
+      showToast("Ban issued");
       setTarget("");
       setReason("");
       await load();
     } catch (err: unknown) {
-      toast.show(
+      showToast(
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
           "Could not issue ban",
         "error"
@@ -128,7 +131,7 @@ export default function ModerationPage() {
     setBusy(true);
     try {
       await adminRequest("post", `/api/v1/admin/bans/${id}/lift`);
-      toast.show("Ban lifted");
+      showToast("Ban lifted");
       await load();
     } finally {
       setBusy(false);
@@ -139,7 +142,7 @@ export default function ModerationPage() {
     setBusy(true);
     try {
       await adminRequest("patch", `/api/v1/admin/cheat-reports/${id}`, { verdict });
-      toast.show("Report reviewed");
+      showToast("Report reviewed");
       await load();
     } finally {
       setBusy(false);
@@ -149,15 +152,13 @@ export default function ModerationPage() {
   async function decideAppeal(id: string, status: "ACCEPTED" | "DENIED") {
     const decision = decisions[id]?.trim();
     if (!decision) {
-      toast.show("Record your reasoning before deciding", "error");
+      showToast("Record your reasoning before deciding", "error");
       return;
     }
     setBusy(true);
     try {
       await adminRequest("patch", `/api/v1/admin/appeals/${id}`, { status, decision });
-      toast.show(
-        status === "ACCEPTED" ? "Appeal accepted, punishment overturned" : "Appeal denied"
-      );
+      showToast(status === "ACCEPTED" ? "Appeal accepted, punishment overturned" : "Appeal denied");
       await load();
     } finally {
       setBusy(false);
@@ -168,7 +169,7 @@ export default function ModerationPage() {
     setBusy(true);
     try {
       await adminRequest("patch", `/api/v1/admin/reports/${id}`, { outcome });
-      toast.show("Report reviewed");
+      showToast("Report reviewed");
       await load();
     } finally {
       setBusy(false);

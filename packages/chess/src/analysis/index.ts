@@ -11,7 +11,14 @@ export {
 } from "./coaching";
 
 export type { EngineId, EngineSpec } from "./engines";
-export { ENGINES, DEFAULT_ENGINE, enginesFor, isEngineValidFor, resolveEngine } from "./engines";
+export {
+  ENGINES,
+  DEFAULT_ENGINE,
+  enginesFor,
+  availableEngines,
+  isEngineValidFor,
+  resolveEngine,
+} from "./engines";
 
 export type { CoachPersona, CoachNote } from "./coachMode";
 export {

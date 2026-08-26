@@ -29,7 +29,10 @@ interface FriendRequest {
 export default function FriendsPage() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
 
   const [friends, setFriends] = useState<Friend[]>([]);
   const [filter, setFilter] = useState("");
@@ -65,7 +68,7 @@ export default function FriendsPage() {
       setFriends(friendsRes.data.friends);
       setRequests(requestsRes.data.requests);
     } catch {
-      toast.show("Failed to load friends", "error");
+      showToast("Failed to load friends", "error");
     }
   }, []);
 

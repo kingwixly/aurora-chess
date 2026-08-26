@@ -50,7 +50,10 @@ interface Pagination {
 }
 
 export default function AdminUsersPage() {
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [users, setUsers] = useState<User[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [search, setSearch] = useState("");
@@ -86,9 +89,9 @@ export default function AdminUsersPage() {
   async function copyPassword() {
     try {
       await navigator.clipboard.writeText(newPassword);
-      toast.show("Password copied to clipboard");
+      showToast("Password copied to clipboard");
     } catch {
-      toast.show("Failed to copy", "error");
+      showToast("Failed to copy", "error");
     }
   }
 
@@ -102,7 +105,7 @@ export default function AdminUsersPage() {
         role: newRole,
         verified: true,
       });
-      toast.show("User created");
+      showToast("User created");
       setShowCreate(false);
       setNewEmail("");
       setNewUsername("");
@@ -113,7 +116,7 @@ export default function AdminUsersPage() {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
         "Failed to create user";
-      toast.show(msg, "error");
+      showToast(msg, "error");
     } finally {
       setCreating(false);
     }
@@ -128,11 +131,11 @@ export default function AdminUsersPage() {
       setUsers(data.users);
       setPagination(data.pagination);
     } catch {
-      toast.show("Failed to load users", "error");
+      showToast("Failed to load users", "error");
     } finally {
       setLoading(false);
     }
-  }, [page, search, toast]);
+  }, [page, search, showToast]);
 
   useEffect(() => {
     loadUsers();
@@ -146,13 +149,13 @@ export default function AdminUsersPage() {
     setActionLoading(true);
     try {
       await adminRequest("patch", `/api/v1/admin/users/${id}`, data);
-      toast.show("User updated");
+      showToast("User updated");
       await loadUsers();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
         "Update failed";
-      toast.show(msg, "error");
+      showToast(msg, "error");
     } finally {
       setActionLoading(false);
       setConfirm(null);
@@ -163,14 +166,14 @@ export default function AdminUsersPage() {
     setActionLoading(true);
     try {
       await adminRequest("patch", `/api/v1/admin/users/${id}/title`, patch);
-      toast.show("Titles updated");
+      showToast("Titles updated");
       await loadUsers();
       setTitleEditing(null);
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
         "Title update failed";
-      toast.show(msg, "error");
+      showToast(msg, "error");
     } finally {
       setActionLoading(false);
     }
@@ -181,11 +184,11 @@ export default function AdminUsersPage() {
     setActionLoading(true);
     try {
       await adminRequest("patch", `/api/v1/admin/users/${id}/fide`, patch);
-      toast.show("FIDE details updated");
+      showToast("FIDE details updated");
       await loadUsers();
       setPanelUser(null);
     } catch (err: unknown) {
-      toast.show(
+      showToast(
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
           "Update failed",
         "error"
@@ -200,11 +203,11 @@ export default function AdminUsersPage() {
     setActionLoading(true);
     try {
       await adminRequest("patch", `/api/v1/admin/users/${id}`, { rating, ratingReason });
-      toast.show("Rating updated");
+      showToast("Rating updated");
       await loadUsers();
       setPanelUser(null);
     } catch (err: unknown) {
-      toast.show(
+      showToast(
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
           "Rating update failed",
         "error"
@@ -222,10 +225,10 @@ export default function AdminUsersPage() {
         granted,
         evidence: evidence || undefined,
       });
-      toast.show(granted ? "Badge granted" : "Badge revoked");
+      showToast(granted ? "Badge granted" : "Badge revoked");
       await loadUsers();
     } catch (err: unknown) {
-      toast.show(
+      showToast(
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
           "Badge update failed",
         "error"
@@ -239,13 +242,13 @@ export default function AdminUsersPage() {
     setActionLoading(true);
     try {
       await adminRequest("delete", `/api/v1/admin/users/${id}`);
-      toast.show("User deleted");
+      showToast("User deleted");
       await loadUsers();
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
         "Delete failed";
-      toast.show(msg, "error");
+      showToast(msg, "error");
     } finally {
       setActionLoading(false);
       setConfirm(null);
@@ -632,7 +635,7 @@ export default function AdminUsersPage() {
               await adminRequest("patch", `/api/v1/admin/users/${panelUser.id}/exempt`, {
                 cheatExempt: exempt,
               });
-              toast.show(exempt ? "Exempted from detection" : "Exemption removed");
+              showToast(exempt ? "Exempted from detection" : "Exemption removed");
               await loadUsers();
               setPanelUser(null);
             } finally {

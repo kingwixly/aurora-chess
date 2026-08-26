@@ -17,7 +17,10 @@ interface ExportPGNProps {
  * @returns The export button with a dropdown menu for copy/download actions.
  */
 export default function ExportPGN({ gameId, compact = false }: ExportPGNProps) {
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [loading, setLoading] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -30,7 +33,7 @@ export default function ExportPGN({ gameId, compact = false }: ExportPGNProps) {
       });
       return data;
     } catch {
-      toast.show("Failed to load PGN", "error");
+      showToast("Failed to load PGN", "error");
       return null;
     } finally {
       setLoading(false);
@@ -42,9 +45,9 @@ export default function ExportPGN({ gameId, compact = false }: ExportPGNProps) {
     if (!pgn) return;
     try {
       await navigator.clipboard.writeText(pgn);
-      toast.show("PGN copied to clipboard");
+      showToast("PGN copied to clipboard");
     } catch {
-      toast.show("Failed to copy", "error");
+      showToast("Failed to copy", "error");
     }
     setShowMenu(false);
   }

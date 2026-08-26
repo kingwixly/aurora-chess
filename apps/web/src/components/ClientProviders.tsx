@@ -10,6 +10,8 @@ import TosGate from "./TosGate";
 import { useUpdateNotification, checkDeferredUpdate } from "../lib/useUpdateNotification";
 import { useOnlineStatus } from "../lib/useOnlineStatus";
 import { useInstallPrompt } from "../lib/useInstallPrompt";
+import AppTabBar from "./AppTabBar";
+import { useStandalone } from "../lib/useStandalone";
 import { setDeviceIdProvider } from "@aurora/api-client";
 import { getDeviceId } from "../lib/deviceId";
 
@@ -34,6 +36,7 @@ export default function ClientProviders({ children }: { children: React.ReactNod
   const { canInstall, isInstalled, install } = useInstallPrompt();
   const [showIosBanner, setShowIosBanner] = useState(false);
   const [installDismissed, setInstallDismissed] = useState(false);
+  const standalone = useStandalone();
 
   // Register the device identifier once, before any request goes out.
   useEffect(() => {

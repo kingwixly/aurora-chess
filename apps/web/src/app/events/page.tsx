@@ -26,8 +26,17 @@ const EVENTS: EventEntry[] = [
     name: "Beat WorstFish",
     blurb: "Harder than it sounds.",
     detail:
-      "WorstFish finds the worst legal move in every position — it is not a weakened engine but an inverted one. It will hang everything, refuse every capture it can avoid, and walk its king toward you. Winning is easy. Winning quickly is not, and losing is a genuine achievement.",
+      "WorstFish finds the worst legal move in every position - it is not a weakened engine but an inverted one. It will hang everything, refuse every capture it can avoid, and walk its king toward you. Winning is easy. Winning quickly is not, and losing is a genuine achievement.",
     cta: { label: "Play WorstFish", href: "/play/bot?bot=worstfish" },
+    status: "open",
+  },
+  {
+    id: "drawfish",
+    name: "Draw against DrawFish",
+    blurb: "Sounds easy. It is not.",
+    detail:
+      "DrawFish plays whichever move leaves the position closest to dead level. It will take an immediate draw and refuse a winning one, because winning is further from zero than not winning. Build an advantage and it slides toward defeat as slowly as arithmetic allows - so the game becomes about forcing a result it is actively trying to avoid.",
+    cta: { label: "Play DrawFish", href: "/play/bot?bot=drawfish" },
     status: "open",
   },
   {

@@ -337,6 +337,26 @@ export default function PlayPage() {
             <span className="mt-0.5 block text-sm text-night-400">Play from your home screen</span>
           </button>
         )}
+
+        {/* Deliberately below the fold: this is for a specific situation, not
+            the main way anyone plays. Findable when you want it, not competing
+            with the buttons people came for. */}
+        <section className="mt-10 border-t border-night-700 pt-6">
+          <Link
+            href="/play/otb"
+            className="flex items-center justify-between rounded-xl bg-night-900 px-4 py-3 ring-1 ring-inset ring-night-700 transition-colors hover:bg-night-800"
+          >
+            <span>
+              <span className="block text-sm font-medium">Play in person</span>
+              <span className="block text-xs text-night-400">
+                Real board, one device as the clock. Works offline.
+              </span>
+            </span>
+            <span aria-hidden="true" className="text-night-400">
+              &rarr;
+            </span>
+          </Link>
+        </section>
       </div>
 
       <TimeControlPanel

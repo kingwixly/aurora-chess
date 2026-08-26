@@ -29,7 +29,10 @@ interface GameRecord {
 export default function HistoryPage() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [games, setGames] = useState<GameRecord[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -49,7 +52,7 @@ export default function HistoryPage() {
       setGames(data.games);
       setTotalPages(data.pagination.totalPages);
     } catch {
-      toast.show("Failed to load game history", "error");
+      showToast("Failed to load game history", "error");
     } finally {
       setLoading(false);
     }

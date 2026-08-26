@@ -31,7 +31,10 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function AdminGamesPage() {
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
   const [games, setGames] = useState<Game[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [search, setSearch] = useState("");
@@ -51,11 +54,11 @@ export default function AdminGamesPage() {
       setGames(data.games);
       setPagination(data.pagination);
     } catch {
-      toast.show("Failed to load games", "error");
+      showToast("Failed to load games", "error");
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, toast]);
+  }, [page, search, statusFilter, showToast]);
 
   useEffect(() => {
     loadGames();
@@ -69,10 +72,10 @@ export default function AdminGamesPage() {
     setActionLoading(true);
     try {
       await adminRequest("delete", `/api/v1/admin/games/${id}`);
-      toast.show("Game deleted");
+      showToast("Game deleted");
       await loadGames();
     } catch {
-      toast.show("Delete failed", "error");
+      showToast("Delete failed", "error");
     } finally {
       setActionLoading(false);
       setDeleteTarget(null);

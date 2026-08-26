@@ -23,6 +23,17 @@ interface ChessBoardProps {
    */
   playerColor?: "white" | "black";
   premovable?: boolean;
+  /**
+   * Rotate the PIECES 180 degrees without rotating the board.
+   *
+   * For two people sharing one phone laid flat between them. Flipping the whole
+   * board each turn makes the position appear to jump — squares you were
+   * looking at move somewhere else — which is disorienting when you are also
+   * tracking your opponent's last move. Rotating only the pieces keeps every
+   * square exactly where it was and still presents them upright to whoever is
+   * sitting opposite.
+   */
+  rotatePieces?: boolean;
   /** Called when a premove is set or cleared, for UI feedback. */
   onPremoveSet?: (from: string | null, to: string | null) => void;
   coordinates?: boolean;
@@ -104,6 +115,7 @@ export default function ChessBoard({
   fen,
   orientation,
   movable,
+  rotatePieces,
   playerColor,
   premovable,
   onPremoveSet,

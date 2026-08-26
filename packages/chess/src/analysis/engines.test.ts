@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { ENGINES, DEFAULT_ENGINE, enginesFor, isEngineValidFor, resolveEngine } from "./engines";
+import {
+  ENGINES,
+  DEFAULT_ENGINE,
+  enginesFor,
+  availableEngines,
+  isEngineValidFor,
+  resolveEngine,
+} from "./engines";
 
 describe("catalogue", () => {
   it("describes every engine honestly", () => {
@@ -11,8 +18,8 @@ describe("catalogue", () => {
     }
   });
 
-  it("defaults to something small", () => {
-    // The default is what most people will download without thinking about it.
+  it("defaults to something bundled and reasonably sized", () => {
+    expect(ENGINES[DEFAULT_ENGINE].available).toBe(true);
     expect(ENGINES[DEFAULT_ENGINE].sizeMb).toBeLessThan(10);
   });
 });
@@ -29,9 +36,18 @@ describe("purpose filtering", () => {
     expect(enginesFor("analyse").map((e) => e.id)).not.toContain("worstfish");
   });
 
-  it("orders by download size, smallest first", () => {
-    const sizes = enginesFor("play").map((e) => e.sizeMb);
-    expect([...sizes].sort((a, b) => a - b)).toEqual(sizes);
+  it("puts engines we actually ship first", () => {
+    // An unbundled engine offered above a bundled one means the player picks
+    // it, waits, and silently gets something else.
+    const list = enginesFor("play");
+    const firstUnavailable = list.findIndex((e) => !e.available);
+    const lastAvailable = list.map((e) => e.available).lastIndexOf(true);
+    if (firstUnavailable !== -1) expect(lastAvailable).toBeLessThan(firstUnavailable);
+  });
+
+  it("only offers bundled engines in the picker", () => {
+    for (const e of availableEngines("play")) expect(e.available).toBe(true);
+    for (const e of availableEngines("analyse")) expect(e.available).toBe(true);
   });
 
   it("offers something for both purposes", () => {
@@ -42,14 +58,21 @@ describe("purpose filtering", () => {
 
 describe("resolving a stored choice", () => {
   it("keeps a valid choice", () => {
-    expect(resolveEngine("weiss", "analyse")).toBe("weiss");
+    expect(resolveEngine("stockfish-18", "analyse")).toBe("stockfish-18");
+  });
+
+  it("refuses an engine that is not bundled", () => {
+    // Weiss is catalogued but not shipped. Falling back is the honest
+    // behaviour; pretending it loaded is not.
+    expect(resolveEngine("weiss", "analyse")).toBe(DEFAULT_ENGINE);
   });
 
   it("falls back when the choice does not fit the purpose", () => {
     // A stored preference can outlive the reason it was valid: someone who
     // picked Maia to play against should not silently get it as an analyst.
     expect(resolveEngine("lc0-maia", "analyse")).toBe(DEFAULT_ENGINE);
-    expect(resolveEngine("lc0-maia", "play")).toBe("lc0-maia");
+    // Also unbundled, so it falls back for play too.
+    expect(resolveEngine("lc0-maia", "play")).toBe(DEFAULT_ENGINE);
   });
 
   it("falls back on an unknown id", () => {

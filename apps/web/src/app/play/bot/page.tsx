@@ -114,7 +114,10 @@ export default function PlayBotPage() {
   useEffect(() => {
     if (!isLoading && !user) router.push("/login");
   }, [isLoading, user, router]);
-  const toast = useToast();
+  // Select the function, not the store. Subscribing to the whole store
+  // makes this a new reference on every toast, which turns any dependent
+  // callback into an unstable one and any dependent effect into a loop.
+  const showToast = useToast((s) => s.show);
 
   // Check for in-progress games to resume
   useEffect(() => {
@@ -127,13 +130,13 @@ export default function PlayBotPage() {
       syncOfflineGames().then(({ failed }) => {
         setPendingSyncCount(getPendingCount());
         if (failed > 0) {
-          toast.show(`${failed} game(s) failed to sync — will retry`, "error");
+          showToast(`${failed} game(s) failed to sync — will retry`, "error");
         }
       });
       // Retry any online games that failed to sync moves
       retryPendingSyncs().then(({ synced }) => {
         if (synced > 0) {
-          toast.show(`${synced} game(s) synced successfully`, "success");
+          showToast(`${synced} game(s) synced successfully`, "success");
         }
       });
     }

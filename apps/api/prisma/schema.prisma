@@ -167,6 +167,17 @@ model User {
   cheatReports    CheatReport[]
   usernameHistory UsernameHistory[]
   authTokens      AuthToken[]
+
+  /// Authorised alternate accounts.
+  ///
+  /// Second accounts are normally a ban-evasion signal, so these are opt-in per
+  /// user and granted by staff rather than self-service. `altsEnabled` is the
+  /// grant; `altOf` links a created alt back to its owner so moderation can see
+  /// the whole set at once rather than treating them as unrelated strangers.
+  altsEnabled     Boolean           @default(false)
+  altOf           String?
+  altOwner        User?             @relation("UserAlts", fields: [altOf], references: [id], onDelete: Cascade)
+  alts            User[]            @relation("UserAlts")
   messagesSent    Message[]         @relation("MessageAuthor")
   conversations   ConversationMember[]
 
