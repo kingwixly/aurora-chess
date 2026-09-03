@@ -66,7 +66,7 @@ export default function CollectionDetailPage() {
     <main className="flex flex-col items-center min-h-screen p-4 pt-12">
       <div className="max-w-2xl w-full space-y-4">
         <h1 className="text-2xl font-bold text-center font-display">
-          {name === "Favorites" ? "❤️ " : ""}
+          {name === "Favorites" ? "♥ " : ""}
           {name}
         </h1>
 
@@ -87,7 +87,7 @@ export default function CollectionDetailPage() {
                     {g.black?.username || (g.isVsBot ? `Bot (${g.botElo})` : "?")}
                   </p>
                   <p className="text-xs text-night-400">
-                    {g.result || "—"} &middot; {g.timeControl} &middot;{" "}
+                    {g.result || "-"} &middot; {g.timeControl} &middot;{" "}
                     {new Date(g.createdAt).toLocaleDateString()}
                   </p>
                 </div>

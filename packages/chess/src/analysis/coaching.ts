@@ -25,20 +25,20 @@ export type MoveQuality =
 
 const TEXT: Record<MoveQuality, Record<CoachingBand, string>> = {
   book: {
-    beginner: "This is a known opening move — people have played it for centuries.",
+    beginner: "This is a known opening move - people have played it for centuries.",
     intermediate: "Book move. This is established theory.",
     advanced: "Still in book.",
     expert: "Book.",
   },
   brilliant: {
     beginner: "A brilliant move. You gave up material and it was worth it.",
-    intermediate: "Brilliant — a sacrifice the engine agrees with.",
+    intermediate: "Brilliant - a sacrifice the engine agrees with.",
     advanced: "Brilliant. The material investment is justified by the resulting initiative.",
     expert: "Brilliant.",
   },
   great: {
     beginner: "A great move. This was the one move that worked here.",
-    intermediate: "Great move — clearly better than the alternatives.",
+    intermediate: "Great move - clearly better than the alternatives.",
     advanced: "Great move. The only continuation that holds the advantage.",
     expert: "Great move.",
   },
@@ -51,25 +51,25 @@ const TEXT: Record<MoveQuality, Record<CoachingBand, string>> = {
   good: {
     beginner: "A good move. Not the very best, but nothing goes wrong.",
     intermediate: "Good. A small step behind the engine's choice.",
-    advanced: "Good — marginally behind the main line.",
+    advanced: "Good - marginally behind the main line.",
     expert: "Good.",
   },
   inaccuracy: {
     beginner: "A slightly better move was available. Nothing is lost here.",
     intermediate: "Inaccuracy. There was a more precise move.",
-    advanced: "Inaccuracy — the position loosens slightly.",
+    advanced: "Inaccuracy - the position loosens slightly.",
     expert: "Inaccuracy.",
   },
   mistake: {
     beginner: "This one costs you. Look at what your opponent can do next.",
     intermediate: "A mistake. This hands over a real advantage.",
-    advanced: "Mistake — the evaluation swings substantially.",
+    advanced: "Mistake - the evaluation swings substantially.",
     expert: "Mistake.",
   },
   blunder: {
     beginner: "A blunder. Check whether any of your pieces can be taken for free.",
     intermediate: "Blunder. This loses material or allows a decisive tactic.",
-    advanced: "Blunder — the position is now losing.",
+    advanced: "Blunder - the position is now losing.",
     expert: "Blunder.",
   },
 };
@@ -100,7 +100,7 @@ const PATTERN_ADVICE: Record<string, Record<CoachingBand, string>> = {
   hangingPiece: {
     beginner: "Before each move, check every piece you own for whether it can be taken.",
     intermediate: "Scan for undefended pieces before committing to a plan.",
-    advanced: "Loose pieces are recurring here — check them before calculating.",
+    advanced: "Loose pieces are recurring here - check them before calculating.",
     expert: "Recurring loose-piece oversights.",
   },
   missedFork: {

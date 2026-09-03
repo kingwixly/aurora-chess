@@ -1,5 +1,7 @@
 "use client";
 
+import { ENGINES, resolveEngine } from "@aurora/chess";
+import { useSettingsStore } from "../stores/settings";
 import { useStockfish } from "./useStockfish";
 import { computeCustomMove, getStockfishConfig, type BotPersonality } from "@aurora/chess";
 
@@ -18,7 +20,12 @@ import { computeCustomMove, getStockfishConfig, type BotPersonality } from "@aur
  *   and `getPersonalityMove` (personality-aware move selection).
  */
 export function useBotEngine() {
-  const stockfish = useStockfish();
+  // Bot games use the play engine, which can differ from the analysis one.
+  const playEngine = useSettingsStore((st) => st.playEngine);
+  const stockfish = useStockfish(
+    ENGINES[resolveEngine(playEngine, "play")].worker,
+    ENGINES[resolveEngine(playEngine, "play")].workerType ?? "classic"
+  );
 
   /**
    * Get a move for the given position using the bot's personality tier.

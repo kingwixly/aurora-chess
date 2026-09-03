@@ -39,7 +39,7 @@ export function connectSocket() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost";
 
   socket = io(apiUrl, {
-    // Auth as function — called on each reconnect to get fresh token
+    // Auth as function - called on each reconnect to get fresh token
     auth: (cb) => {
       cb({ token: getAccessToken() || token });
     },
@@ -55,7 +55,16 @@ export function connectSocket() {
       // Silent unless the connection was actually gone for a moment. Telling
       // someone they reconnected when they merely clicked a link is noise, and
       // noise trains people to ignore the toast that matters.
-      if (Date.now() - disconnectedAt > RECONNECT_NOTICE_THRESHOLD_MS) {
+      // Opt-in. Even with a threshold, a toast nobody asked for during a game
+      // is worse than recovering quietly - the reconnection already happened,
+      // and there is nothing for the player to do about it.
+      let wanted = false;
+      try {
+        wanted = localStorage.getItem("aurora-reconnect-notices") === "true";
+      } catch {
+        wanted = false;
+      }
+      if (wanted && Date.now() - disconnectedAt > RECONNECT_NOTICE_THRESHOLD_MS) {
         useToast.getState().show("Reconnected", "success");
       }
       wasDisconnected = false;
@@ -76,14 +85,14 @@ export function connectSocket() {
     }
   });
 
-  // Handle auth errors on reconnect — try refreshing token
+  // Handle auth errors on reconnect - try refreshing token
   socket.on("connect_error", async (err) => {
     if (err.message === "Invalid token" || err.message === "Missing token") {
       try {
         const api = (await import("./api")).default;
         await api.post("/api/v1/auth/refresh");
       } catch {
-        // Token refresh failed — user will need to re-login
+        // Token refresh failed - user will need to re-login
       }
     }
   });

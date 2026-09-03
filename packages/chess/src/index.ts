@@ -3,13 +3,13 @@
  * Shared chess types, constants, and helpers used by both the API and web app.
  *
  * Organized by domain:
- * - `game/` — game results, statuses, terminations
- * - `time-control/` — time control presets and categorization
- * - `moves/` — move records and classification
- * - `player/` — player profiles, roles, clock state
- * - `openings/` — ECO opening database and lookup
- * - `reactions/` — emoji reactions for live games
- * - `activity/` — activity feed event types
+ * - `game/` - game results, statuses, terminations
+ * - `time-control/` - time control presets and categorization
+ * - `moves/` - move records and classification
+ * - `player/` - player profiles, roles, clock state
+ * - `openings/` - ECO opening database and lookup
+ * - `reactions/` - emoji reactions for live games
+ * - `activity/` - activity feed event types
  */
 
 // ── Game ──────────────────────────────────────────────────
@@ -137,6 +137,7 @@ export {
   DEFAULT_ENGINE,
   enginesFor,
   availableEngines,
+  engineForVariant,
   isEngineValidFor,
   resolveEngine,
 } from "./analysis/index";
@@ -148,6 +149,8 @@ export {
   lookupOpening as lookupOpeningByPosition,
   isBookPosition,
   isBookMove,
+  shouldLabelAsBook,
+  BOOK_MEANINGFUL_FROM_PLY,
   identifyOpening,
   BOOK_SIZE,
 } from "./openings/book";
@@ -174,3 +177,25 @@ export {
   MAX_ALTS,
   ALT_INDEPENDENT_SETTINGS,
 } from "./player/index";
+
+export type { Variant, VariantInfo, CheckCount, Pocket } from "./variants/index";
+export {
+  VARIANTS,
+  PLAYABLE_VARIANTS,
+  needsFairyEngine,
+  startingFenFor,
+  explosionSquares,
+  applyAtomicMove,
+  atomicResult,
+  HILL,
+  hillWinner,
+  countCheck,
+  threeCheckWinner,
+  antichessMoves,
+  antichessResult,
+  hordeResult,
+  addToPocket,
+  dropSquares,
+  pocketIsEmpty,
+  EMPTY_POCKET,
+} from "./variants/index";

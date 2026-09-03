@@ -9,7 +9,12 @@
  * So the engine is a choice, with the cost stated up front.
  */
 
-export type EngineId = "stockfish-18" | "stockfish-17" | "lc0-maia" | "weiss";
+export type EngineId =
+  | "stockfish-18-lite"
+  | "stockfish-18-single"
+  | "stockfish-classic"
+  | "stockfish-16-7"
+  | "fairy-sf14";
 
 export interface EngineSpec {
   id: EngineId;
@@ -33,6 +38,24 @@ export interface EngineSpec {
   /** Worker path, relative to the site root. */
   worker: string;
   /**
+   * How the worker must be constructed.
+   *
+   * The classic Stockfish.js builds are plain scripts; the lila-stockfish-web
+   * builds are ES modules and fail to load without `{ type: "module" }`. This
+   * is not a detail the caller can guess, and getting it wrong produces a
+   * worker that never sends a message rather than an error.
+   */
+  workerType?: "classic" | "module";
+  /** Variants beyond standard chess, when the engine supports them. */
+  variants?: string[];
+  /**
+   * Whether a player may pick this in settings.
+   *
+   * Special-purpose engines are chosen by the situation, not the person. They
+   * still need to be catalogued so the loader can find them.
+   */
+  selectable?: boolean;
+  /**
    * Whether the build is actually bundled.
    *
    * Offering an engine we do not ship means the player picks it, waits, and
@@ -45,11 +68,72 @@ export interface EngineSpec {
 }
 
 export const ENGINES: Record<EngineId, EngineSpec> = {
-  "stockfish-18": {
-    id: "stockfish-18",
-    name: "Stockfish 18",
+  "stockfish-18-lite": {
+    id: "stockfish-18-lite",
+    name: "Stockfish 18 Lite",
     description:
-      "The strongest engine there is. Runs entirely in your browser, which is what makes unlimited analysis free - you pay the download once and it is cached after that.",
+      "The strongest engine there is, in its smaller build. Uses multiple threads where the browser allows it. The right choice for almost everyone.",
+    sizeMb: 7,
+    strength: "superhuman",
+    canAnalyse: true,
+    canPlay: true,
+    worker: "/engines/stockfish-18-lite.js",
+    licence: "GPL-3.0",
+    available: true,
+  },
+  "stockfish-18-single": {
+    id: "stockfish-18-single",
+    name: "Stockfish 18 (single thread)",
+    description:
+      "The same engine without threading. Slower, but works in browsers and privacy modes that block SharedArrayBuffer - which is why it is here rather than as a fallback nobody can choose.",
+    sizeMb: 7,
+    strength: "superhuman",
+    canAnalyse: true,
+    canPlay: true,
+    worker: "/engines/stockfish-18-lite-single.js",
+    licence: "GPL-3.0",
+    available: true,
+  },
+  "stockfish-16-7": {
+    id: "stockfish-16-7",
+    name: "Stockfish 16.7",
+    description:
+      "A much smaller build from the Lichess project. Under half a megabyte, so it loads almost instantly and works well on older phones. Weaker than 18, but far stronger than any human.",
+    sizeMb: 1,
+    strength: "superhuman",
+    canAnalyse: true,
+    canPlay: true,
+    worker: "/engines/lila-adapter.js?engine=stockfish-16-7",
+    workerType: "module",
+    licence: "GPL-3.0",
+    available: true,
+  },
+  /**
+   * Not a choice. Selected automatically for variant games.
+   *
+   * Kept out of every picker via `selectable: false`: asking someone to pick
+   * an engine that only matters for Atomic, and which is chosen for them the
+   * moment they start an Atomic game, is a question with no useful answer.
+   */
+  "fairy-sf14": {
+    id: "fairy-sf14",
+    name: "Fairy-Stockfish 14",
+    description: "Used automatically for variant games. Not offered as a general choice.",
+    sizeMb: 1,
+    strength: "superhuman",
+    canAnalyse: true,
+    canPlay: true,
+    worker: "/engines/lila-adapter.js?engine=fairy-sf14",
+    workerType: "module",
+    variants: ["chess960", "crazyhouse", "atomic", "horde", "kingofthehill", "3check", "antichess"],
+    licence: "GPL-3.0",
+    available: true,
+  },
+  "stockfish-classic": {
+    id: "stockfish-classic",
+    name: "Stockfish (classic build)",
+    description:
+      "The build Aurora shipped originally. Kept so analysis you have already run stays comparable.",
     sizeMb: 7,
     strength: "superhuman",
     canAnalyse: true,
@@ -58,49 +142,10 @@ export const ENGINES: Record<EngineId, EngineSpec> = {
     licence: "GPL-3.0",
     available: true,
   },
-  "stockfish-17": {
-    id: "stockfish-17",
-    name: "Stockfish 17",
-    description:
-      "The previous release. Useful if you have compared analysis against it before and want the numbers to stay comparable.",
-    sizeMb: 6,
-    strength: "superhuman",
-    canAnalyse: true,
-    canPlay: true,
-    worker: "/engines/stockfish-17.js",
-    licence: "GPL-3.0",
-    available: false,
-  },
-  "lc0-maia": {
-    id: "lc0-maia",
-    name: "Maia",
-    description:
-      "Trained to play like a human of a given rating rather than to play well. Its mistakes are the ones people actually make, which makes it better practice than a weakened engine.",
-    sizeMb: 12,
-    strength: "club",
-    canAnalyse: false,
-    canPlay: true,
-    worker: "/engines/lc0-maia.js",
-    licence: "GPL-3.0",
-    available: false,
-  },
-  weiss: {
-    id: "weiss",
-    name: "Weiss",
-    description:
-      "A small, fast classical engine with no neural network. Tiny download, and it runs well on older machines.",
-    sizeMb: 1,
-    strength: "strong",
-    canAnalyse: true,
-    canPlay: true,
-    worker: "/engines/weiss.js",
-    licence: "GPL-3.0",
-    available: false,
-  },
 };
 
 /** The default: smallest download that is still strong enough for anything. */
-export const DEFAULT_ENGINE: EngineId = "stockfish-18";
+export const DEFAULT_ENGINE: EngineId = "stockfish-18-lite";
 
 export function enginesFor(purpose: "play" | "analyse"): EngineSpec[] {
   return (
@@ -113,7 +158,26 @@ export function enginesFor(purpose: "play" | "analyse"): EngineSpec[] {
 
 /** Only the engines actually shipped. What a picker should offer. */
 export function availableEngines(purpose: "play" | "analyse"): EngineSpec[] {
-  return enginesFor(purpose).filter((e) => e.available);
+  return enginesFor(purpose).filter((e) => e.available && e.selectable !== false);
+}
+
+/**
+ * The engine to use for a game.
+ *
+ * Variants override the player's preference entirely, because only one engine
+ * understands them - offering the choice and then ignoring it would be worse
+ * than not offering it. Standard games use whatever they picked.
+ */
+export function engineForVariant(
+  variant: string | null | undefined,
+  preferred: string | null | undefined,
+  purpose: "play" | "analyse" = "play"
+): EngineId {
+  const v = (variant ?? "STANDARD").toUpperCase();
+  if (v !== "STANDARD" && v !== "CHESS960") {
+    return "fairy-sf14";
+  }
+  return resolveEngine(preferred, purpose);
 }
 
 /**

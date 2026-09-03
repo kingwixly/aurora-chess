@@ -71,6 +71,20 @@ export const gameActionBodySchema = z.object({
 });
 
 export const createBotGameBodySchema = z.object({
+  variant: z
+    .enum([
+      "STANDARD",
+      "CHESS960",
+      "ATOMIC",
+      "CRAZYHOUSE",
+      "KINGOFTHEHILL",
+      "THREECHECK",
+      "ANTICHESS",
+      "HORDE",
+    ])
+    .optional(),
+  /** Specific Chess960 position, or omitted for a random one. */
+  positionId: z.number().int().min(0).max(959).optional(),
   botElo: z.number().int().min(200).max(3200),
   color: z.enum(["white", "black", "random"]),
   preset: z.string().optional(),

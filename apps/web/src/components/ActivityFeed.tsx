@@ -6,11 +6,15 @@ import api from "../lib/api";
 import type { ActivityEvent } from "@aurora/chess";
 
 const ICONS: Record<string, string> = {
-  game_won: "🏆",
-  game_lost: "😔",
-  game_draw: "🤝",
-  game_analysed: "🔍",
-  friend_added: "👋",
+  // Chess figurines and geometric shapes from the standard Unicode blocks,
+  // which render consistently everywhere. Emoji are drawn by the platform's
+  // own font, so the same glyph looks different on every device and reads as
+  // informal next to the rest of the interface.
+  game_won: "\u25B2",
+  game_lost: "\u25BC",
+  game_draw: "\u25A0",
+  game_analysed: "\u25C8",
+  friend_added: "\u25CF",
 };
 
 function relativeTime(ts: string): string {

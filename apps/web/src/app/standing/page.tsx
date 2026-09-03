@@ -39,7 +39,7 @@ interface Standing {
 }
 
 const BLOCK_REASONS: Record<string, string> = {
-  "too-short": "Bans shorter than three days cannot be appealed — they end before a review would.",
+  "too-short": "Bans shorter than three days cannot be appealed - they end before a review would.",
   "appeals-disabled": "A moderator has closed appeals on this action.",
   "already-open": "You already have an open appeal for this.",
   "three-denials": "This has been appealed three times without success.",

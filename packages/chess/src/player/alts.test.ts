@@ -25,7 +25,7 @@ describe("eligibility", () => {
 
   it("refuses an alt creating its own alts", () => {
     // Otherwise the tree becomes impossible to reason about, and the link back
-    // to a single owner — the entire point — is lost.
+    // to a single owner - the entire point - is lost.
     expect(canCreateAlt({ ...base, isAlt: true }).reason).toBe("is-an-alt");
   });
 

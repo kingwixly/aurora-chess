@@ -9,7 +9,7 @@ export default function OfflinePage() {
       <Image src="/logo.png" alt="AuroraChess" width={80} height={80} className="mb-6 opacity-50" />
       <h1 className="text-2xl font-bold mb-2 font-display">You&apos;re Offline</h1>
       <p className="text-night-400 mb-6 max-w-sm">
-        No internet connection. You can still play against the bot offline — your games will sync
+        No internet connection. You can still play against the bot offline - your games will sync
         when you reconnect.
       </p>
       <div className="flex flex-col gap-3">

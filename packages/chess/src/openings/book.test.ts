@@ -1,6 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { Chess } from "chess.js";
-import { lookupOpening, isBookPosition, isBookMove, identifyOpening, BOOK_SIZE } from "./book";
+import {
+  lookupOpening,
+  isBookPosition,
+  isBookMove,
+  identifyOpening,
+  shouldLabelAsBook,
+  BOOK_SIZE,
+} from "./book";
 
 describe("the book", () => {
   it("holds the whole ECO set", () => {
@@ -72,7 +79,7 @@ describe("book moves", () => {
   });
 
   it("recognises offbeat openings that are still named", () => {
-    // The Grob is bad and it is still book — being in the book is a statement
+    // The Grob is bad and it is still book - being in the book is a statement
     // about theory, not about quality.
     const start = new Chess().fen();
     expect(isBookMove(start, "g4")).toBe(true);
@@ -93,5 +100,69 @@ describe("book moves", () => {
     const c = new Chess();
     c.move("e4");
     expect(isBookPosition(c.fen())).toBe(true);
+  });
+});
+
+describe("book moves judge the move, not the game", () => {
+  it("stops being book when the line leaves theory", () => {
+    // The bug this guards: asking "does this game have an opening name?"
+    // rather than "is this move still theory". The first is true forever once
+    // you are a couple of moves in, so every later move was labelled book
+    // however bad it was.
+    const c = new Chess();
+    for (const san of ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5"]) c.move(san);
+
+    // A pointless rook shuffle out of a real opening is not theory.
+    expect(isBookMove(c.fen(), "Rf1g1")).toBe(false);
+    expect(isBookMove(c.fen(), "Rg1")).toBe(false);
+  });
+
+  it("does not report the position before the move", () => {
+    const c = new Chess();
+    c.move("e4");
+    c.move("e5");
+    // The position here IS in the book. So is 2.a3 - that is Mengarini's
+    // Opening, and being named is a statement about theory, not quality.
+    expect(isBookPosition(c.fen())).toBe(true);
+    // But a deep, pointless line is not, even though the game passed through
+    // named openings on the way there.
+    for (const san of ["Nf3", "Nc6", "Bc4", "Bc5", "h3", "h6", "a3"]) c.move(san);
+    expect(isBookMove(c.fen(), "Rh2")).toBe(false);
+  });
+
+  it("returns false when the move does not apply at all", () => {
+    // An unapplied move leaves the position unchanged, which would otherwise
+    // report on the wrong position entirely.
+    const c = new Chess();
+    c.move("e4");
+    expect(isBookMove(c.fen(), "")).toBe(false);
+    expect(isBookMove(c.fen(), "Qxf7")).toBe(false);
+  });
+});
+
+describe("when a book label is worth showing", () => {
+  it("says nothing on the first move", () => {
+    // Measured: all twenty of White's first moves are in the database,
+    // including 1.a4 and 1.Na3. A label that applies to everything carries no
+    // information, and because BOOK replaces the quality label it also
+    // suppresses the feedback that would have been useful.
+    const start = new Chess().fen();
+    for (const m of ["e4", "d4", "a4", "Na3", "h4"]) {
+      expect(shouldLabelAsBook(start, m, 1), m).toBe(false);
+    }
+  });
+
+  it("applies from the second ply, where it distinguishes", () => {
+    // 30% of legal replies are book at this point, so saying so means
+    // something.
+    const c = new Chess();
+    c.move("e4");
+    expect(shouldLabelAsBook(c.fen(), "c5", 2)).toBe(true);
+  });
+
+  it("still refuses a move that is not theory", () => {
+    const c = new Chess();
+    for (const san of ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "h3", "h6"]) c.move(san);
+    expect(shouldLabelAsBook(c.fen(), "Rh2", 9)).toBe(false);
   });
 });

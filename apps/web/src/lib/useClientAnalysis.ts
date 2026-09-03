@@ -2,7 +2,14 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useStockfish, type EngineLine } from "./useStockfish";
-import { classifyMove, computeAccuracy, type ClassifiedMove } from "@aurora/chess";
+import {
+  classifyMove,
+  computeAccuracy,
+  type ClassifiedMove,
+  ENGINES,
+  resolveEngine,
+} from "@aurora/chess";
+import { useSettingsStore } from "../stores/settings";
 
 export interface AnalysisMoveResult {
   ply: number;
@@ -60,7 +67,13 @@ const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
  * Analyses each move sequentially with real-time progress tracking.
  */
 export function useClientAnalysis(): ClientAnalysisState {
-  const stockfish = useStockfish();
+  // Whichever engine the player picked for analysis. Falls back if their
+  // stored choice is not usable for it.
+  const analysisEngine = useSettingsStore((st) => st.analysisEngine);
+  const stockfish = useStockfish(
+    ENGINES[resolveEngine(analysisEngine, "analyse")].worker,
+    ENGINES[resolveEngine(analysisEngine, "analyse")].workerType ?? "classic"
+  );
   const [analysing, setAnalysing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentPly, setCurrentPly] = useState(0);

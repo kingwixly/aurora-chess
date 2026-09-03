@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 /**
  * Sitemap.
  *
- * Public pages only. Anything behind a login is excluded — listing `/messages`
+ * Public pages only. Anything behind a login is excluded - listing `/messages`
  * or `/standing` invites crawlers to hammer routes that will only ever return a
  * redirect, and a punishment record has no business in a search index.
  */

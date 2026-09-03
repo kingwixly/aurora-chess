@@ -14,7 +14,7 @@ interface User {
   /** Resolved server-side: ban, then manual, then automatic. */
   title?: import("@aurora/chess").Title | null;
   modShield?: boolean;
-  /** FIDE details verified — rendered before the shield and title. */
+  /** FIDE details verified - rendered before the shield and title. */
   fideVerified?: boolean;
   staffRank?: string | null;
   /** ISO 3166-1 alpha-2. Renders a flag beside the name. */
@@ -45,7 +45,7 @@ interface AuthState {
    * Whether the session has been resolved once already.
    *
    * Kept in store state rather than a module variable so it resets with the
-   * store — which matters for tests, and means a state reset cannot leave a
+   * store - which matters for tests, and means a state reset cannot leave a
    * stale "already checked" behind.
    */
   sessionChecked: boolean;
@@ -101,7 +101,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email, password) => {
     const { data } = await api.post("/api/v1/auth/login", { email, password });
-    // A banned account signs in successfully — that is what lets them appeal.
+    // A banned account signs in successfully - that is what lets them appeal.
     // The flag tells the UI to send them to their standing page instead of a
     // dashboard where every button would silently fail.
     setAccessToken(data.accessToken);
@@ -137,7 +137,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   fetchMe: async () => {
     // Single-flight for the lifetime of the page, not just for concurrent
     // callers. Several components call fetchMe on mount, and React re-mounts
-    // them in development — each firing its own /auth/refresh. Refresh ROTATES
+    // them in development - each firing its own /auth/refresh. Refresh ROTATES
     // the token, so the first request invalidates the one every other request
     // is holding, and the losers all come back 401 "token already used". The
     // result was a dozen refreshes and a session that appeared to fail.
@@ -158,7 +158,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         syncSettings(data.user);
       } catch (err: unknown) {
         // A 401 means "not signed in", which is normal. A 5xx means the server
-        // is broken, which is NOT the same thing — silently treating it as
+        // is broken, which is NOT the same thing - silently treating it as
         // logged-out sent people to a blank page with no explanation. Surface
         // it so the UI can say what happened.
         const status = (err as { response?: { status?: number } })?.response?.status;

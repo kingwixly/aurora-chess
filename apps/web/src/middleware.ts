@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 /**
  * Route hints only.
  *
- * Middleware runs at the edge and **cannot validate a session** — the refresh
+ * Middleware runs at the edge and **cannot validate a session** - the refresh
  * token is httpOnly and signed server-side, so all this can see is whether a
  * cookie exists, not whether it is still good.
  *
@@ -49,7 +49,7 @@ export function middleware(request: NextRequest) {
 
   // The standing pages have ONE address. Reaching them on the main site sends
   // you to the subdomain instead, so there is a single place a punished player
-  // is ever pointed at — and so the separation survives a ban, where the main
+  // is ever pointed at - and so the separation survives a ban, where the main
   // site is unreachable but this host is not.
   if (pathname.startsWith("/standing")) {
     const siteHost = host || "aurorachess.org";
@@ -58,7 +58,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(target);
   }
 
-  // A missing cookie definitely means no session, so this redirect is safe —
+  // A missing cookie definitely means no session, so this redirect is safe -
   // it can produce a false "signed out", never a false "signed in".
   if (
     protectedRoutes.some((r) => pathname.startsWith(r)) &&

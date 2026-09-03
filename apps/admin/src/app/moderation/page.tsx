@@ -225,7 +225,7 @@ export default function ModerationPage() {
                 <input
                   value={decisions[a.id] ?? ""}
                   onChange={(e) => setDecisions((d) => ({ ...d, [a.id]: e.target.value }))}
-                  placeholder="Your reasoning — the appellant reads this"
+                  placeholder="Your reasoning - the appellant reads this"
                   className={`${INPUT} mt-3 w-full`}
                 />
                 <div className="mt-2 flex gap-2">
@@ -291,7 +291,7 @@ export default function ModerationPage() {
       <section className="mt-6 rounded-lg bg-gray-800 p-5">
         <h2 className="mb-1 font-semibold">Issue a ban</h2>
         <p className="mb-4 text-xs text-gray-400">
-          IP bans are blunt — households and schools share an address. Prefer an account or device
+          IP bans are blunt - households and schools share an address. Prefer an account or device
           ban unless you are dealing with repeat signups.
         </p>
 
@@ -389,7 +389,7 @@ export default function ModerationPage() {
         <h2 className="mb-1 font-semibold">Cheat reports ({reports.length})</h2>
         <p className="mb-3 text-xs text-gray-400">
           These are prompts to look, never verdicts. Accuracy cannot distinguish a cheat from a
-          strong player having a good game — check the games before acting.
+          strong player having a good game - check the games before acting.
         </p>
         {reports.length === 0 ? (
           <p className="text-sm text-gray-400">Nothing awaiting review.</p>

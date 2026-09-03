@@ -18,8 +18,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // This used to bounce to the main site's /login on any failure. That page
   // then saw a live session and forwarded to /play, so the whole thing looked
   // like "clicking Admin sends me to the dashboard" with no indication of
-  // what was refused or why. Two completely different faults — no session, and
-  // a session belonging to a non-admin — produced the identical mystery loop.
+  // what was refused or why. Two completely different faults - no session, and
+  // a session belonging to a non-admin - produced the identical mystery loop.
   //
   // Failing visibly is worth more than failing tidily.
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost";

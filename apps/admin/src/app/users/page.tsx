@@ -468,6 +468,16 @@ export default function AdminUsersPage() {
                           Manage
                         </button>
                         <button
+                          onClick={() => updateUser(u.id, { verified: !u.verified })}
+                          className={`px-2 py-1 text-xs rounded transition-colors ${
+                            u.verified
+                              ? "bg-green-700 hover:bg-green-600"
+                              : "bg-gray-700 hover:bg-gray-600"
+                          }`}
+                        >
+                          {u.verified ? "Verified" : "Verify"}
+                        </button>
+                        <button
                           onClick={() => setTitleEditing(u)}
                           className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
                         >
@@ -529,6 +539,35 @@ export default function AdminUsersPage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1 mt-2">
+                  {/* The desktop table had Manage and the mobile cards did not,
+                      so on a phone there was no route to a user's panel at all
+                      - which is where titles, badges and history live. */}
+                  <button
+                    onClick={() => setPanelUser(u)}
+                    className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+                  >
+                    Manage
+                  </button>
+                  {/* Manual verification, for people whose mail never arrives.
+                      The API has always accepted this; there was simply no
+                      control for it, so a bounced verification email meant an
+                      account stuck on bot-play forever. */}
+                  <button
+                    onClick={() => updateUser(u.id, { verified: !u.verified })}
+                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                      u.verified
+                        ? "bg-green-700 hover:bg-green-600"
+                        : "bg-gray-700 hover:bg-gray-600"
+                    }`}
+                  >
+                    {u.verified ? "Verified" : "Verify"}
+                  </button>
+                  <button
+                    onClick={() => setTitleEditing(u)}
+                    className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+                  >
+                    Title
+                  </button>
                   <button
                     onClick={() =>
                       setConfirm({

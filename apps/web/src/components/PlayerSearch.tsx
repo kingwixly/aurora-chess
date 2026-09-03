@@ -22,7 +22,7 @@ interface Found {
  * Search for players by name.
  *
  * Debounced, because a request per keystroke is both wasteful and rate-limited.
- * Results link straight to profiles rather than offering actions inline —
+ * Results link straight to profiles rather than offering actions inline -
  * deciding whether to friend or challenge someone is a decision you make after
  * looking at them, not from a dropdown.
  */

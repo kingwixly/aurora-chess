@@ -7,8 +7,8 @@ export const metadata: Metadata = { title: "How moderation works" };
  * How moderation actually works here.
  *
  * The most common complaint about large chess sites is being actioned with no
- * explanation and no meaningful appeal. Saying plainly what we do — including
- * the one thing we hold back and why — is most of what makes a small site feel
+ * explanation and no meaningful appeal. Saying plainly what we do - including
+ * the one thing we hold back and why - is most of what makes a small site feel
  * fair, and it costs nothing.
  */
 export default function HowItWorksPage() {
@@ -62,7 +62,7 @@ export default function HowItWorksPage() {
         <h2 className="font-display text-2xl">This page survives a ban</h2>
         <p className="mt-2 text-sm leading-relaxed text-[#3c4658]">
           A ban removes access to Aurora. It does not remove access to this site. You can always
-          sign in here to see what happened and contest it — which is why standing lives on its own
+          sign in here to see what happened and contest it - which is why standing lives on its own
           address.
         </p>
       </section>
@@ -90,11 +90,11 @@ export default function HowItWorksPage() {
         <h2 className="font-display text-2xl">What we look at</h2>
         <ul className="mt-2 space-y-2 text-sm leading-relaxed text-[#3c4658]">
           <li>
-            <strong>Your games</strong> — move quality compared against your own history, not
+            <strong>Your games</strong> - move quality compared against your own history, not
             against an absolute bar. What counts as unusual at 1200 is ordinary at 2200.
           </li>
           <li>
-            <strong>Timing</strong> — how long you spend on each move. Humans think longer in
+            <strong>Timing</strong> - how long you spend on each move. Humans think longer in
             complex positions; a machine tends not to.
           </li>
           <li>

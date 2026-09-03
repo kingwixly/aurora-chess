@@ -7,7 +7,7 @@ import { bandFor, coachingText, type MoveQuality } from "./coaching";
  * here is the *strength dial*, and that is the point of the feature.
  *
  * A 3200 engine tells a 900-rated player their move gave up 0.4 pawns. True,
- * and useless — at that level games turn on hanging pieces, not on small
+ * and useless - at that level games turn on hanging pieces, not on small
  * positional concessions. A coach set near your own rating flags what you can
  * act on and stays quiet about the rest.
  */
@@ -50,7 +50,7 @@ export const COACHES: CoachPersona[] = [
  * Centipawn loss below which the coach says nothing.
  *
  * Scaled to strength deliberately. Told about every 30-point inaccuracy, a
- * 700-rated player learns to ignore the coach — and a muted coach teaches
+ * 700-rated player learns to ignore the coach - and a muted coach teaches
  * nothing at all. The same threshold at 2400 would hide the mistakes that
  * actually decide games there.
  */
@@ -65,7 +65,7 @@ export function noiseFloorFor(strength: number): number {
 /**
  * Search depth for a coach of a given strength.
  *
- * A weak coach is not a strong engine kept quiet — it should genuinely miss
+ * A weak coach is not a strong engine kept quiet - it should genuinely miss
  * what a player at that level misses, so its advice is reachable rather than
  * oracular.
  */
@@ -160,7 +160,7 @@ function voiced(
   if (persona === "patient") {
     switch (quality) {
       case "book":
-        return `${played} is theory — a well-known move here.`;
+        return `${played} is theory - a well-known move here.`;
       case "best":
         return `${played} is the move. Nicely spotted.`;
       case "brilliant":
@@ -168,7 +168,7 @@ function voiced(
       case "inaccuracy":
         return `${played} is playable, though ${alt} keeps more of your edge.`;
       case "mistake":
-        return `${played} gives something back. ${alt} was the one — worth seeing why.`;
+        return `${played} gives something back. ${alt} was the one - worth seeing why.`;
       case "blunder":
         return `${played} costs material. ${alt} held it together.`;
       default:
@@ -178,7 +178,7 @@ function voiced(
   if (persona === "analytical") {
     switch (quality) {
       case "book":
-        return `${played} — book move, established theory.`;
+        return `${played} - book move, established theory.`;
       case "best":
         return `${played} is the engine's first choice.`;
       case "brilliant":

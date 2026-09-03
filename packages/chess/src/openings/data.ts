@@ -1,7 +1,7 @@
 import type { OpeningEntry } from "./types";
 
 /**
- * ECO opening database — common openings mapped by SAN move sequence.
+ * ECO opening database - common openings mapped by SAN move sequence.
  * Sorted by move sequence length (longest first) for longest prefix match.
  */
 export const ECO_DATABASE: OpeningEntry[] = [

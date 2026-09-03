@@ -25,7 +25,7 @@ export function AuroraBand({ className = "" }: { className?: string }) {
  * The FIDE Details Verified mark.
  *
  * Renders before the shield and the title, because it qualifies *who someone
- * is* rather than how well they play — it means site verification is complete
+ * is* rather than how well they play - it means site verification is complete
  * and a registered FIDE account has been confirmed.
  *
  * The full FIDE lockup is unreadable at this size, so the mark is the check in
@@ -35,7 +35,6 @@ export function AuroraBand({ className = "" }: { className?: string }) {
 export function FideVerifiedMark({ size = 16 }: { size?: number }) {
   const label = "FIDE details verified";
   return (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src="/fide/fide-verified.png"
       alt={label}
@@ -61,7 +60,7 @@ interface TitleBadgeProps {
  *
  * Federation titles render amber, matching the convention players already know
  * from elsewhere. Aurora's own titles render in the brand violet so nobody
- * mistakes an AM for a FIDE credential — the tooltip says so outright, and the
+ * mistakes an AM for a FIDE credential - the tooltip says so outright, and the
  * criteria line explains how it was earned.
  *
  * Set in the mono face: a title is a credential, and it reads alongside a
@@ -71,7 +70,7 @@ export function TitleBadge({ title, size = "md", className = "" }: TitleBadgePro
   if (!title) return null;
 
   const unofficial = isUnofficialTitle(title);
-  const tooltip = `${TITLE_LABELS[title]} — ${TITLE_CRITERIA_TEXT[title]}`;
+  const tooltip = `${TITLE_LABELS[title]} - ${TITLE_CRITERIA_TEXT[title]}`;
 
   const sizing = size === "sm" ? "text-[10px] px-1 py-0" : "text-[11px] px-1.5 py-0.5";
   const tone = unofficial
@@ -101,14 +100,13 @@ export function TitleBadge({ title, size = "md", className = "" }: TitleBadgePro
  * would make every browser tab look like a staff badge.
  *
  * Uses the artwork exactly as supplied. An earlier version lightened the navy
- * for contrast against the dark header; that was reverted on request — the mark
+ * for contrast against the dark header; that was reverted on request - the mark
  * reads by its shape and the ribbon carries the colour.
  */
 export function StaffMark({ rank, size = 16 }: { rank?: string | null; size?: number }) {
   if (!rank) return null;
   const label = `Aurora ${rank}`;
   return (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src="/icons/staff-mark-64.png"
       alt={label}
@@ -145,7 +143,7 @@ export function ModShield({ size = "md" }: { size?: "sm" | "md" }) {
 /**
  * The flair a player has chosen to display beside their name.
  *
- * Unlike badges — which live on the profile — one flair follows the player
+ * Unlike badges - which live on the profile - one flair follows the player
  * around. It is purely cosmetic and carries no competitive meaning, which is
  * why it renders as a bare glyph rather than a chip: it should read as
  * decoration, not as a second title.
@@ -190,7 +188,7 @@ interface PlayerNameProps {
  * A player, named the way they appear everywhere: shield, title, name, flair,
  * rating.
  *
- * Prefer this over composing the parts by hand at each call site — consistent
+ * Prefer this over composing the parts by hand at each call site - consistent
  * ordering is what makes a title scannable in a game list.
  */
 export function PlayerName({
@@ -289,7 +287,6 @@ export function BadgeShelf({ badges }: { badges: ProfileBadge[] }) {
             }`}
           >
             {isLockup ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src="/fide/fide-verified-full.png"
                 alt={b.label}
@@ -298,7 +295,6 @@ export function BadgeShelf({ badges }: { badges: ProfileBadge[] }) {
             ) : (
               <>
                 {b.icon.startsWith("/") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={b.icon} alt="" className="h-5 w-5 shrink-0 object-contain" />
                 ) : (
                   <span className="text-lg leading-none">{b.icon}</span>
@@ -333,7 +329,7 @@ export interface FidePanelData {
  * misleading thing this page could do. Hence the FIDE lockup at the top and
  * the explicit note underneath.
  *
- * Arena and arbiter titles appear here and nowhere else — they are not
+ * Arena and arbiter titles appear here and nowhere else - they are not
  * over-the-board playing titles and must not sit beside a username.
  */
 export function FideProfilePanel({
@@ -355,7 +351,6 @@ export function FideProfilePanel({
   return (
     <section className="overflow-hidden rounded-xl bg-night-900 ring-1 ring-inset ring-night-700">
       <div className="flex items-center justify-between gap-4 border-b border-night-700 px-5 py-4">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/fide/fide-verified-full.png" alt="FIDE details verified" className="h-7" />
         {data.federation && (
           <span className="font-mono text-xs uppercase tracking-wider text-night-400">

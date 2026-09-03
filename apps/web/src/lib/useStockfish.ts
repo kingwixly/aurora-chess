@@ -13,7 +13,7 @@ interface StockfishHook {
   ready: boolean;
   /** Handshake progress, for loading feedback. */
   loadState: "downloading" | "starting" | "ready" | "failed";
-  getBotMove: (fen: string, elo: number) => Promise<string | null>;
+  getBotMove: (fen: string, elo: number, chess960?: boolean) => Promise<string | null>;
   evaluate: (
     fen: string,
     movetimeMs?: number
@@ -48,7 +48,17 @@ const DEFAULT_MOVETIME_MS = 600;
  * line-oriented protocol with no request IDs, so two searches in flight at once
  * would interleave their `info` lines with no way to tell them apart.
  */
-export function useStockfish(): StockfishHook {
+export function useStockfish(
+  /** Worker to load. Defaults to the standard build. */
+  workerPath: string = "/engines/stockfish-18-lite.js",
+  /**
+   * ES-module builds need `{ type: "module" }` or they fail to load.
+   *
+   * The failure is silent - the Worker constructs, the import throws inside
+   * it, and no message ever arrives - so this cannot be left to a guess.
+   */
+  workerType: "classic" | "module" = "classic"
+): StockfishHook {
   const workerRef = useRef<Worker | null>(null);
   const [ready, setReady] = useState(false);
   /**
@@ -56,7 +66,7 @@ export function useStockfish(): StockfishHook {
    *
    * The engine is a multi-megabyte WASM download; on a cold cache it can take
    * many seconds. Without this the page said "Loading Stockfish engine" with no
-   * movement, which is indistinguishable from a hang — and it never cleared
+   * movement, which is indistinguishable from a hang - and it never cleared
    * because nothing re-rendered when readiness arrived on a ref.
    */
   const [loadState, setLoadState] = useState<"downloading" | "starting" | "ready" | "failed">(
@@ -90,7 +100,10 @@ export function useStockfish(): StockfishHook {
 
   useEffect(() => {
     // stockfish.js detects worker context and speaks raw UCI strings.
-    const worker = new Worker("/stockfish/stockfish.js");
+    // Path comes from the chosen engine. It used to be hardcoded here, which
+    // meant the engine picker in settings changed a stored value and nothing
+    // else - every game and every analysis ran the same binary regardless.
+    const worker = new Worker(workerPath, { type: workerType });
     workerRef.current = worker;
 
     let sawUciOk = false;
@@ -141,7 +154,7 @@ export function useStockfish(): StockfishHook {
       queueRef.current = [];
       readyRef.current = false;
     };
-  }, [finish]);
+  }, [finish, workerPath, workerType]);
 
   const send = useCallback(
     (cmd: string, waitFor: string, timeoutMs = 30000): Promise<string[]> =>
@@ -163,10 +176,14 @@ export function useStockfish(): StockfishHook {
   }, []);
 
   const getBotMove = useCallback(
-    async (fen: string, elo: number): Promise<string | null> => {
+    async (fen: string, elo: number, chess960 = false): Promise<string | null> => {
       if (!readyRef.current) return null;
       const clampedElo = Math.max(200, Math.min(3200, elo));
 
+      // Told to the engine explicitly. Stockfish plays 960 natively, but only
+      // when this is set - otherwise it encodes castling the standard way and
+      // will offer castles that are illegal from a shuffled back rank.
+      setOption(`setoption name UCI_Chess960 value ${chess960 ? "true" : "false"}`);
       setOption("setoption name UCI_LimitStrength value true");
       setOption(`setoption name UCI_Elo value ${clampedElo}`);
       setOption("ucinewgame");

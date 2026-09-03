@@ -1,60 +1,75 @@
 # Local play: two modes
 
-## Two different things, kept separate
+| Mode                             | You have                | Screen shows           |
+| -------------------------------- | ----------------------- | ---------------------- |
+| **Play in person** (`/play/otb`) | two people, one device  | board, clock, controls |
+| **Clock only** (`/play/clock`)   | a real board and pieces | just the clock         |
 
-**Play in person** (`/play/otb`) - you have a real board and pieces. The phone
-is the clock and the scoresheet. This is the one you said to keep.
+`/play/pass` redirects to `/play/otb`. It was a duplicate of the same mode
+built without a clock, which made it strictly worse than the thing it copied.
+The only actual bug in the original was that "no clock" set 999 minutes instead
+of removing the timer.
 
-**Pass and play** (`/play/pass`) - no physical board. Two people share the
-phone, either handing it across or laying it flat between them.
+## Play in person
 
-Both are linked from the bottom of the play page, below a divider.
+The original mode, with the gaps filled rather than rebuilt:
+
+- **No clock now means no clock.** `null`, not 999 minutes. The clock faces
+  disappear, nothing counts down, nobody can flag.
+- **Names before the game**, optional, used only to label the history entry.
+- **Takebacks.** There is no rating to protect and the opponent is sitting
+  right there to object.
+- **Resign, draw offers and abandon**, with the draw offer shown to the player
+  who has to answer it rather than the one who made it.
+- **Saved to history** when it finishes.
+- **Phone flat toggle**, off by default, which is what drives piece rotation.
 
 ## The board does not flip
 
-On pass and play, the board stays put and the **pieces** rotate 180 degrees on
-black's turn.
+The board stays fixed and the **pieces** rotate 180 degrees, and only when the
+phone is lying flat between two players.
 
-Flipping the whole board makes the position appear to jump - squares you were
-just looking at move somewhere else, which is disorienting when you are also
-trying to see what your opponent played. Rotating only the pieces keeps every
-square exactly where it was and still presents them upright to whoever is
-sitting opposite.
+Flipping the board moves a1 to the opposite corner every move, so the position
+appears to jump and neither player can hold a mental picture of it. On a real
+board nobody rotates the table.
 
-Implemented as a CSS rule on the `<piece>` elements rather than a board option,
-so it composes with Chessground's own positioning transform instead of fighting
-it. Coordinates and the last-move highlight belong to the board, not the pieces,
-so they deliberately stay put.
+Held and handed across, nothing rotates - the person looking at it is always
+the person to move.
 
-There is a **"phone flat on table"** toggle, off by default, because most people
-hand the device across rather than lay it down - and rotation only helps in the
-second case.
+## Clocks are readable upside down
 
-## Resign, draw, abandon
+Each clock face carries its colour in words and an underline beneath the
+numerals.
 
-Shared by both modes via `LocalGameControls`.
+Rotated 180 degrees, "9:00" and "0:06" are genuinely hard to tell apart, and a
+player reading the wrong clock is worse off than one with no clock. Shaped
+digits alone cannot fix that; a label and a baseline can.
 
-A draw offer here is not a network message, it is a prompt handed physically
-across the table - so the offer appears to the player who has to **answer** it,
-not the one who made it. Accept and decline are on that same screen.
+## Clock only
 
-Every destructive action asks twice. On a shared phone a mis-tap ends somebody
-else's game, and a confirmation is cheap next to that.
+The moving player's colour fills the whole screen. On a real chess clock the
+running side is obvious from two metres; a small highlight on a phone is not.
 
-Takebacks are allowed in pass and play. There is no rating to protect and the
-opponent is sitting right there to object.
+White is a pale blue-grey rather than pure white - a full screen of #ffffff at
+brightness is unpleasant to sit opposite.
 
-When the phone is flat, the black-side controls are rendered rotated too, so
-the player opposite can reach their own resign button without turning the
-device round.
+Ending asks **how** it ended: checkmate, resignation, agreement, stalemate,
+repetition, fifty-move, insufficient material. A loss on time and a loss to a
+mating attack are different games, and a history that conflates them is worth
+less.
 
-## Not rated, not recorded
+## History
 
-Neither mode touches a rating or writes to a profile. These are games between
-two people in a room; recording them would make people hesitate to use the
-feature, and the rating would be meaningless anyway since one person controls
-both sides of the device.
+`/play/history`. localStorage, on the device, visible only to whoever holds the
+phone. These games had no accounts behind them, so there is nowhere on the
+server they could go and no rating they could affect.
+
+PGN with the full seven tag roster, because other tools reject or mangle a file
+without it. Copy to clipboard, or open in the analysis board.
+
+8 tests on the PGN writer: quote escaping in names, odd move counts, date
+format, empty games.
 
 ## Verified
 
-355 shared, 340 API, 251 web tests. Schema, routes and contrast clean.
+355 shared, 340 API, 259 web tests. All five checks clean.

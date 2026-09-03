@@ -10,7 +10,7 @@ import { useAuthStore } from "../stores/auth";
  *
  * Flairs and badges are complementary rather than alternatives: you *earn* many
  * badges, all shown on your profile, and *display* one of them everywhere else.
- * You can only pick something you hold — the server enforces that too, since
+ * You can only pick something you hold - the server enforces that too, since
  * this field is user-settable.
  */
 export default function FlairPicker({ earned }: { earned: string[] }) {
@@ -65,7 +65,6 @@ export default function FlairPicker({ earned }: { earned: string[] }) {
             }`}
           >
             {badge.icon.startsWith("/") ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img src={badge.icon} alt="" className="h-4 w-4 object-contain" />
             ) : (
               <span>{badge.icon}</span>

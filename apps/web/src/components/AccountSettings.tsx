@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Flag, FLAG_COUNTRIES } from "@aurora/ui";
-import { enginesFor } from "@aurora/chess";
+import EnginePicker from "./EnginePicker";
 import api from "../lib/api";
 import FlairPicker from "./FlairPicker";
 import { useAuthStore } from "../stores/auth";
@@ -159,36 +159,21 @@ export default function AccountSettings({ earnedFlairs = [] }: { earnedFlairs?: 
         />
       </Row>
 
-      <Row
-        label="Engine for bot games"
-        hint="Runs in your browser. Bigger is stronger; smaller downloads faster."
-      >
-        <select
-          value={playEngine}
-          onChange={(e) => setPlayEngine(e.target.value)}
-          className={INPUT}
-        >
-          {enginesFor("play").map((eng) => (
-            <option key={eng.id} value={eng.id}>
-              {eng.name} — {eng.sizeMb}MB
-            </option>
-          ))}
-        </select>
-      </Row>
+      <div>
+        <span className="mb-1.5 block text-sm font-medium">Engine for bot games</span>
+        <span className="mb-2 block text-xs text-night-400">
+          Runs in your browser and is cached after the first download.
+        </span>
+        <EnginePicker purpose="play" value={playEngine} onChange={setPlayEngine} />
+      </div>
 
-      <Row label="Engine for analysis" hint="Only engines that can evaluate positions.">
-        <select
-          value={analysisEngine}
-          onChange={(e) => setAnalysisEngine(e.target.value)}
-          className={INPUT}
-        >
-          {enginesFor("analyse").map((eng) => (
-            <option key={eng.id} value={eng.id}>
-              {eng.name} — {eng.sizeMb}MB
-            </option>
-          ))}
-        </select>
-      </Row>
+      <div>
+        <span className="mb-1.5 block text-sm font-medium">Engine for analysis</span>
+        <span className="mb-2 block text-xs text-night-400">
+          Used by the analysis board and by game review.
+        </span>
+        <EnginePicker purpose="analyse" value={analysisEngine} onChange={setAnalysisEngine} />
+      </div>
 
       <div>
         <span className="mb-1.5 block text-sm font-medium">Flair</span>
@@ -205,7 +190,7 @@ export default function AccountSettings({ earnedFlairs = [] }: { earnedFlairs?: 
       {emailChanged && (
         <Row
           label="Current password"
-          hint="Required to change your email — it is where password resets are sent."
+          hint="Required to change your email - it is where password resets are sent."
         >
           <input
             type="password"

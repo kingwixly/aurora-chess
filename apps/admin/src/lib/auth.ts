@@ -24,8 +24,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     // The admin panel is a separate origin, so it starts with no access token
     // in memory even when the refresh cookie is present and valid. Refresh
     // FIRST rather than relying on a 401 to trigger it: if that request fails
-    // for any reason other than a genuine 401 — a CORS problem, a network
-    // blip — the retry never fires and the panel bounces you to the login page
+    // for any reason other than a genuine 401 - a CORS problem, a network
+    // blip - the retry never fires and the panel bounces you to the login page
     // of a site you are already signed in to.
     try {
       const { data } = await api.post("/api/v1/auth/refresh");
@@ -40,7 +40,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
       // Only a real authentication failure clears the session. A 429 or a 5xx
-      // means the request did not get through — treating that as "signed out"
+      // means the request did not get through - treating that as "signed out"
       // is what threw a moderator back to the login page mid-review after the
       // panel tripped the rate limit.
       if (status === 401 || status === 403) {

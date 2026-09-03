@@ -7,7 +7,7 @@ import Link from "next/link";
  * Route-level error boundary.
  *
  * Without this a client-side crash renders Next's unstyled default, which looks
- * like the site is broken rather than that one page failed — and gives no way
+ * like the site is broken rather than that one page failed - and gives no way
  * back. Reset is offered first because most of these are transient.
  */
 export default function Error({
@@ -27,7 +27,7 @@ export default function Error({
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-night-950 px-6 text-center">
       <h1 className="font-display text-3xl tracking-tight">Something broke</h1>
       <p className="max-w-sm text-sm text-night-400">
-        This page hit an error. It is usually temporary — trying again often works.
+        This page hit an error. It is usually temporary - trying again often works.
       </p>
       {error.digest && (
         <p className="font-mono text-xs text-night-400">Reference: {error.digest}</p>

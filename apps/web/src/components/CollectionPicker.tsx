@@ -87,7 +87,7 @@ export default function CollectionPicker({ gameId, open, onClose }: CollectionPi
                   className="rounded"
                 />
                 <span>
-                  {c.name === "Favorites" ? "❤️ " : ""}
+                  {c.name === "Favorites" ? "♥ " : ""}
                   {c.name}
                 </span>
               </label>

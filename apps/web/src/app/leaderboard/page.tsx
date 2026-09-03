@@ -34,7 +34,7 @@ const POOLS = [
  *
  * Only settled ratings appear. Glicko-2 knows how confident each rating is, and
  * a 2400 with a wide deviation has played four games rather than demonstrated
- * anything — ranking on the raw number would put a lucky newcomer above a
+ * anything - ranking on the raw number would put a lucky newcomer above a
  * proven player and make the board worthless within a week.
  */
 export default function LeaderboardPage() {

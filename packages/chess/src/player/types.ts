@@ -27,6 +27,8 @@ export interface Player {
   modShield?: boolean;
   /** The one badge they display beside their name. */
   activeFlair?: string | null;
+  /** ISO country code, for the flag beside their name. */
+  countryCode?: string | null;
 }
 
 /**

@@ -7,7 +7,7 @@ export type BoardTheme = "classic" | "wood" | "green" | "blue" | "purple" | "dar
  * Installed piece sets.
  *
  * `fontaine` is Chessground's built-in default. The rest are real image sets
- * under /piece-sets/<key>/, named `wK.png`, `bQ.png` and so on — the same
+ * under /piece-sets/<key>/, named `wK.png`, `bQ.png` and so on - the same
  * naming Chessground's own role classes map to.
  */
 export type PieceSet = "fontaine" | "sleek" | "fae" | "fatty";
@@ -28,8 +28,10 @@ interface SettingsState {
   boardTheme: BoardTheme;
   pieceSet: PieceSet;
   materialStyle: MaterialStyle;
-  /** In-game chat. Off by default — most of it is tilt. */
+  /** In-game chat. Off by default - most of it is tilt. */
   gameChatEnabled: boolean;
+  /** Off by default: recovering quietly is the better default. */
+  showReconnectNotices: boolean;
   /** Engine used for bot games. */
   playEngine: string;
   /** Engine used on the analysis board. */
@@ -40,6 +42,7 @@ interface SettingsState {
   setPieceSet: (set: PieceSet) => void;
   setMaterialStyle: (style: MaterialStyle) => void;
   setGameChatEnabled: (on: boolean) => void;
+  setShowReconnectNotices: (on: boolean) => void;
   setPlayEngine: (id: string) => void;
   setAnalysisEngine: (id: string) => void;
   setSoundEnabled: (enabled: boolean) => void;
@@ -56,7 +59,7 @@ async function savePreference(data: Record<string, unknown>) {
     await api.put("/api/v1/auth/preferences", data);
     useToast.getState().show("Settings saved", "success");
   } catch {
-    // Silently fail — will sync next login
+    // Silently fail - will sync next login
   }
 }
 
@@ -70,13 +73,18 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   pieceSet: "fontaine",
   soundEnabled: true,
   playEngine: ((): string => {
-    if (typeof window === "undefined") return "stockfish-18";
-    return window.localStorage.getItem("aurora-play-engine") ?? "stockfish-18";
+    if (typeof window === "undefined") return "stockfish-18-lite";
+    return window.localStorage.getItem("aurora-play-engine") ?? "stockfish-18-lite";
   })(),
 
   analysisEngine: ((): string => {
-    if (typeof window === "undefined") return "stockfish-18";
-    return window.localStorage.getItem("aurora-analysis-engine") ?? "stockfish-18";
+    if (typeof window === "undefined") return "stockfish-18-lite";
+    return window.localStorage.getItem("aurora-analysis-engine") ?? "stockfish-18-lite";
+  })(),
+
+  showReconnectNotices: ((): boolean => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("aurora-reconnect-notices") === "true";
   })(),
 
   gameChatEnabled: ((): boolean => {
@@ -118,6 +126,15 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     }
   },
 
+  setShowReconnectNotices: (showReconnectNotices) => {
+    set({ showReconnectNotices });
+    try {
+      localStorage.setItem("aurora-reconnect-notices", String(showReconnectNotices));
+    } catch {
+      // Private browsing; the default applies for this session.
+    }
+  },
+
   setGameChatEnabled: (gameChatEnabled) => {
     set({ gameChatEnabled });
     try {
@@ -152,8 +169,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     set({
       darkMode: prefs.darkMode,
       boardTheme: prefs.boardTheme as BoardTheme,
-      // Retired keys — "classic"/"modern"/"minimal" from the CSS-filter era,
-      // "vista" and "minimalistic" from later passes — fall back rather than
+      // Retired keys - "classic"/"modern"/"minimal" from the CSS-filter era,
+      // "vista" and "minimalistic" from later passes - fall back rather than
       // resolving to a directory that no longer exists.
       pieceSet: (["sleek", "fae", "fatty"].includes(prefs.pieceSet)
         ? prefs.pieceSet

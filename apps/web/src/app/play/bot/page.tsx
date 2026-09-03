@@ -27,6 +27,8 @@ import { ConfirmModal, useToast } from "@aurora/ui";
 import { TIME_CONTROL_PRESETS, type BotPersonality } from "@aurora/chess";
 import { loadBotPrefs, saveBotPrefs } from "../../../lib/gamePrefs";
 import BotDetail from "../../../components/BotDetail";
+import VariantPicker from "../../../components/VariantPicker";
+import type { Variant } from "@aurora/chess";
 import BotSelector from "../../../components/BotSelector";
 import TimeControlPicker from "../../../components/TimeControlPicker";
 
@@ -86,6 +88,7 @@ export default function PlayBotPage() {
 
   // Game mode
   const [modePreset, setModePreset] = useState<GameModePreset>("friendly");
+  const [variant, setVariant] = useState<Variant>("STANDARD");
   const [customSettings, setCustomSettings] = useState<GameModeSettings>({ ...DEFAULT_CUSTOM });
 
   // Restore last-used settings from localStorage
@@ -130,7 +133,7 @@ export default function PlayBotPage() {
       syncOfflineGames().then(({ failed }) => {
         setPendingSyncCount(getPendingCount());
         if (failed > 0) {
-          showToast(`${failed} game(s) failed to sync — will retry`, "error");
+          showToast(`${failed} game(s) failed to sync - will retry`, "error");
         }
       });
       // Retry any online games that failed to sync moves
@@ -210,6 +213,7 @@ export default function PlayBotPage() {
         const body: Record<string, unknown> = {
           botElo,
           color: isWhite ? "white" : "black",
+          variant,
         };
         if (showCustomTime) {
           body.initialTime = customMinutes * 60;
@@ -244,7 +248,7 @@ export default function PlayBotPage() {
         <h1 className="text-center font-display text-3xl tracking-tight">Play the engine</h1>
         {!isOnline && (
           <div className="bg-amber-500/10 border border-amber-500/40 rounded-lg p-2 text-center text-xs text-amber-300">
-            Offline — games sync when you reconnect
+            Offline - games sync when you reconnect
           </div>
         )}
         {pendingSyncCount > 0 && isOnline && (
@@ -325,6 +329,17 @@ export default function PlayBotPage() {
           </div>
         )}
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+
+        <div className="bg-night-900 rounded-lg p-4">
+          <h2 className="text-sm font-semibold text-night-400 mb-3 font-display">Variant</h2>
+          <VariantPicker value={variant} onChange={setVariant} />
+          {variant !== "STANDARD" && variant !== "CHESS960" && (
+            <p className="mt-2 text-xs text-night-400">
+              Variant games use Fairy-Stockfish regardless of your engine setting, because it is the
+              only engine that knows these rules.
+            </p>
+          )}
+        </div>
 
         {/* Game Mode */}
         <div className="bg-night-900 rounded-lg p-4">
@@ -505,7 +520,7 @@ export default function PlayBotPage() {
         <ConfirmModal
           open={confirmStart}
           title="Start Game?"
-          message={`Mode: ${GAME_MODE_LABELS[modePreset].name}\nBot: ${selectedBot ? `${selectedBot.avatar} ${selectedBot.name}` : "Custom"} (${botElo} - ${eloLabel(botElo)})\nColor: ${colorChoice}\nTime: ${showCustomTime ? `${customMinutes}+${customIncrement}` : TIME_CONTROL_PRESETS[selectedTime]?.label || selectedTime}${!isOnline ? "\n\nOffline — will sync later" : ""}`}
+          message={`Mode: ${GAME_MODE_LABELS[modePreset].name}\nBot: ${selectedBot ? `${selectedBot.avatar} ${selectedBot.name}` : "Custom"} (${botElo} - ${eloLabel(botElo)})\nColor: ${colorChoice}\nTime: ${showCustomTime ? `${customMinutes}+${customIncrement}` : TIME_CONTROL_PRESETS[selectedTime]?.label || selectedTime}${!isOnline ? "\n\nOffline - will sync later" : ""}`}
           confirmLabel="Start"
           confirmVariant="primary"
           onConfirm={startGame}

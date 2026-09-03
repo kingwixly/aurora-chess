@@ -22,7 +22,7 @@ interface Friend {
  * Friends who are online, with a one-tap challenge.
  *
  * The most-repeated complaint about the big sites in our research was that
- * starting a game with a friend is unreasonably hard — they do not appear
+ * starting a game with a friend is unreasonably hard - they do not appear
  * anywhere you already are, so playing someone you know takes more steps than
  * playing a stranger. This puts them on the page you land on.
  *

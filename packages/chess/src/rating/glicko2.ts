@@ -118,7 +118,7 @@ function newVolatility(phi: number, sigma: number, v: number, delta: number): nu
  *
  * Glicko-2 is designed around rating periods rather than single games. Passing
  * one result at a time works and is what a live site needs, but batching a
- * session's games gives a more accurate answer — hence the array.
+ * session's games gives a more accurate answer - hence the array.
  *
  * @param player - Current rating, deviation and volatility.
  * @param results - Games played this period.
@@ -179,7 +179,7 @@ export function updateFromGame(player: Rating, opponent: Rating, score: number):
 /**
  * Whether a rating is settled enough to publish or to award a title from.
  *
- * A 2400 with a deviation of 300 has not demonstrated 2400 — it has played
+ * A 2400 with a deviation of 300 has not demonstrated 2400 - it has played
  * three games. Titles and leaderboards should wait for the evidence.
  */
 export function isEstablished(r: Rating): boolean {

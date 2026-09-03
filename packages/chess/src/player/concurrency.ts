@@ -6,7 +6,7 @@
  * a script starts a thousand games in a minute. The limit exists for the
  * second reason more than the first.
  *
- * Correspondence games are exempt because they are not a real-time commitment —
+ * Correspondence games are exempt because they are not a real-time commitment -
  * having twenty of those running is a hobby, not a load problem.
  */
 
@@ -69,7 +69,7 @@ export type ChallengeAction = "play-now" | "queue" | "decline";
  *
  * Mirrors the flow on the big sites: if you are free, you can start now; if you
  * are mid-game, you can queue it to begin when this one ends. Queuing is the
- * useful option — declining because you happen to be busy loses the game
+ * useful option - declining because you happen to be busy loses the game
  * entirely, and people rarely come back to re-challenge.
  */
 export function actionsForChallenge(opts: {

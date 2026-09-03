@@ -167,7 +167,7 @@ export default function InvitesPage() {
           {generating
             ? "Generating..."
             : stats && !stats.canCreate
-              ? "Invite limit reached — get more invites used"
+              ? "Invite limit reached - get more invites used"
               : "Generate New Invite"}
         </button>
 

@@ -9,7 +9,7 @@ import { useStandalone } from "../lib/useStandalone";
  *
  * In a browser tab this would be redundant chrome competing with the browser's
  * own navigation. Launched from the home screen there is no back button and no
- * address bar, so without something like this the app is a dead end — which is
+ * address bar, so without something like this the app is a dead end - which is
  * the single most common way an installed web app feels broken.
  *
  * Sits above the home indicator via safe-area padding, and stays fixed so it

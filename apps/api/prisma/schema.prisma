@@ -174,6 +174,10 @@ model User {
   /// user and granted by staff rather than self-service. `altsEnabled` is the
   /// grant; `altOf` links a created alt back to its owner so moderation can see
   /// the whole set at once rather than treating them as unrelated strangers.
+  posts           Post[]            @relation("PostAuthor")
+  threads         Thread[]          @relation("ThreadAuthor")
+  threadPosts     ThreadPost[]      @relation("ThreadPostAuthor")
+
   altsEnabled     Boolean           @default(false)
   altOf           String?
   altOwner        User?             @relation("UserAlts", fields: [altOf], references: [id], onDelete: Cascade)
@@ -966,3 +970,71 @@ model AuthToken {
   @@index([expiresAt])
 }
 
+
+
+/// A blog post, written by staff.
+///
+/// Separate from forum threads because the two have different rules: posts are
+/// authored by staff, edited over time, and are the site speaking. Threads are
+/// anyone's and are a conversation. Collapsing them into one model would mean
+/// every permission check needed a type flag anyway.
+model Post {
+  id          String    @id @default(cuid())
+  /// URL segment. Stable once published, so links keep working after a retitle.
+  slug        String    @unique
+  title       String
+  /// Short line for listings and link previews.
+  summary     String
+  /// Markdown.
+  body        String
+  authorId    String
+  author      User      @relation("PostAuthor", fields: [authorId], references: [id])
+  /// Null until published. Drafts are invisible to everyone but staff.
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([publishedAt])
+  @@index([slug])
+}
+
+/// A forum thread.
+model Thread {
+  id           String         @id @default(cuid())
+  title        String
+  /// Which board it sits in: general, help, feedback, appeals.
+  category     String         @default("general")
+  authorId     String
+  author       User           @relation("ThreadAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  /// Staff-set. Pinned threads sort first regardless of activity.
+  pinned       Boolean        @default(false)
+  /// Locked threads are readable but take no new replies.
+  locked       Boolean        @default(false)
+  /// Soft delete, so moderation can undo it and the thread is not lost.
+  deletedAt    DateTime?
+  /// Denormalised so the thread list can sort without counting replies.
+  lastReplyAt  DateTime       @default(now())
+  replyCount   Int            @default(0)
+  createdAt    DateTime       @default(now())
+  posts        ThreadPost[]
+
+  @@index([category, pinned, lastReplyAt])
+  @@index([authorId])
+}
+
+/// A message in a thread. The first one is the thread body.
+model ThreadPost {
+  id        String    @id @default(cuid())
+  threadId  String
+  thread    Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User      @relation("ThreadPostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  body      String
+  /// Soft delete again: a removed post leaves a tombstone so the conversation
+  /// still reads sensibly rather than losing its middle.
+  deletedAt DateTime?
+  editedAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([threadId, createdAt])
+}

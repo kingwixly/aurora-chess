@@ -7,7 +7,7 @@ import { AuroraBand } from "@aurora/ui";
  * What a signed-out visitor sees on a page that needs an account.
  *
  * Guarded pages used to `return null` while a redirect effect ran, which
- * renders a literally blank screen — and if the redirect never fires, or the
+ * renders a literally blank screen - and if the redirect never fires, or the
  * session check fails outright, the blank screen is *all* you get, with no way
  * out. This always gives a way forward.
  */

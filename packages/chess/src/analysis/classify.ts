@@ -1,4 +1,4 @@
-import { isBookMove } from "../openings/book";
+import { shouldLabelAsBook } from "../openings/book";
 import { Chess } from "chess.js";
 import type { MoveClassification } from "../moves/types";
 
@@ -75,7 +75,7 @@ export function classifyMove(
   //
   // Judging opening moves by centipawns is actively misleading: the engine will
   // call 1.e4 "great" and 1.d4 "best", implying a difference that does not
-  // exist and teaching a learner nothing. "Book" says the true thing — this is
+  // exist and teaching a learner nothing. "Book" says the true thing - this is
   // established theory, and the question of better or worse does not arise yet.
   //
   // Gated on the move not being a disaster. The book contains the Bongcloud
@@ -83,7 +83,11 @@ export function classifyMove(
   // database holds it would excuse exactly the mistakes worth flagging.
   // Theory-and-fine gets BOOK; theory-and-losing gets judged on its merits.
   const bookLoss = Math.abs(evalBefore - evalAfter);
-  if (bookLoss < 100 && isBookMove(fen, playedMoveUCI)) {
+  // Ply is derived from the FEN's fullmove counter and side to move, so the
+  // caller does not have to thread it through. White's first move is ply 1.
+  const fullmove = Number(fen.split(" ")[5]) || 1;
+  const ply = (fullmove - 1) * 2 + (fen.split(" ")[1] === "b" ? 2 : 1);
+  if (bookLoss < 100 && shouldLabelAsBook(fen, playedMoveUCI, ply)) {
     return {
       classification: "BOOK",
       cpLoss: 0,

@@ -3,7 +3,7 @@
 /**
  * Country flags, from a responsive sprite.
  *
- * Emoji flags have no glyphs on Windows — they render as the two letters — so
+ * Emoji flags have no glyphs on Windows - they render as the two letters - so
  * they cannot be used. An earlier version drew flags as SVG band
  * constructions, which was fine for tricolours and wrong for anything with a
  * canton, cross or crest.
@@ -118,7 +118,7 @@ const SPRITE: Record<string, number> = {
   ZW: 100.0,
 };
 
-/** The artwork's own aspect ratio — 44x30 per cell. */
+/** The artwork's own aspect ratio - 44x30 per cell. */
 const RATIO = 44 / 30;
 
 export function Flag({

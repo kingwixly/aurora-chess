@@ -25,17 +25,6 @@ describe("catalogue", () => {
 });
 
 describe("purpose filtering", () => {
-  it("does not offer Maia for analysis", () => {
-    // Maia predicts the likely human move, not the best one. Offering it as an
-    // analyst would give people confident, wrong evaluations.
-    expect(enginesFor("analyse").map((e) => e.id)).not.toContain("lc0-maia");
-    expect(enginesFor("play").map((e) => e.id)).toContain("lc0-maia");
-  });
-
-  it("does not offer WorstFish for analysis", () => {
-    expect(enginesFor("analyse").map((e) => e.id)).not.toContain("worstfish");
-  });
-
   it("puts engines we actually ship first", () => {
     // An unbundled engine offered above a bundled one means the player picks
     // it, waits, and silently gets something else.
@@ -56,22 +45,27 @@ describe("purpose filtering", () => {
   });
 });
 
+describe("worker paths", () => {
+  it("every available engine names a worker file", () => {
+    // A wrong path does not throw - the worker simply never loads and the
+    // board sits at "Loading engine" forever.
+    for (const e of availableEngines("play")) {
+      // A query string is allowed: the adapter uses one to choose its build.
+      expect(e.worker, e.id).toMatch(/^\/(engines|stockfish)\/.+\.js(\?.+)?$/);
+    }
+  });
+});
+
 describe("resolving a stored choice", () => {
   it("keeps a valid choice", () => {
-    expect(resolveEngine("stockfish-18", "analyse")).toBe("stockfish-18");
+    expect(resolveEngine("stockfish-classic", "analyse")).toBe("stockfish-classic");
   });
 
-  it("refuses an engine that is not bundled", () => {
-    // Weiss is catalogued but not shipped. Falling back is the honest
-    // behaviour; pretending it loaded is not.
+  it("falls back on a choice that is no longer catalogued", () => {
+    // Stored preferences outlive the catalogue. Someone who picked Weiss
+    // before it was removed should quietly get the default rather than a
+    // worker path that 404s.
     expect(resolveEngine("weiss", "analyse")).toBe(DEFAULT_ENGINE);
-  });
-
-  it("falls back when the choice does not fit the purpose", () => {
-    // A stored preference can outlive the reason it was valid: someone who
-    // picked Maia to play against should not silently get it as an analyst.
-    expect(resolveEngine("lc0-maia", "analyse")).toBe(DEFAULT_ENGINE);
-    // Also unbundled, so it falls back for play too.
     expect(resolveEngine("lc0-maia", "play")).toBe(DEFAULT_ENGINE);
   });
 
@@ -83,5 +77,44 @@ describe("resolving a stored choice", () => {
 
   it("rejects an unknown id outright", () => {
     expect(isEngineValidFor("not-an-engine", "play")).toBe(false);
+  });
+});
+
+describe("worker construction", () => {
+  it("marks ES-module builds as such", () => {
+    // Loading a module build without `{ type: "module" }` fails silently: the
+    // Worker constructs, the import throws inside it, and no message ever
+    // arrives. The board then waits forever for a ready that never comes.
+    expect(ENGINES["fairy-sf14"].workerType).toBe("module");
+    expect(ENGINES["stockfish-16-7"].workerType).toBe("module");
+  });
+
+  it("leaves classic builds classic", () => {
+    // Passing type: module to a plain script is equally fatal, in the other
+    // direction.
+    expect(ENGINES["stockfish-18-lite"].workerType ?? "classic").toBe("classic");
+    expect(ENGINES["stockfish-classic"].workerType ?? "classic").toBe("classic");
+  });
+
+  it("routes module builds through the adapter", () => {
+    for (const e of Object.values(ENGINES)) {
+      if (e.workerType !== "module") continue;
+      expect(e.worker, e.id).toContain("lila-adapter.js?engine=");
+    }
+  });
+});
+
+describe("variants", () => {
+  it("has exactly one engine that plays variants", () => {
+    // Worth asserting: if a second one ever claims variant support, the code
+    // that picks an engine for a variant game needs to choose between them
+    // rather than taking the first match.
+    const withVariants = Object.values(ENGINES).filter((e) => e.variants && e.variants.length > 0);
+    expect(withVariants).toHaveLength(1);
+    expect(withVariants[0].id).toBe("fairy-sf14");
+  });
+
+  it("includes chess960, which the site already supports", () => {
+    expect(ENGINES["fairy-sf14"].variants).toContain("chess960");
   });
 });

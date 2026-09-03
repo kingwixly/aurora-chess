@@ -5,7 +5,7 @@ import ClientProviders from "../components/ClientProviders";
 import StandingBanner from "../components/StandingBanner";
 
 /**
- * Fraunces for display. An optical-size serif with a "wonk" axis — it has
+ * Fraunces for display. An optical-size serif with a "wonk" axis - it has
  * character at large sizes without reading as a stock editorial serif, and it
  * suits a game with a few centuries of print history behind it.
  */

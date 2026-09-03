@@ -16,6 +16,7 @@ export {
   DEFAULT_ENGINE,
   enginesFor,
   availableEngines,
+  engineForVariant,
   isEngineValidFor,
   resolveEngine,
 } from "./engines";

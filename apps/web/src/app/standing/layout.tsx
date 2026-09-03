@@ -11,7 +11,7 @@ export const metadata: Metadata = {
  *
  * The rest of Aurora is dark, and a punishment notice rendered in the same
  * skin as the game reads as part of the game. Light makes it plainly a
- * different kind of page — an account record, not a place to play — and it is
+ * different kind of page - an account record, not a place to play - and it is
  * easier to read carefully, which is what people do here.
  */
 export default function StandingLayout({ children }: { children: React.ReactNode }) {

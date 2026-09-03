@@ -53,7 +53,7 @@ export default function StandingBanner() {
         <button
           onClick={() => setDismissed(true)}
           aria-label="Dismiss"
-          // Dismissable for this page view only — it returns on navigation,
+          // Dismissable for this page view only - it returns on navigation,
           // because a live restriction should not be easy to forget.
           className="ml-auto text-night-400 transition-colors hover:text-white"
         >

@@ -18,7 +18,7 @@ export interface Capabilities {
   playBots: boolean;
   puzzles: boolean;
   chat: boolean;
-  /** Profiles, forums, history — anything read-only. */
+  /** Profiles, forums, history - anything read-only. */
   browse: boolean;
   /** The standing pages. Never removed by a punishment. */
   standing: true;
@@ -88,7 +88,7 @@ export function isActive(p: PunishmentRecord, now = new Date()): boolean {
  * What this account may do right now.
  *
  * Capabilities are removed, never granted, so overlapping punishments combine
- * to the most restrictive rather than the most recent — otherwise a warning
+ * to the most restrictive rather than the most recent - otherwise a warning
  * issued after a suspension would quietly unsuspend someone.
  */
 export function capabilitiesFor(
@@ -124,7 +124,7 @@ function withinStrikeWindow(p: PunishmentRecord, now: Date): boolean {
  * Records remain visible to staff forever; only their weight expires. A mistake
  * at fourteen should not still be deciding things at twenty.
  *
- * Overturned punishments never count — a successful appeal means it should not
+ * Overturned punishments never count - a successful appeal means it should not
  * have happened, so it must not keep having effects.
  */
 export function countingStrikes(
@@ -133,7 +133,7 @@ export function countingStrikes(
 ): PunishmentRecord[] {
   return punishments.filter((p) => {
     if (p.overturnedAt) return false;
-    // A ban is a ban forever, but it is not a strike — it never converts.
+    // A ban is a ban forever, but it is not a strike - it never converts.
     if (p.type === "BAN") return false;
     if (isActive(p, now)) return true;
     return withinStrikeWindow(p, now);
@@ -143,7 +143,7 @@ export function countingStrikes(
 /**
  * Whether automatic titles are blocked.
  *
- * Any counting strike blocks them. Manual titles are unaffected — those are
+ * Any counting strike blocks them. Manual titles are unaffected - those are
  * staff discretion, and a GM does not stop being a GM over a warning.
  */
 export function blocksAutomaticTitles(
@@ -191,7 +191,7 @@ export interface AppealEligibility {
   reason?: AppealBlockReason;
 }
 
-/** Bans shorter than this cannot be appealed — they expire before review would. */
+/** Bans shorter than this cannot be appealed - they expire before review would. */
 export const MIN_APPEALABLE_BAN_HOURS = 72;
 
 /**

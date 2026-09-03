@@ -125,14 +125,14 @@ export default function HistoryPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className={`font-bold ${resultColors[pr]}`}>
-                          {pr === "win" ? "W" : pr === "loss" ? "L" : pr === "draw" ? "D" : "—"}
+                          {pr === "win" ? "W" : pr === "loss" ? "L" : pr === "draw" ? "D" : "-"}
                         </span>
                         <span className="font-medium text-sm truncate">vs {getOpponent(g)}</span>
                         <span className="text-xs text-night-400">{g.timeControl}</span>
                       </div>
                       <div className="text-xs text-night-400 mt-1">
                         {RESULT_LABELS[g.result || ""] || g.status}
-                        {g.termination && ` — ${g.termination.toLowerCase()}`}
+                        {g.termination && ` - ${g.termination.toLowerCase()}`}
                         <span className="ml-2">{new Date(g.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>

@@ -28,7 +28,7 @@ interface TitleEditorProps {
  *
  * Deliberately shows the resolved outcome up front, because the interaction
  * between a manual title, an auto title and a ban is not obvious from the
- * individual controls — staff should be able to see what the player will
+ * individual controls - staff should be able to see what the player will
  * actually display before saving.
  */
 export default function TitleEditor({ user, saving, onClose, onSave }: TitleEditorProps) {
@@ -67,7 +67,7 @@ export default function TitleEditor({ user, saving, onClose, onSave }: TitleEdit
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="w-full max-w-lg rounded-lg bg-gray-800 p-6 shadow-xl">
-        <h2 className="mb-1 text-lg font-bold">Titles — {user.username}</h2>
+        <h2 className="mb-1 text-lg font-bold">Titles - {user.username}</h2>
         <p className="mb-4 text-xs text-gray-400">
           Rating {user.rating} · peak {user.peakRating}
         </p>
@@ -79,10 +79,10 @@ export default function TitleEditor({ user, saving, onClose, onSave }: TitleEdit
           onChange={(e) => setTitleManual(e.target.value as ManualTitle | "")}
           className="mb-1 w-full rounded bg-gray-700 px-3 py-2 text-sm"
         >
-          <option value="">— none —</option>
+          <option value="">- none -</option>
           {MANUAL_TITLES.map((t) => (
             <option key={t} value={t}>
-              {t} — {TITLE_LABELS[t]}
+              {t} - {TITLE_LABELS[t]}
             </option>
           ))}
         </select>
@@ -99,10 +99,10 @@ export default function TitleEditor({ user, saving, onClose, onSave }: TitleEdit
             disabled={!locked}
             className="flex-1 rounded bg-gray-700 px-3 py-2 text-sm disabled:opacity-50"
           >
-            <option value="">— none —</option>
+            <option value="">- none -</option>
             {AUTO_TITLES.map((t) => (
               <option key={t} value={t}>
-                {t} — {TITLE_LABELS[t]}
+                {t} - {TITLE_LABELS[t]}
               </option>
             ))}
           </select>
@@ -113,7 +113,7 @@ export default function TitleEditor({ user, saving, onClose, onSave }: TitleEdit
         </div>
         <p className="mb-4 text-xs text-gray-500">
           {locked
-            ? "Overridden — automatic recomputation is suspended for this user."
+            ? "Overridden - automatic recomputation is suspended for this user."
             : "Computed from peak rating after every rated game. Tick Override to set it by hand."}
         </p>
 

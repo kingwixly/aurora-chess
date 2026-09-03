@@ -7,7 +7,7 @@ import { useState } from "react";
  *
  * Shared by pass-and-play and the over-the-board clock, because both have the
  * same problem: two people, one device, and no server to arbitrate. A draw
- * offer here is not a network message — it is a prompt handed physically across
+ * offer here is not a network message - it is a prompt handed physically across
  * the table, so the confirmation belongs on the same screen.
  *
  * Every destructive action asks twice. On a shared phone a mis-tap ends

@@ -50,7 +50,9 @@ describe("Home page", () => {
 
   it("shows the tagline", () => {
     render(<Home />);
-    expect(screen.getByText("A chess club that lives online")).toBeInTheDocument();
+    // Reworded away from marketing copy: a large display-font slogan over a
+    // hero was the most generated-looking thing on the page.
+    expect(screen.getByText("Free chess, no accounts required to start")).toBeInTheDocument();
   });
 
   it("has a login link", () => {

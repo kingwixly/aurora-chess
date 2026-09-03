@@ -137,7 +137,7 @@ export default function AdminAuditLogPage() {
                     <td className="px-3 py-2 text-gray-500 text-xs max-w-xs truncate">
                       {formatDetails(log.details)}
                     </td>
-                    <td className="px-3 py-2 text-gray-500 font-mono text-xs">{log.ip || "—"}</td>
+                    <td className="px-3 py-2 text-gray-500 font-mono text-xs">{log.ip || "-"}</td>
                   </tr>
                 ))}
               </tbody>

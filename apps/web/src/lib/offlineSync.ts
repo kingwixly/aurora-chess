@@ -31,7 +31,7 @@ function savePending(games: OfflineGame[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(games));
   } catch {
-    // storage full — drop oldest
+    // storage full - drop oldest
   }
 }
 

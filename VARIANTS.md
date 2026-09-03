@@ -1,64 +1,80 @@
-# Chess960
+# Chess variants
 
-## The blocker worth knowing about
+## Fairy-Stockfish is not a choice
 
-**chess.js gets Chess960 castling wrong**, and silently.
+Corrected from the previous version, which listed it in the engine picker.
 
-It applies the standard rule — move the king two squares toward the rook. In
-Chess960 the king always finishes on g1/g8 or c1/c8 regardless of where it
-started. With the king on b1, chess.js sends it to d1 for `O-O`; the correct
-square is g1.
+It is now `selectable: false` - catalogued so the loader can find it, hidden
+from every picker. `engineForVariant(variant, preferred)` returns it
+automatically for any variant game and the player's own preference otherwise.
 
-I checked this before writing any feature code, because building on top of it
-would have produced games that looked fine and were illegal.
+The reasoning: asking someone to pick an engine that only matters for Atomic,
+and which is chosen for them the moment they start an Atomic game, is a
+question with no useful answer. Offering the choice and then overriding it
+would be worse than not offering it.
 
-## What is built
+Chess960 deliberately does **not** trigger Fairy. It is a shuffled start, not a
+rule change, and plain Stockfish plays it with `UCI_Chess960`.
 
-`packages/chess/src/variants/chess960.ts` — the part that can be wrong, done
-properly and tested exhaustively.
+## Six new variants
 
-- **Position generation** using Scharnagl numbering, so a stored position id
-  always replays the same game. 518 is the ordinary array.
-- **Validity rules**: bishops on opposite colours, king between the rooks,
-  correct piece counts.
-- **Castling**, implemented directly rather than delegated: king to g/c file,
-  rook to f/d, with checks for occupancy, castling rights, and the king passing
-  through attack.
+| Variant              | Rule                                                                  | Wins by                           |
+| -------------------- | --------------------------------------------------------------------- | --------------------------------- |
+| **Atomic**           | Captures explode, destroying both pieces and every non-pawn neighbour | Blowing up the enemy king         |
+| **Crazyhouse**       | Captured pieces become yours and can be dropped                       | Checkmate                         |
+| **King of the Hill** | The four central squares are the hill                                 | Walking your king into the centre |
+| **Three-check**      | Checks are counted                                                    | Three checks                      |
+| **Antichess**        | Capturing is compulsory, no check, king is ordinary                   | Losing everything                 |
+| **Horde**            | Black has an army, White has thirty-six pawns and no king             | Taking every pawn                 |
 
-**20 tests**, including all 960 positions verified valid, all 960 distinct, and
-all 960 accepted by the move generator.
+Each is ordinary chess with one rule changed, which is why they layer over a
+standard move generator rather than needing their own.
 
-Two of those tests caught my own wrong assumptions rather than bugs in the code:
-I asserted every position opens with exactly 20 moves (a knight on the a-file
-has one fewer, so it is 18–20), and I picked a "same-coloured bishops" example
-that was actually legal.
+## The problem chess.js caused
 
-## What is not built yet
+**chess.js refuses to construct a position missing either king.** Reasonable
+for standard chess, fatal here: Atomic ends by exploding a king, Horde gives
+White no king at all, and in Antichess kings are ordinary capturable pieces.
 
-The foundation is done; the wiring is not. Remaining:
+Every result function therefore parses the FEN board field directly rather than
+loading a position. This surfaced as four failing tests before it surfaced as a
+bug, which is the right order.
 
-- A `variant` column on Game, and `positionId` alongside it
-- Game creation offering the variant, and the matchmaking pools kept separate —
-  a 960 rating and a standard rating should not mix
-- The move route calling `applyCastling` when the move is a castle, rather than
-  passing it to chess.js
-- The client board allowing the king-onto-own-rook gesture, which is how
-  castling is expressed in 960
-- Stockfish needs `UCI_Chess960 true` set, or the bots will suggest illegal
-  castles
+## Details worth keeping
 
-That is a session's work, not an afternoon, and it touches the move path — the
-one place where a bug corrupts games rather than annoying someone.
+**Pawns survive the Atomic blast.** Only the captured pawn itself dies. Without
+that, pawn structure evaporates and the game collapses in a handful of moves.
 
-## Fairy chess with amazons
+**A move that blows up your own king is illegal**, even when it destroys
+theirs at the same time. The mover loses in that case, so it is never a winning
+move - it is simply not a move.
 
-Deferred, and honestly it should be.
+**Capturing is compulsory in Antichess.** This is the entire game; without it
+you have chess played badly.
 
-An amazon moves as queen plus knight. No chess library supports it, so the move
-generator, check detection, and mate detection would all have to be written from
-scratch — and Stockfish cannot evaluate it at all, so there would be no bots, no
-analysis, and no puzzles for that variant.
+**A promoted piece reverts to a pawn when captured** in Crazyhouse. Reading the
+type off the board would hand out free queens.
 
-It is a genuinely interesting build, but it is a much larger one than Chess960
-and it lands on a site with no players yet. Worth revisiting once there are
-people asking for it.
+**`UCI_Variant` is set before the first move**, not on the first capture. An
+engine told to play Atomic generates different moves from ply one, and one
+that was not told plays ordinary chess on a variant board - which looks like
+the engine making illegal moves.
+
+**The opening book is skipped for every variant.** Theory belongs to standard
+chess; a shuffled rank or an altered rule set makes it meaningless at best.
+
+## Where the boundary sits
+
+These rules exist so the client can validate moves and detect endings without a
+round trip. **Fairy-Stockfish remains authoritative.** Two places where the
+client is an approximation, and says so in the code:
+
+- Antichess positions where a king is pinned, since chess.js will not generate
+  moves that leave a king attacked and Antichess has no such restriction
+- Crazyhouse drops, which chess.js has no concept of at all
+
+24 tests on the rules.
+
+## Verified
+
+388 shared, 342 API, 259 web tests. All six checks clean.

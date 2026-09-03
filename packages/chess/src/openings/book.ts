@@ -35,7 +35,7 @@ function hashPosition(key: string): string {
  * The position key.
  *
  * Move counters are dropped, so the same position reached by different move
- * orders — or after a repetition — still matches.
+ * orders - or after a repetition - still matches.
  */
 function positionKey(fen: string): string {
   return fen.split(" ").slice(0, 4).join(" ");
@@ -89,7 +89,7 @@ export function identifyOpening(moves: string[]): {
  * Whether a move played from this position is a book move.
  *
  * Checked on the position AFTER the move. A move is "book" if it leads to a
- * named opening position — which is why 1.e4 is book and 1.g4 is not, despite
+ * named opening position - which is why 1.e4 is book and 1.g4 is not, despite
  * both being first moves.
  *
  * This exists because classifying opening moves by evaluation is misleading:
@@ -99,7 +99,12 @@ export function identifyOpening(moves: string[]): {
 export function isBookMove(fenBefore: string, move: string): boolean {
   try {
     const chess = new Chess(fenBefore);
-    chess.move(move);
+    const applied = chess.move(move);
+    // Checked explicitly. If the move does not apply, the position is
+    // unchanged and this would otherwise report whether the position BEFORE
+    // the move was book - which is a different and much more misleading
+    // question, and true for far too many moves.
+    if (!applied) return false;
     return isBookPosition(chess.fen());
   } catch {
     return false;
@@ -108,3 +113,27 @@ export function isBookMove(fenBefore: string, move: string): boolean {
 
 /** How many named openings the book holds. */
 export const BOOK_SIZE = Object.keys(TABLE).length;
+
+/**
+ * Ply below which "book" tells you nothing.
+ *
+ * Measured, not guessed: every one of White's twenty first moves is in the ECO
+ * database, including 1.a4 and 1.Na3. A label that applies to 100% of moves
+ * carries no information - and because BOOK replaces the quality label, it also
+ * suppresses the only feedback that would have been useful.
+ *
+ * By the second ply it is 30% of legal moves, and by the third 4%, so it starts
+ * distinguishing almost immediately.
+ */
+export const BOOK_MEANINGFUL_FROM_PLY = 2;
+
+/**
+ * Whether a book label is worth showing at this point in the game.
+ *
+ * Separate from {@link isBookMove} because the question is different: one asks
+ * whether the move is theory, this asks whether saying so helps.
+ */
+export function shouldLabelAsBook(fenBefore: string, move: string, ply: number): boolean {
+  if (ply < BOOK_MEANINGFUL_FROM_PLY) return false;
+  return isBookMove(fenBefore, move);
+}

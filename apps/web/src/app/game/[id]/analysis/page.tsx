@@ -24,6 +24,7 @@ const EvalGraph = dynamic(() => import("../../../../components/EvalGraph"), {
 });
 import type { Player } from "@aurora/chess";
 import { CLASSIFICATION_COLORS, CLASSIFICATION_SYMBOLS } from "@aurora/chess";
+import { Chess } from "chess.js";
 import { useClientAnalysis } from "../../../../lib/useClientAnalysis";
 import EngineLines from "../../../../components/EngineLines";
 import { identifyOpening, ENGINES, resolveEngine } from "@aurora/chess";
@@ -71,7 +72,7 @@ export default function AnalysisPage() {
     { ply: number; san: string; uci: string; fen: string }[]
   >([]);
   // The engine the player picked, falling back if their stored choice cannot
-  // analyse — Maia predicts human moves rather than best ones.
+  // analyse - Maia predicts human moves rather than best ones.
   const analysisEngine = useSettingsStore((st) => st.analysisEngine);
   const chosenEngine = resolveEngine(analysisEngine, "analyse");
 
@@ -178,7 +179,38 @@ export default function AnalysisPage() {
   const currentFen =
     currentPly === 0
       ? startingFen
-      : analysis?.feedback.find((f) => f.ply === currentPly)?.fen || startingFen;
+      : analysis?.feedback.find((f) => f.ply === currentPly)?.fen ||
+        gameMoves.find((m) => m.ply === currentPly)?.fen ||
+        startingFen;
+
+  /**
+   * A line played out from the current position.
+   *
+   * The board was inert - `movable={false}` with a no-op handler - so there was
+   * no way to ask "what if". Exploration lives alongside the game rather than
+   * replacing it: stepping the move list clears it and puts you back on the
+   * real game.
+   */
+  const [explored, setExplored] = useState<{ fen: string; sans: string[] } | null>(null);
+
+  const exploreMove = useCallback(
+    (from: string, to: string, promotion?: string) => {
+      const base = explored?.fen ?? currentFen;
+      const board = new Chess(base);
+      try {
+        const move = board.move({ from, to, promotion: promotion ?? "q" });
+        if (!move) return false;
+        setExplored({
+          fen: board.fen(),
+          sans: [...(explored?.sans ?? []), move.san],
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [explored, currentFen]
+  );
 
   // Candidate lines share ONE Stockfish worker with the bulk analysis run.
   //
@@ -192,7 +224,7 @@ export default function AnalysisPage() {
     let cancelled = false;
     setLinesLoading(true);
     clientAnalysis
-      .evaluateMultiPV(currentFen, 3, 1200)
+      .evaluateMultiPV(explored?.fen ?? currentFen, 3, 1200)
       .then((r) => {
         // The board may have moved on while the engine was thinking.
         if (!cancelled) setCandidateLines(r);
@@ -206,7 +238,7 @@ export default function AnalysisPage() {
     return () => {
       cancelled = true;
     };
-  }, [currentFen, clientAnalysis.engineReady, clientAnalysis.analysing]);
+  }, [currentFen, explored, clientAnalysis.engineReady, clientAnalysis.analysing]);
 
   // Current eval
   const currentFeedback = analysis?.feedback.find((f) => f.ply === currentPly);
@@ -215,6 +247,12 @@ export default function AnalysisPage() {
   // mate displayed as "+1000.0".
   const currentMate = currentFeedback?.mateAfter ?? null;
 
+  useEffect(() => {
+    // Moving through the real game abandons any side line, which is what
+    // clicking a move plainly means.
+    setExplored(null);
+  }, [currentPly]);
+
   // Last move
   // Opening name for the position currently shown, so it updates as you step
   // through rather than only naming the game as a whole.
@@ -222,7 +260,9 @@ export default function AnalysisPage() {
     gameMoves.filter((m) => m.ply <= currentPly).map((m) => m.san)
   );
 
-  const lastMoveFeedback = analysis?.feedback.find((f) => f.ply === currentPly);
+  const lastMoveFeedback =
+    analysis?.feedback.find((f) => f.ply === currentPly) ??
+    gameMoves.find((m) => m.ply === currentPly);
   const lastMove = lastMoveFeedback?.uci
     ? ([lastMoveFeedback.uci.slice(0, 2), lastMoveFeedback.uci.slice(2, 4)] as [string, string])
     : undefined;
@@ -272,44 +312,14 @@ export default function AnalysisPage() {
     );
   }
 
-  if (status === "none") {
-    return (
-      <main className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="bg-night-900 rounded-lg p-8 max-w-md w-full text-center">
-          <h1 className="text-xl font-bold mb-4 font-display">Game Analysis</h1>
-          <p className="text-night-400 mb-6">
-            Analyse every move with {ENGINES[chosenEngine]?.name ?? "the engine"}.
-            {isOnline
-              ? " Deep analysis (depth 18) saved to your account."
-              : " Running in your browser (depth 14)."}
-          </p>
-          <button
-            onClick={() => {
-              if (isOnline) {
-                requestAnalysis();
-              } else if (gameMoves.length > 0 && clientAnalysis.ready) {
-                setStatus("client-analysing");
-                clientAnalysis.analyse(gameMoves);
-              }
-            }}
-            disabled={!isOnline && (!clientAnalysis.ready || gameMoves.length === 0)}
-            className="w-full px-6 py-3 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 rounded font-medium transition-colors"
-          >
-            {isOnline
-              ? "Analyse Game"
-              : clientAnalysis.ready
-                ? "Analyse Game (Offline)"
-                : "Loading engine..."}
-          </button>
-          <div className="mt-4">
-            <Link href={`/game/${gameId}`} className="text-night-400 hover:text-white text-sm">
-              &larr; Back to game
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  /**
+   * No analysis has been run yet.
+   *
+   * Rendered as a banner over the normal page rather than instead of it. The
+   * previous version returned early with just a prompt, so the board and move
+   * list were absent entirely and the page looked broken rather than idle.
+   */
+  const notAnalysed = status === "none";
 
   if (status === "client-analysing") {
     return (
@@ -391,12 +401,48 @@ export default function AnalysisPage() {
     }
   }
 
-  const timelineMoves = analysis.feedback.map((f) => ({ ply: f.ply, san: f.san }));
+  /**
+   * The moves to display.
+   *
+   * Falls back to the game's own moves when no analysis has been run. Every
+   * part of this page read `analysis.feedback`, so before analysing the board
+   * showed the starting position and the move list was empty - the game looked
+   * like it had failed to load rather than simply not being analysed yet.
+   */
+  const displayMoves =
+    analysis?.feedback && analysis.feedback.length > 0
+      ? analysis.feedback.map((f) => ({ ply: f.ply, san: f.san }))
+      : gameMoves.map((m) => ({ ply: m.ply, san: m.san }));
+
+  const timelineMoves = displayMoves;
 
   return (
     <main className="flex flex-col h-[100dvh] lg:h-auto lg:min-h-screen overflow-hidden lg:overflow-auto p-1 lg:p-4">
       <div className="max-w-6xl mx-auto flex flex-col flex-1 min-h-0 lg:block w-full">
         <div className="flex flex-col lg:flex-row gap-1 lg:gap-6 items-start flex-1 min-h-0">
+          {notAnalysed && (
+            <div className="mb-2 w-full rounded-lg bg-aurora-cyan/10 px-4 py-3 ring-1 ring-inset ring-aurora-cyan/30 lg:absolute lg:top-2">
+              <p className="text-sm text-night-200">
+                This game has not been analysed yet. You can step through it now, or run the engine
+                over every move.
+              </p>
+              <button
+                onClick={() => {
+                  if (isOnline) {
+                    requestAnalysis();
+                  } else if (gameMoves.length > 0 && clientAnalysis.ready) {
+                    setStatus("client-analysing");
+                    clientAnalysis.analyse(gameMoves);
+                  }
+                }}
+                disabled={!isOnline && (!clientAnalysis.ready || gameMoves.length === 0)}
+                className="mt-2 rounded-lg bg-aurora-cyan px-4 py-2 text-sm font-semibold text-night-950 disabled:opacity-50"
+              >
+                Analyse this game
+              </button>
+            </div>
+          )}
+
           {/* ── LEFT: Board area ── */}
           <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full justify-center lg:justify-start">
             {openingHere.opening && (
@@ -412,11 +458,11 @@ export default function AnalysisPage() {
             <div className="flex items-center justify-between px-1 py-0.5 text-xs">
               <span className="text-night-400">
                 {white?.username || "White"}:{" "}
-                <strong>{analysis.whiteAccuracy?.toFixed(1) ?? "—"}%</strong>
+                <strong>{analysis.whiteAccuracy?.toFixed(1) ?? "-"}%</strong>
               </span>
               <span className="text-night-400">
                 {black?.username || "Black"}:{" "}
-                <strong>{analysis.blackAccuracy?.toFixed(1) ?? "—"}%</strong>
+                <strong>{analysis.blackAccuracy?.toFixed(1) ?? "-"}%</strong>
               </span>
             </div>
 
@@ -433,12 +479,17 @@ export default function AnalysisPage() {
               <div className="flex flex-col min-w-0 flex-1">
                 <div className="relative w-full lg:max-w-[480px]">
                   <ChessBoard
-                    fen={currentFen}
+                    fen={explored?.fen ?? currentFen}
                     orientation="white"
-                    movable={false}
+                    movable={true}
+                    /* Both sides. An analysis board where you can only move
+                       white is not an analysis board - exploring any line for
+                       black was impossible. */
+                    playerColor="both"
+                    premovable
                     lastMove={lastMove}
                     check={false}
-                    onMove={() => {}}
+                    onMove={exploreMove}
                     arrows={bestMoveArrow}
                   />
                 </div>
@@ -506,12 +557,30 @@ export default function AnalysisPage() {
 
             <EvalGraph points={evalPoints} currentPly={currentPly} onClickPly={setCurrentPly} />
 
+            {explored && (
+              <div className="flex items-center justify-between rounded-lg bg-aurora-cyan/10 px-3 py-2 text-sm ring-1 ring-inset ring-aurora-cyan/30">
+                <span className="truncate text-night-200">
+                  Exploring: {explored.sans.join(" ")}
+                </span>
+                <button
+                  onClick={() => setExplored(null)}
+                  className="shrink-0 text-xs text-aurora-cyan hover:underline"
+                >
+                  Back to game
+                </button>
+              </div>
+            )}
+
             <section className="rounded-lg bg-night-900 p-3">
               <div className="mb-2 flex items-baseline justify-between">
                 <h2 className="text-sm font-semibold">Engine lines</h2>
                 {linesLoading && <span className="text-xs text-night-400">thinking...</span>}
               </div>
-              <EngineLines fen={currentFen} lines={candidateLines} loading={linesLoading} />
+              <EngineLines
+                fen={explored?.fen ?? currentFen}
+                lines={candidateLines}
+                loading={linesLoading}
+              />
             </section>
 
             <div className="bg-night-900 rounded-lg p-3 overflow-y-auto max-h-72">
@@ -583,13 +652,13 @@ export default function AnalysisPage() {
                 <div className="text-center">
                   <p className="text-xs text-night-400 mb-1">{white?.username || "White"}</p>
                   <p className="text-2xl font-bold font-display">
-                    {analysis.whiteAccuracy?.toFixed(1) ?? "—"}%
+                    {analysis.whiteAccuracy?.toFixed(1) ?? "-"}%
                   </p>
                 </div>
                 <div className="text-center">
                   <p className="text-xs text-night-400 mb-1">{black?.username || "Black"}</p>
                   <p className="text-2xl font-bold font-display">
-                    {analysis.blackAccuracy?.toFixed(1) ?? "—"}%
+                    {analysis.blackAccuracy?.toFixed(1) ?? "-"}%
                   </p>
                 </div>
               </div>

@@ -6,7 +6,7 @@
  * Uses the real piece images rather than Unicode glyphs. The glyph version
  * rendered every piece in the same colour, because the outline and filled
  * variants of a Unicode chess piece are separate characters and the text colour
- * overrode both — so a starting position looked like white had all 32 pieces.
+ * overrode both - so a starting position looked like white had all 32 pieces.
  *
  * Decorative only: hidden from screen readers and not interactive.
  */
@@ -50,7 +50,6 @@ export default function MiniBoard({
       {squares.map((sq, i) => (
         <div key={i} className={`relative ${sq.dark ? "bg-[#b58863]" : "bg-[#f0d9b5]"}`}>
           {sq.piece && (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={`/piece-sets/${set}/${sq.piece}.png`}
               alt=""

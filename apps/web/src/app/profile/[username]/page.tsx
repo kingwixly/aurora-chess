@@ -400,7 +400,7 @@ export default function ProfilePage() {
                       )}
                     </p>
                     <p className="text-xs text-night-400">
-                      {g.result || "—"} &middot; {g.timeControl} &middot;{" "}
+                      {g.result || "-"} &middot; {g.timeControl} &middot;{" "}
                       {new Date(g.createdAt).toLocaleDateString()}
                     </p>
                   </div>

@@ -7,7 +7,7 @@ import { Chess } from "chess.js";
  * both sides get the same arrangement. Everything else is ordinary chess.
  *
  * **Why this file exists rather than leaning on chess.js:** chess.js applies
- * the standard castling rule — move the king two squares toward the rook. In
+ * the standard castling rule - move the king two squares toward the rook. In
  * Chess960 the king always finishes on g1/g8 (kingside) or c1/c8 (queenside)
  * no matter where it started, and the rook lands on f1/d1. With the king on b1,
  * chess.js sends it to d1 for `O-O`; the correct destination is g1. Building on
@@ -171,7 +171,7 @@ export function applyCastling(fen: string, side: CastlingSide, positionId: numbe
   if (!rights.includes(needed)) return null;
 
   // Every square the pair moves through must be empty, ignoring the two of
-  // them — in some positions the king or rook already stands on a destination.
+  // them - in some positions the king or rook already stands on a destination.
   const occupiedSpan = (from: number, to: number) => {
     const [lo, hi] = from < to ? [from, to] : [to, from];
     for (let f = lo; f <= hi; f++) {

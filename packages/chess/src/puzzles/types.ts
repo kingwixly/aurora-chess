@@ -4,7 +4,7 @@ import { updateFromGame } from "../rating/glicko2";
  * Puzzle types and solution checking.
  *
  * The important decision here: a puzzle is **not** validated by exact move
- * match. Several of Aurora's own puzzles have more than one correct answer —
+ * match. Several of Aurora's own puzzles have more than one correct answer -
  * the Arabian position has two distinct mates in one, and both are equally
  * right. Rejecting a player's legitimate mate because a stored string says
  * otherwise is the fastest way to make a trainer feel broken.
@@ -88,7 +88,7 @@ export function checkPuzzleMove(
  * Rating change after a puzzle attempt.
  *
  * Glicko-2, treating the puzzle as an opponent whose rating is well established
- * — which it is, since a puzzle's difficulty is measured across everyone who
+ * - which it is, since a puzzle's difficulty is measured across everyone who
  * has attempted it. The player's own deviation does the work: a new solver
  * finds their level in a handful of puzzles instead of dozens.
  */

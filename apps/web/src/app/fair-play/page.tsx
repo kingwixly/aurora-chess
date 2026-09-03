@@ -69,7 +69,7 @@ export default function FairPlayPage() {
           <h2 className="font-display text-2xl">Your standing is always reachable</h2>
           <p className="text-night-300">
             A ban removes access to the site. It does not remove access to your standing page or to
-            appealing — you can always sign in to see what happened and contest it.
+            appealing - you can always sign in to see what happened and contest it.
           </p>
         </section>
 

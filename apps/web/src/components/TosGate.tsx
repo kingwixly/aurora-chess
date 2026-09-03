@@ -17,7 +17,7 @@ export default function TosGate({ children }: { children: React.ReactNode }) {
   const [accepting, setAccepting] = useState(false);
   const [declined, setDeclined] = useState(false);
 
-  // Not logged in or already accepted — show the app
+  // Not logged in or already accepted - show the app
   if (!user || user.tosAccepted) {
     return <>{children}</>;
   }

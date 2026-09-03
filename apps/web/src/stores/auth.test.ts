@@ -22,7 +22,7 @@ import { useAuthStore } from "./auth";
 import api, { setAccessToken } from "../lib/api";
 
 describe("useAuthStore", () => {
-  // fetchMe resolves the session once per page load and remembers it —
+  // fetchMe resolves the session once per page load and remembers it -
   // otherwise every component mount fires its own /auth/refresh, and refresh
   // ROTATES the token, so the first call invalidates all the others. Tests
   // therefore need a fresh module per case.

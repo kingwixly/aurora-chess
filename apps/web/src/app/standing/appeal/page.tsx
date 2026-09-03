@@ -152,7 +152,7 @@ function AppealForm() {
                     <span className="font-medium">Also post this publicly for faster review</span>
                     <span className="mt-1 block text-sm text-[#5a6478]">
                       Volunteers read the public appeal forum and flag genuine cases for a
-                      moderator, which is usually quicker. Entirely optional — this appeal is
+                      moderator, which is usually quicker. Entirely optional - this appeal is
                       already submitted either way, and posting publicly does not change your place
                       in the queue.
                     </span>

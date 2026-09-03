@@ -6,7 +6,7 @@ import { useState } from "react";
  * A bot's portrait.
  *
  * `avatar` is a path under /public rather than an emoji. When the file is
- * missing — art lands one band at a time — this falls back to the character's
+ * missing - art lands one band at a time - this falls back to the character's
  * initial on a neutral tile rather than a broken image, so a partial art drop
  * never breaks the roster.
  */
@@ -41,7 +41,6 @@ export default function BotAvatar({
   return (
     // Plain <img>: these are small static files and next/image's optimiser adds
     // a round trip per portrait for no benefit at this size.
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={avatar}
       alt=""

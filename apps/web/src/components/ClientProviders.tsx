@@ -16,7 +16,7 @@ import { setDeviceIdProvider } from "@aurora/api-client";
 import { getDeviceId } from "../lib/deviceId";
 
 // Pages that don't require TOS acceptance
-// Pages a user must be able to reach before accepting the terms — plus the
+// Pages a user must be able to reach before accepting the terms - plus the
 // standing pages, because someone banned before the terms changed still needs
 // to see their record and appeal.
 const TOS_EXEMPT_PATHS = ["/legal", "/login", "/register", "/fair-play", "/standing"];

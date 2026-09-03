@@ -30,7 +30,7 @@ describe("position generation", () => {
     expect(backRankForPosition(STANDARD_POSITION_ID)).toBe("rnbqkbnr");
   });
 
-  it("is stable — the same number always gives the same position", () => {
+  it("is stable - the same number always gives the same position", () => {
     expect(backRankForPosition(42)).toBe(backRankForPosition(42));
   });
 
@@ -77,7 +77,7 @@ describe("starting FEN", () => {
 
   it("opens with a sane number of moves in every position", () => {
     // 16 pawn moves plus knight moves. A knight on the a- or h-file has only
-    // one square, so the total is 18 to 20 rather than always 20 — the
+    // one square, so the total is 18 to 20 rather than always 20 - the
     // assumption my first version of this test made.
     for (let i = 0; i < 960; i++) {
       const n = new Chess(fenForPosition(i)).moves().length;
@@ -89,7 +89,7 @@ describe("starting FEN", () => {
 
 describe("castling", () => {
   it("puts king and rook on the right squares from a known position", () => {
-    // King b1, rooks a1 and h1 — position where standard rules would send the
+    // King b1, rooks a1 and h1 - position where standard rules would send the
     // king to d1. Chess960 says g1, rook f1.
     const id = [...Array(960).keys()].find((i) => backRankForPosition(i) === ("rk4nr" as never));
     void id;

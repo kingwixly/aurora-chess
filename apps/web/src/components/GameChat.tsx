@@ -22,7 +22,7 @@ interface ChatMessage {
  * Chat during a game.
  *
  * Off by default and remembered per player. Most in-game chat is tilt, and the
- * people it lands on are the ones who quietly stop playing — so this is
+ * people it lands on are the ones who quietly stop playing - so this is
  * something you turn on, not something you turn off after the first time it
  * ruins a game.
  */

@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/events", label: "Events" },
   { href: "/search", label: "Search" },
+  { href: "/forum", label: "Forum" },
   { href: "/history", label: "Games" },
   { href: "/stats", label: "Stats" },
   { href: "/friends", label: "Friends" },
@@ -23,7 +24,7 @@ const LINKS = [
  * Navigation for small screens.
  *
  * The desktop nav is `hidden md:flex`, which meant a phone had no way to reach
- * puzzles, the leaderboard, messages or anything else — every page existed and
+ * puzzles, the leaderboard, messages or anything else - every page existed and
  * none of them were findable. Chess is played on phones more than anywhere
  * else, so this is not a nice-to-have.
  */

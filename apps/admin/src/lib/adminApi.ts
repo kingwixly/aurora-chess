@@ -49,7 +49,7 @@ export async function adminRequest(
   } catch (err: unknown) {
     const status = (err as { response?: { status?: number } }).response?.status;
     if (method !== "get" && status === 403) {
-      // CSRF token likely expired — refetch and retry once
+      // CSRF token likely expired - refetch and retry once
       await fetchCsrfToken();
       const { data } = await api.request({
         method,

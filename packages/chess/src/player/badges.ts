@@ -8,8 +8,8 @@
  * - Badges appear only on the profile page, never beside a username in game
  *   lists, chat, or search results. They are something you look up, not
  *   something that follows a player around.
- * - Badges can express things that are not playing strength — arbiter
- *   certification, staff role, event participation — which is exactly why
+ * - Badges can express things that are not playing strength - arbiter
+ *   certification, staff role, event participation - which is exactly why
  *   FIDE Arbiter is a badge rather than being forced into the title enum.
  *
  * Users choose which badges to **pin**; pinned badges sort first on the profile.
@@ -49,7 +49,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "fide-arbiter",
     label: "FIDE Certified Arbiter",
     description: "Holds a FIDE Arbiter certification, verified by Aurora staff.",
-    icon: "⚖️",
+    icon: "\u2696",
     category: "credential",
     grant: "verified",
     requiresEvidence: true,
@@ -58,7 +58,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "fide-international-arbiter",
     label: "FIDE International Arbiter",
     description: "Holds the International Arbiter title, verified by Aurora staff.",
-    icon: "⚖️",
+    icon: "\u2696",
     category: "credential",
     grant: "verified",
     requiresEvidence: true,
@@ -67,7 +67,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "fide-trainer",
     label: "FIDE Trainer",
     description: "Holds a FIDE trainer certification, verified by Aurora staff.",
-    icon: "🎓",
+    icon: "\u25C7",
     category: "credential",
     grant: "verified",
     requiresEvidence: true,
@@ -89,7 +89,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "club-official",
     label: "Club Official",
     description: "Recognised representative of an affiliated chess club.",
-    icon: "♞",
+    icon: "\u265E",
     category: "credential",
     grant: "verified",
     requiresEvidence: true,
@@ -100,7 +100,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "tournament-winner",
     label: "Tournament Winner",
     description: "Won an Aurora tournament.",
-    icon: "🏆",
+    icon: "\u2605",
     category: "achievement",
     grant: "automatic",
   },
@@ -108,7 +108,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "puzzle-streak-30",
     label: "Streak Keeper",
     description: "Solved puzzles on 30 consecutive days.",
-    icon: "🧩",
+    icon: "\u25A9",
     category: "achievement",
     grant: "automatic",
   },
@@ -116,7 +116,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "marathon",
     label: "Marathon",
     description: "Played 1000 rated games.",
-    icon: "⏱️",
+    icon: "◴",
     category: "achievement",
     grant: "automatic",
   },
@@ -124,7 +124,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "giant-slayer",
     label: "Giant Slayer",
     description: "Beat an opponent rated 400 or more points higher.",
-    icon: "⚔️",
+    icon: "\u2694",
     category: "achievement",
     grant: "automatic",
   },
@@ -132,7 +132,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "centurion",
     label: "Centurion",
     description: "Won 100 rated games.",
-    icon: "🛡️",
+    icon: "⛨",
     category: "achievement",
     grant: "automatic",
   },
@@ -142,10 +142,10 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "founder",
     label: "Founder",
     description: "One of the first 50 accounts on Aurora Chess.",
-    icon: "🌅",
+    icon: "\u25D2",
     category: "community",
     // Granted automatically at signup for the first 50, but staff can also
-    // grant or revoke it — someone who deleted and remade an account should not
+    // grant or revoke it - someone who deleted and remade an account should not
     // lose it, and someone who bought one should not keep it.
     grant: "manual",
   },
@@ -153,7 +153,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "contributor",
     label: "Contributor",
     description: "Contributed to Aurora Chess itself.",
-    icon: "🛠️",
+    icon: "⚒",
     category: "community",
     grant: "manual",
   },
@@ -161,7 +161,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "author",
     label: "Author",
     description: "Published articles or opening theory on Aurora.",
-    icon: "📖",
+    icon: "\u2637",
     category: "community",
     grant: "manual",
   },
@@ -169,7 +169,7 @@ export const BADGES: readonly BadgeDefinition[] = [
     key: "patron",
     label: "Patron",
     description: "Supported Aurora Chess.",
-    icon: "💎",
+    icon: "\u25C6",
     category: "community",
     grant: "manual",
   },
@@ -222,7 +222,7 @@ export interface ResolvedBadge extends BadgeDefinition {
  * Order a user's badges for display: pinned first in their chosen order, then
  * the rest by category and grant time.
  *
- * Unknown keys are dropped rather than rendered as a blank — a badge removed
+ * Unknown keys are dropped rather than rendered as a blank - a badge removed
  * from {@link BADGES} should disappear from profiles, not leave a hole. Pins
  * beyond {@link MAX_PINNED_BADGES} are demoted rather than rejected, so a lower
  * cap later cannot leave anyone in a broken state.

@@ -15,7 +15,7 @@ const PIECE_CODES: Record<string, string> = { q: "Q", r: "R", b: "B", n: "N", p:
 /**
  * A captured piece, drawn with the same artwork as the board.
  *
- * Unicode chess glyphs render inconsistently across platforms — the same
+ * Unicode chess glyphs render inconsistently across platforms - the same
  * problem that made flags appear as country codes on Windows. Using the
  * installed piece set means the captured row matches the board and looks
  * identical everywhere.
@@ -76,10 +76,10 @@ function materialValue(counts: Record<string, number>): number {
 /**
  * Captured material, in whichever convention the player prefers.
  *
- * **board** — the over-the-board habit: every piece you have taken, laid out
+ * **board** - the over-the-board habit: every piece you have taken, laid out
  * beside you. Complete, but it makes you do the subtraction.
  *
- * **compact** — the online convention: only the *surplus*. If you are up a
+ * **compact** - the online convention: only the *surplus*. If you are up a
  * knight and two pawns you see a knight and "+2", because the pieces that
  * cancel out carry no information.
  *

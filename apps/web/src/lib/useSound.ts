@@ -70,7 +70,7 @@ export function useSound() {
     // Reset and play (allows rapid consecutive plays)
     audio.currentTime = 0;
     audio.play().catch(() => {
-      // Browser blocked autoplay — ignore silently
+      // Browser blocked autoplay - ignore silently
     });
   }, []);
 

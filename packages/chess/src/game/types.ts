@@ -6,10 +6,10 @@ export type GameResult = "WHITE_WIN" | "BLACK_WIN" | "DRAW" | "ABORTED";
 /**
  * Lifecycle status of a chess game.
  *
- * - `WAITING` — challenge sent, waiting for opponent to accept
- * - `ACTIVE` — game in progress
- * - `COMPLETED` — game finished with a result
- * - `ABORTED` — game was cancelled before completion
+ * - `WAITING` - challenge sent, waiting for opponent to accept
+ * - `ACTIVE` - game in progress
+ * - `COMPLETED` - game finished with a result
+ * - `ABORTED` - game was cancelled before completion
  */
 export type GameStatus = "WAITING" | "ACTIVE" | "COMPLETED" | "ABORTED";
 

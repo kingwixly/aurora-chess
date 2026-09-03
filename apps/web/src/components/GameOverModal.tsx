@@ -52,8 +52,8 @@ const TERMINATION_TEXT: Record<string, string> = {
 /**
  * End-of-game dialog.
  *
- * Leads with the outcome from the viewer's point of view — "You won", not
- * "WHITE_WIN" — because that is the only thing anyone reads. The rating delta
+ * Leads with the outcome from the viewer's point of view - "You won", not
+ * "WHITE_WIN" - because that is the only thing anyone reads. The rating delta
  * is the second most important thing, so it is large and adjacent, and the
  * actions are ordered by what people actually do next: play again, look at what
  * went wrong, leave.
@@ -98,7 +98,19 @@ export default function GameOverModal({
       aria-labelledby="game-over-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-night-950/80 p-4 backdrop-blur-sm"
     >
-      <div className="w-full max-w-sm overflow-hidden rounded-2xl bg-night-900 ring-1 ring-inset ring-night-700">
+      <div className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-night-900 ring-1 ring-inset ring-night-700">
+        {/* A plain close control, in the corner where people look for one.
+            The buttons below all navigate somewhere; this is the one that just
+            dismisses. */}
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-night-400 transition-colors hover:bg-night-800 hover:text-white"
+        >
+          <span aria-hidden="true" className="text-lg leading-none">
+            &times;
+          </span>
+        </button>
         {/* The aurora band carries the result colour, so the outcome registers
             before you have read a word. */}
         <div

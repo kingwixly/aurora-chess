@@ -138,7 +138,7 @@ export default function PuzzlesPage() {
       if (data.status === "wrong") {
         setFailedOnce(true);
         setNotes((n) => {
-          const text = "Not this one. Look again — what is the opponent's king short of?";
+          const text = "Not this one. Look again - what is the opponent's king short of?";
           // Replace rather than append. Repeating the same line for every wrong
           // attempt turned the panel into a wall of identical messages.
           const withoutDuplicate = n.filter((x) => x.text !== text);
@@ -146,7 +146,7 @@ export default function PuzzlesPage() {
         });
         // Bumping a counter alongside the FEN is what actually resets the
         // board. Setting `fen` to the value it already holds is a no-op to
-        // React, so the second wrong move in a row never snapped back — the
+        // React, so the second wrong move in a row never snapped back - the
         // piece just stayed where it was dropped.
         setFen(chess.fen());
         setBoardNonce((n) => n + 1);

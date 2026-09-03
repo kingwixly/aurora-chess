@@ -120,6 +120,7 @@ export default function PlayPage() {
               { href: "/leaderboard", label: "Leaderboard" },
               { href: "/events", label: "Events" },
               { href: "/search", label: "Search" },
+              { href: "/forum", label: "Forum" },
               { href: "/friends", label: "Friends" },
               { href: "/messages", label: "Messages" },
             ].map((l) => (
@@ -341,7 +342,11 @@ export default function PlayPage() {
         {/* Deliberately below the fold: this is for a specific situation, not
             the main way anyone plays. Findable when you want it, not competing
             with the buttons people came for. */}
-        <section className="mt-10 border-t border-night-700 pt-6">
+        {/* Hidden on desktop. Both modes are built around a phone shared
+            between two people sitting together; on a monitor they are at best
+            confusing and at worst look broken. The routes still work if you
+            navigate to them directly. */}
+        <section className="mt-10 border-t border-night-700 pt-6 lg:hidden">
           <Link
             href="/play/otb"
             className="flex items-center justify-between rounded-xl bg-night-900 px-4 py-3 ring-1 ring-inset ring-night-700 transition-colors hover:bg-night-800"

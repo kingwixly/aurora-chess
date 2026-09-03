@@ -45,7 +45,7 @@ const PIECE_ROLES = [
  * Rotate pieces without rotating the board.
  *
  * Chessground positions pieces by transform, so this composes with its own
- * translation rather than replacing it — hence `rotate(180deg)` applied to the
+ * translation rather than replacing it - hence `rotate(180deg)` applied to the
  * piece element while Chessground keeps owning placement.
  */
 const ROTATED_PIECES_CSS = [

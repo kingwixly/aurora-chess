@@ -160,7 +160,7 @@ export function computeCustomMove(
   const moveCount = chess.moveNumber();
   const isWhite = chess.turn() === "w";
 
-  // Opening book — check before personality quirks
+  // Opening book - check before personality quirks
   const openingMove = getOpeningMove(personality, moveHistory, isWhite);
   if (openingMove) {
     // Verify the opening move is legal
@@ -182,7 +182,7 @@ export function computeCustomMove(
     return `${m.from}${m.to}${m.promotion || ""}`;
   }
 
-  // Queen early quirk — if queen hasn't moved in first 5 moves, move it
+  // Queen early quirk - if queen hasn't moved in first 5 moves, move it
   if (personality.queenEarly && moveCount <= 5) {
     const queenMoves = moves.filter((m) => m.piece === "q");
     if (queenMoves.length > 0 && Math.random() < 0.6) {
@@ -191,7 +191,7 @@ export function computeCustomMove(
     }
   }
 
-  // Pawn pusher quirk — prefer pawn moves on edges
+  // Pawn pusher quirk - prefer pawn moves on edges
   if (personality.pawnPusher && Math.random() < 0.4) {
     const edgePawnMoves = moves.filter(
       (m) =>
@@ -218,14 +218,14 @@ export function computeCustomMove(
       score += 200;
     }
 
-    // Aggression bias — prefer moves toward enemy king area
+    // Aggression bias - prefer moves toward enemy king area
     if (personality.aggressionBias > 0) {
       const targetRank = isWhite ? 7 : 0;
       const moveRank = parseInt(m.to[1]) - 1;
       const closeness = 7 - Math.abs(targetRank - moveRank);
       score += closeness * personality.aggressionBias * 15;
     } else if (personality.aggressionBias < 0) {
-      // Defensive — prefer retreating moves
+      // Defensive - prefer retreating moves
       const homeRank = isWhite ? 0 : 7;
       const moveRank = parseInt(m.to[1]) - 1;
       const closeness = 7 - Math.abs(homeRank - moveRank);
@@ -238,7 +238,7 @@ export function computeCustomMove(
   // Sort by score descending
   scored.sort((a, b) => b.score - a.score);
 
-  // Blunder chance — pick a move from the bottom half
+  // Blunder chance - pick a move from the bottom half
   if (scored.length > 2 && Math.random() < personality.blunderChance) {
     const bottomHalf = scored.slice(Math.floor(scored.length / 2));
     const m = bottomHalf[Math.floor(Math.random() * bottomHalf.length)].move;
@@ -297,7 +297,7 @@ export interface ThinkTimeContext {
 
 /**
  * Compute a simulated think time in milliseconds based on the bot's personality
- * and current game context. Derives timing from existing personality parameters —
+ * and current game context. Derives timing from existing personality parameters -
  * no additional configuration needed.
  */
 export function computeThinkTime(personality: BotPersonality, ctx: ThinkTimeContext): number {

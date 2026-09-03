@@ -16,9 +16,11 @@
     "version-packages": "changeset version",
     "check:schema": "node scripts/check-prisma-selects.mjs",
     "check:routes": "node scripts/check-api-routes.mjs",
-    "check": "pnpm check:schema-fields && pnpm check:schema && pnpm check:routes && pnpm check:contrast",
+    "check": "pnpm check:schema-fields && pnpm check:schema && pnpm check:routes && pnpm check:contrast && pnpm check:emoji && pnpm check:engines",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "check:schema-fields": "node scripts/check-schema-fields.mjs"
+    "check:schema-fields": "node scripts/check-schema-fields.mjs",
+    "check:emoji": "node scripts/check-no-emoji.mjs",
+    "check:engines": "node scripts/check-engines.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",

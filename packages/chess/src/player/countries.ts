@@ -2,7 +2,7 @@
  * Countries, for the flag beside a name.
  *
  * Stored as ISO 3166-1 alpha-2 so the flag can be rendered from the code
- * itself — regional-indicator characters mean no flag image assets, no
+ * itself - regional-indicator characters mean no flag image assets, no
  * licensing question, and no 250-file sprite sheet.
  */
 

@@ -16,7 +16,14 @@ import { parsePagination, paginationMeta } from "../lib/pagination.js";
 import { initClocks, onMove as clockOnMove } from "../lib/gameClock.js";
 import { getIO } from "../lib/socket.js";
 import { getBotMove, type OpeningPrefs } from "../lib/botEngine.js";
-import { canAcceptChallenge } from "@aurora/chess";
+import {
+  canAcceptChallenge,
+  randomPositionId,
+  fenForPosition,
+  startingFenFor,
+  needsFairyEngine,
+  type Variant,
+} from "@aurora/chess";
 import {
   type TimeControl,
   type GameResult,
@@ -444,6 +451,20 @@ export async function gameRoutes(app: FastifyInstance) {
         increment: customIncrement,
       } = request.body;
 
+      const variant = request.body.variant ?? "STANDARD";
+      // A specific position if asked for, otherwise random. Recorded either
+      // way so the game can be replayed exactly — the FEN alone loses which
+      // of the 960 arrangements produced it once pieces move.
+      const positionId =
+        variant === "CHESS960" ? (request.body.positionId ?? randomPositionId()) : null;
+
+      // Chess960 gets a shuffled array; Horde has its own array; everything
+      // else starts from the ordinary one and differs only in how it is played.
+      const startFen =
+        positionId !== null
+          ? fenForPosition(positionId)
+          : (startingFenFor(variant as Variant) ?? undefined);
+
       // Resolve time control
       let timeControl: TimeControl;
       let initialTime: number;
@@ -480,6 +501,10 @@ export async function gameRoutes(app: FastifyInstance) {
           blackTimeLeft: initialTime * 1000,
           isVsBot: true,
           botElo,
+          variant,
+          positionId,
+          // Only set for Chess960; standard games keep the schema default.
+          ...(startFen ? { fen: startFen } : {}),
           startedAt: new Date(),
         },
         include: {
@@ -510,7 +535,15 @@ export async function gameRoutes(app: FastifyInstance) {
             game.fen,
             botElo,
             2000,
-            (profile?.preferredOpenings as OpeningPrefs | null) ?? undefined
+            // A shuffled back rank has no standard opening theory, so the book
+            // is skipped for 960 rather than played from the wrong position.
+            // Opening theory belongs to standard chess. A shuffled back rank
+            // or an altered rule set makes the book meaningless at best.
+            variant === "STANDARD"
+              ? ((profile?.preferredOpenings as OpeningPrefs | null) ?? undefined)
+              : undefined,
+            variant === "CHESS960",
+            variant as Variant
           );
           const chess = new Chess(game.fen);
           const from = botMoveUci.slice(0, 2);

@@ -22,7 +22,7 @@ const PRESETS = [
  *
  * The wait is the problem this page solves. Rather than a spinner, it gives you
  * something to do and tells you honestly what is happening: how long you have
- * waited, and that the rating window widens the longer you wait — so a strong
+ * waited, and that the rating window widens the longer you wait - so a strong
  * player on a quiet server understands why they are still here.
  */
 function QueueContent() {

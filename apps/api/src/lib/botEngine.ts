@@ -1,5 +1,21 @@
 import { Chess } from "chess.js";
 import { StockfishEngine } from "./stockfish.js";
+
+/**
+ * How Fairy-Stockfish names each variant.
+ *
+ * Kept here rather than derived from the enum, because the UCI names are the
+ * engine's vocabulary and are not ours to change - "3check" and
+ * "kingofthehill" are what it answers to.
+ */
+const VARIANT_UCI_NAMES: Record<string, string> = {
+  ATOMIC: "atomic",
+  CRAZYHOUSE: "crazyhouse",
+  KINGOFTHEHILL: "kingofthehill",
+  THREECHECK: "3check",
+  ANTICHESS: "antichess",
+  HORDE: "horde",
+};
 import { createChildLogger } from "./logger.js";
 
 const log = createChildLogger("bot-engine");
@@ -76,7 +92,17 @@ export async function getBotMove(
   fen: string,
   elo: number,
   maxTimeMs: number = 2000,
-  preferredOpenings?: OpeningPrefs
+  preferredOpenings?: OpeningPrefs,
+  /** Set for Chess960 games, so castling is encoded and generated correctly. */
+  chess960 = false,
+  /**
+   * The variant, for engines that understand more than standard chess.
+   *
+   * Fairy-Stockfish needs `UCI_Variant` set before it will play Atomic or
+   * Crazyhouse; without it, it plays ordinary chess on a variant board, which
+   * looks like the engine making illegal moves.
+   */
+  variant: string = "STANDARD"
 ): Promise<string> {
   const fromBook = bookMove(fen, preferredOpenings);
   if (fromBook) return fromBook;
@@ -102,6 +128,16 @@ export async function getBotMove(
 
   // Set UCI_Elo and Skill Level if changed
   if (currentElo !== clampedElo) {
+    // Declared before anything else. Stockfish plays 960 natively but only
+    // when told; without it, castling comes back in the standard encoding and
+    // the engine offers castles that are illegal from a shuffled back rank.
+    proc.stdin.write(`setoption name UCI_Chess960 value ${chess960 ? "true" : "false"}\n`);
+    // Set before anything else. An engine told to play "atomic" generates
+    // different moves from the first ply, so this cannot wait until a capture.
+    if (variant !== "STANDARD" && variant !== "CHESS960") {
+      const uciName = VARIANT_UCI_NAMES[variant] ?? "chess";
+      proc.stdin.write(`setoption name UCI_Variant value ${uciName}\n`);
+    }
     proc.stdin.write("setoption name UCI_LimitStrength value true\n");
     proc.stdin.write(`setoption name UCI_Elo value ${clampedElo}\n`);
 

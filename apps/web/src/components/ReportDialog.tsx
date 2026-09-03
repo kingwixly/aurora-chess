@@ -74,8 +74,8 @@ export default function ReportDialog({
           <>
             <h2 className="font-display text-2xl">Report submitted</h2>
             <p className="mt-2 text-sm text-night-400">
-              A moderator will look at it. You will not be told the outcome — what happens to
-              another account is between them and us — but the report is read.
+              A moderator will look at it. You will not be told the outcome - what happens to
+              another account is between them and us - but the report is read.
             </p>
             <button
               onClick={onClose}

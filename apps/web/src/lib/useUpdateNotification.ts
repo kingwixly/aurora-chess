@@ -22,13 +22,13 @@ export function useUpdateNotification() {
       const isInGame = pathname.startsWith("/play/bot/") && pathname !== "/play/bot";
 
       if (isInGame) {
-        // Don't interrupt active game — defer reload
+        // Don't interrupt active game - defer reload
         try {
           sessionStorage.setItem(UPDATE_PENDING_KEY, "1");
         } catch {}
         // Show a non-intrusive message via dynamic import to avoid circular deps
         import("@aurora/ui").then(({ useToast }) => {
-          useToast.getState().show("Update available — will apply after your game");
+          useToast.getState().show("Update available - will apply after your game");
         });
       } else {
         // Safe to reload

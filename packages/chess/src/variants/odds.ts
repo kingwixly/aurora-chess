@@ -1,7 +1,7 @@
 import { Chess } from "chess.js";
 
 /**
- * Odds — deliberate handicaps that make a lopsided pairing worth playing.
+ * Odds - deliberate handicaps that make a lopsided pairing worth playing.
  *
  * A 900 against a 2100 is not a game; it is a formality. Odds turn it into one,
  * and they are the oldest fix in chess for exactly this problem.
@@ -13,7 +13,7 @@ import { Chess } from "chess.js";
  *    queen missing is a bug report, not a feature.
  * 2. **Odds games do not affect rating.** A rating measures even play. Feeding
  *    handicap results into it corrupts the number for both players and makes
- *    the leaderboard meaningless — which is the whole reason the leaderboard
+ *    the leaderboard meaningless - which is the whole reason the leaderboard
  *    excludes unsettled ratings in the first place.
  */
 
@@ -37,7 +37,7 @@ export interface OddsDefinition {
   /**
    * Roughly how many rating points this is worth to the receiver.
    *
-   * Approximate by nature — these are traditional figures, not measurements,
+   * Approximate by nature - these are traditional figures, not measurements,
    * and they exist to order the suggestions sensibly rather than to be precise.
    */
   worth: number;
@@ -108,13 +108,13 @@ export const ODDS: Record<OddsKind, OddsDefinition> = {
   },
 };
 
-/** Below this gap, odds are not suggested — the game is competitive already. */
+/** Below this gap, odds are not suggested - the game is competitive already. */
 export const ODDS_SUGGESTION_THRESHOLD = 500;
 
 /**
  * Should odds be suggested, and which?
  *
- * Returns an ordered list, closest match first. Nothing is applied — this only
+ * Returns an ordered list, closest match first. Nothing is applied - this only
  * decides what to put in front of the two players.
  */
 export function suggestOdds(strongerRating: number, weakerRating: number): OddsDefinition[] {
@@ -134,7 +134,7 @@ export type OddsReceiver = "white" | "black";
  * The starting position for a set of odds.
  *
  * Material odds remove a piece from the STRONGER player, who is the one not
- * receiving the handicap. Move odds and time odds leave the position alone —
+ * receiving the handicap. Move odds and time odds leave the position alone -
  * those are applied by the clock and the move counter instead.
  *
  * Returns null for anything that does not change the starting position.

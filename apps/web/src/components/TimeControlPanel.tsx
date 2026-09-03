@@ -14,7 +14,7 @@ export interface TimeControlChoice {
  * What happens after you tap a time control.
  *
  * Tapping a tile used to drop you straight into a friend challenge, which is
- * the less common intent — most people picking "3+0" want a game now, against
+ * the less common intent - most people picking "3+0" want a game now, against
  * whoever is available. This asks, and puts the live waiting count on the
  * random option so the choice is informed rather than a gamble.
  */

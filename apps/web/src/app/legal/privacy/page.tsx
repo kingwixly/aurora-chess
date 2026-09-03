@@ -28,7 +28,7 @@ export default function PrivacyPolicyPage() {
         <ul>
           <li>Email address</li>
           <li>Username</li>
-          <li>Password (stored as a bcrypt hash — we never store your plaintext password)</li>
+          <li>Password (stored as a bcrypt hash - we never store your plaintext password)</li>
         </ul>
 
         <h3>2.2 Game Data</h3>
@@ -112,11 +112,11 @@ export default function PrivacyPolicyPage() {
         <p>We use the following cookies:</p>
         <ul>
           <li>
-            <strong>refresh_token</strong> — httpOnly, secure (in production), sameSite: lax.
+            <strong>refresh_token</strong> - httpOnly, secure (in production), sameSite: lax.
             Contains an encrypted refresh token for session management. Expires after 7 days.
           </li>
           <li>
-            <strong>csrf_token</strong> — Used for CSRF protection on admin panel operations.
+            <strong>csrf_token</strong> - Used for CSRF protection on admin panel operations.
             Expires after 1 hour.
           </li>
         </ul>
@@ -140,7 +140,7 @@ export default function PrivacyPolicyPage() {
           <li>Update your preferences at any time</li>
           <li>Request account deactivation by contacting the platform administrator</li>
           <li>
-            Request data deletion — contact the platform administrator. Note: deleting your account
+            Request data deletion - contact the platform administrator. Note: deleting your account
             will cascade-delete your games, moves, analysis, friendships, and collections.
           </li>
         </ul>

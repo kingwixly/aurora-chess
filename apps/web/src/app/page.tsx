@@ -69,6 +69,16 @@ export default function Home() {
                   size="sm"
                 />
               </Link>
+              {/* The admin link existed on /play but not here, so an admin
+                  landing on the homepage had no route to the panel at all. */}
+              {user.role === "ADMIN" && process.env.NEXT_PUBLIC_ADMIN_URL && (
+                <a
+                  href={process.env.NEXT_PUBLIC_ADMIN_URL}
+                  className="rounded-lg px-3 py-2 text-sm text-night-400 transition-colors hover:text-white"
+                >
+                  Admin
+                </a>
+              )}
               <button
                 onClick={async () => {
                   await logout();
@@ -102,14 +112,20 @@ export default function Home() {
         <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <p className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-aurora-cyan">
-              {user ? `Welcome back, ${user.username}` : "A chess club that lives online"}
+              {/* Small and plain. A large display-font tagline over a hero is
+                  the single most generated-looking thing a site can do, and it
+                  was the first thing anyone saw. */}
+              {user ? user.username : "Free chess, no accounts required to start"}
             </p>
-            <h1 className="font-display text-5xl leading-[1.05] tracking-tight sm:text-6xl">
-              Titles you earn
-              <br />
-              <span className="bg-aurora bg-clip-text text-transparent">over the board.</span>
+            {/* Down from 5xl/6xl, and the gradient sits on one short phrase
+                rather than a whole line. Enormous display type over a gradient
+                is the house style of every generated landing page, and it was
+                the first thing anyone saw here. */}
+            <h1 className="font-display text-3xl leading-tight tracking-tight sm:text-4xl">
+              Titles you earn{" "}
+              <span className="bg-aurora bg-clip-text text-transparent">over the board</span>
             </h1>
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-night-400">
+            <p className="mt-4 max-w-lg leading-relaxed text-night-400">
               Aurora recognises every FIDE and national title. It also awards its own, earned by
               playing rather than by paperwork. Reach 2200 here and you are an Aurora Master,
               whether or not you have ever entered a rated event.
@@ -164,7 +180,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-6xl px-6 py-20">
         {/* Counted from the data rather than typed, and counting TILES rather
-            than title codes — a "way to earn" is a route, and the staff-granted
+            than title codes - a "way to earn" is a route, and the staff-granted
             titles are one route between them. A hand-written number said "Ten"
             while the grid showed eight. */}
         <h2 className="font-display text-3xl tracking-tight">
@@ -174,7 +190,7 @@ export default function Home() {
           Aurora titles are unofficial and site-local. {AUTO_TITLES.length} are earned on the board
           and awarded automatically, {MANUAL_UNOFFICIAL_TITLES.length} are granted by staff, and
           verified federation titles carry across. They say nothing about FIDE and are not meant to
-          — they say you did something specific here, and once earned they are permanent.
+          - they say you did something specific here, and once earned they are permanent.
         </p>
 
         <ul className="mt-10 grid gap-px overflow-hidden rounded-xl bg-night-700 sm:grid-cols-2 lg:grid-cols-3">

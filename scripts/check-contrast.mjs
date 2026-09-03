@@ -63,15 +63,20 @@ for (const file of walk("apps/web/src")) {
   // single branch of a conditional actually renders as.
   for (const m of src.matchAll(/"([^"]*(?:bg-|text-)[^"]*)"/g)) {
     const cls = m.group ?? m[1];
+    const arbitraryText = /text-\[(#[0-9a-fA-F]{3,8})\]/.exec(cls);
     const text = /text-(night-\d{3}|white|black|aurora-cyan)(?:\/(\d+))?/.exec(cls);
-    if (!text) continue;
-    let fg = PALETTE[text[1]];
+    if (!text && !arbitraryText) continue;
+    let fg = arbitraryText ? arbitraryText[1] : PALETTE[text[1]];
     if (!fg) continue;
-    if (text[2]) fg = blend(fg, PAGE, Number(text[2]) / 100);
+    if (!arbitraryText && text?.[2]) fg = blend(fg, PAGE, Number(text[2]) / 100);
 
+    // Arbitrary hex backgrounds — bg-[#dfe7f2] — are real and common enough
+    // to read properly. Treating them as "the page" produced a false failure
+    // on dark text over a deliberately pale panel.
+    const arbitrary = /bg-\[(#[0-9a-fA-F]{3,8})\]/.exec(cls);
     const bgm = /bg-(night-\d{3}|white|aurora-cyan)(?:\/(\d+))?/.exec(cls);
-    let bg = bgm ? (PALETTE[bgm[1]] ?? PAGE) : PAGE;
-    if (bgm?.[2]) bg = blend(bg, PAGE, Number(bgm[2]) / 100);
+    let bg = arbitrary ? arbitrary[1] : bgm ? (PALETTE[bgm[1]] ?? PAGE) : PAGE;
+    if (!arbitrary && bgm?.[2]) bg = blend(bg, PAGE, Number(bgm[2]) / 100);
 
     // An element can inherit its background from a parent this checker cannot
     // see. Those are marked `contrast-ok` at the point they apply, so the

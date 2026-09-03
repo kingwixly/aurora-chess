@@ -92,3 +92,30 @@ describe("bot roster", () => {
     expect(bots.some((b) => b.name === "DrawFish")).toBe(true);
   });
 });
+
+/**
+ * Chess960 wiring.
+ *
+ * The foundation was tested from the start; what was missing was everything
+ * that connects it to a real game. These check the join, not the maths.
+ */
+describe("chess960 wiring", () => {
+  it("produces a legal, shuffled starting position", async () => {
+    const { fenForPosition, randomPositionId, backRankForPosition } = await import("@aurora/chess");
+    for (let i = 0; i < 20; i++) {
+      const id = randomPositionId();
+      const fen = fenForPosition(id);
+      expect(() => new Chess(fen), `position ${id}`).not.toThrow();
+      // Both sides mirror each other, which is the defining property.
+      const rows = fen.split(" ")[0].split("/");
+      expect(rows[0]).toBe(rows[7].toLowerCase());
+    }
+  });
+
+  it("keeps position 518 as the ordinary array", async () => {
+    // If Scharnagl numbering ever drifts, every stored positionId points at a
+    // different game.
+    const { backRankForPosition } = await import("@aurora/chess");
+    expect(backRankForPosition(518)).toBe("rnbqkbnr");
+  });
+});

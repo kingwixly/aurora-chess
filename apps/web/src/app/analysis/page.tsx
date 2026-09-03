@@ -9,6 +9,8 @@ import ChessBoard from "../../components/ChessBoard";
 import BoardThemeStyles from "../../components/BoardThemeStyles";
 import EvaluationBar from "../../components/EvaluationBar";
 import { useStockfish } from "../../lib/useStockfish";
+import { identifyOpening, ENGINES, resolveEngine } from "@aurora/chess";
+import { useSettingsStore } from "../../stores/settings";
 
 const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -29,7 +31,13 @@ type Mode = "explore" | "vs-engine";
  * against Stockfish answers the other half.
  */
 export default function AnalysisBoardPage() {
-  const engine = useStockfish();
+  // Same engine choice as everywhere else. This page hardcoded the default,
+  // so a player who picked a different build got it everywhere except here.
+  const analysisEngine = useSettingsStore((st) => st.analysisEngine);
+  const engine = useStockfish(
+    ENGINES[resolveEngine(analysisEngine, "analyse")].worker,
+    ENGINES[resolveEngine(analysisEngine, "analyse")].workerType ?? "classic"
+  );
 
   const [fen, setFen] = useState(START_FEN);
   const [history, setHistory] = useState<string[]>([]);
@@ -111,9 +119,15 @@ export default function AnalysisBoardPage() {
     };
   }, [engine, current, showEngine]);
 
-  /** Opening name for the line so far. */
+  /**
+   * Opening name for the line so far.
+   *
+   * Uses the full ECO book - 3,810 named openings, matched by position so
+   * transpositions resolve - rather than the small hand-written list this page
+   * was using, which knew only a couple of dozen.
+   */
   const opening = useMemo(
-    () => (rootFen === START_FEN ? lookupOpening(history.slice(0, cursor)) : null),
+    () => (rootFen === START_FEN ? identifyOpening(history.slice(0, cursor)) : null),
     [rootFen, history, cursor]
   );
 
@@ -161,7 +175,7 @@ export default function AnalysisBoardPage() {
     [current, cursor]
   );
 
-  /** Accept either a PGN or a bare FEN — people paste both. */
+  /** Accept either a PGN or a bare FEN - people paste both. */
   const doImport = useCallback(() => {
     const text = importText.trim();
     setImportError(null);
@@ -404,11 +418,11 @@ export default function AnalysisBoardPage() {
                 <p className="px-4 py-3 text-sm text-night-400">Engine off.</p>
               )}
 
-              {opening && (
+              {opening?.opening && (
                 <div className="border-t border-night-700 px-4 py-2.5">
                   <p className="text-sm">
-                    <span className="font-mono text-xs text-night-400">{opening.eco}</span>{" "}
-                    {opening.name}
+                    <span className="font-mono text-xs text-night-400">{opening.opening.eco}</span>{" "}
+                    {opening.opening.name}
                   </p>
                 </div>
               )}

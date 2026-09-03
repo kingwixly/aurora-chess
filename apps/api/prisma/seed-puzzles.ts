@@ -29,7 +29,7 @@ export const PUZZLES = [
     themes: ["backRankMate", "mateIn1"],
     moves: ["a1a8"],
     explanations: [
-      "Ra8#. Black's own pawns on f7, g7 and h7 have never moved, so the king has no escape square on the seventh rank. Any rook or queen reaching the eighth is mate. This is why players spend a tempo on h6 or g6 in the middlegame \u2014 it is called giving the king luft, and it prevents exactly this.",
+      "Ra8#. Black's own pawns on f7, g7 and h7 have never moved, so the king has no escape square on the seventh rank.",
     ],
   },
   {
@@ -41,7 +41,7 @@ export const PUZZLES = [
     themes: ["fork", "knightFork"],
     moves: ["d5c7"],
     explanations: [
-      "Nxc7+ forks the king and the a8 rook. Because it is check, Black has no time to save the rook \u2014 the king must move first, and the knight takes on a8 next. Look for this whenever an enemy king and rook sit two squares apart: This is a family fork; the name royal fork is reserved for a knight hitting king and queen. Look for it whenever an enemy king and rook sit a knight's double-attack apart \u2014 c7 and f7 are the squares against an uncastled king.",
+      "Nxc7+ forks the king and the a8 rook. Because it is check, Black has no time to save the rook \u2014 the king must move first, and the knight takes on a8 next.",
     ],
   },
   {
@@ -53,7 +53,7 @@ export const PUZZLES = [
     themes: ["mateIn1", "opening"],
     moves: ["d8h4"],
     explanations: [
-      "Qh4#. White's g4 and f3 have torn open the diagonal leading to their own king. Nothing can block on g3 and the king has no square. This is Fool's Mate, and the lesson survives beyond move three: pawn moves in front of your king are permanent, and f3 combined with g4 is the most dangerous pair of them all.",
+      "Qh4#. White's g4 and f3 have torn open the diagonal leading to their own king.",
     ],
   },
   {
@@ -65,7 +65,7 @@ export const PUZZLES = [
     themes: ["smotheredMate", "mateIn1"],
     moves: ["e5f7"],
     explanations: [
-      "Nf7#. Every escape square is occupied by one of Black's own pieces \u2014 the rook on g8, the pawns on g7 and h7 \u2014 and no piece defends f7. A knight is the only unit that can deliver mate here, because it is the only one that cannot be blocked.",
+      "Nf7#. Every escape square is occupied by one of Black's own pieces \u2014 the rook on g8, the pawns on g7 and h7 \u2014 and no piece defends f7.",
     ],
   },
   {
@@ -77,7 +77,7 @@ export const PUZZLES = [
     themes: ["arabianMate", "mateIn1"],
     moves: ["g7g8"],
     explanations: [
-      "Rg8#. The rook checks along the eighth rank and the knight on f6 covers g8 and h7, so the rook cannot be captured and the king cannot run. Rook and knight working the corner like this is one of the oldest patterns in chess \u2014 hence the name.",
+      "Rg8#. The rook checks along the eighth rank and the knight on f6 covers g8 and h7, so the rook cannot be captured and the king cannot run.",
     ],
   },
   {
@@ -118,9 +118,7 @@ export const PUZZLES = [
     intro: "White to move and mate.",
     themes: ["backRankMate", "mateIn1"],
     moves: ["d1d8"],
-    explanations: [
-      "Rd8#. The rook swings to the back rank and there is nothing to block with. Black's pawns have never moved, so the king has no square \u2014 the weakness behind most back-rank mates, and the reason players spend a tempo on h6 in the middlegame."
-    ],
+    explanations: ["Rd8#. The rook swings to the back rank and there is nothing to block with."],
   },
   {
     id: "two-rook-mate",
@@ -133,7 +131,7 @@ export const PUZZLES = [
     explanations: [
       "Rg1 takes the whole g-file away, leaving the king only the h-file. Cutting off before checking is the entire method \u2014 check first and the king simply walks.",
       "Kh7 is forced; every other square is covered.",
-      "Rh2#. The rooks climb like rungs on a ladder: one cuts off, the other delivers. This mates a lone king from anywhere on the board."
+      "Rh2#. The rooks climb like rungs on a ladder: one cuts off, the other delivers. This mates a lone king from anywhere on the board.",
     ],
   },
   {
@@ -145,7 +143,7 @@ export const PUZZLES = [
     themes: ["fork", "knightFork"],
     moves: ["d5c7"],
     explanations: [
-      "Nc7+ is a royal fork \u2014 king and queen at once, which is the only combination that earns the name. The king must step out of check and the knight collects the queen on a8. A knight is the one piece that can attack a queen without the queen being able to take it back."
+      "Nc7+ is a royal fork \u2014 king and queen at once, which is the only combination that earns the name. The king must step out of check and the knight collects the queen on a8.",
     ],
   },
   {
@@ -157,7 +155,7 @@ export const PUZZLES = [
     themes: ["endgame", "pawnEndgame", "opposition"],
     moves: ["d1c2"],
     explanations: [
-      "Kc2, not d3 and not the pawn. The king goes ahead of the pawn and slightly to the side; pushing the pawn first lets the black king sit in front of it and the game is drawn. In king-and-pawn endings the king leads and the pawn follows \u2014 the opposite of most players' instinct."
+      "Kc2, not d3 and not the pawn. The king goes ahead of the pawn and slightly to the side; pushing the pawn first lets the black king sit in front of it and the game is drawn.",
     ],
   },
 ];

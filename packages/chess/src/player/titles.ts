@@ -13,7 +13,7 @@
  * automatic one; the automatic title is still computed and stored underneath so
  * that clearing a manual title restores whatever the player earned themselves.
  *
- * Arbiter credentials are deliberately NOT titles — they say nothing about
+ * Arbiter credentials are deliberately NOT titles - they say nothing about
  * playing strength. They live in the badge system instead.
  */
 

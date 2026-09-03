@@ -20,7 +20,8 @@ import { ConfirmModal } from "@aurora/ui";
 import KeyboardShortcutsHelp from "../../../components/KeyboardShortcutsHelp";
 import ReactionPicker from "../../../components/ReactionPicker";
 import ReactionOverlay, { type ActiveReaction } from "../../../components/ReactionOverlay";
-import { PlayerName } from "@aurora/ui";
+import { PlayerName, Flag } from "@aurora/ui";
+import PlayerHoverCard from "../../../components/PlayerHoverCard";
 import GameChat from "../../../components/GameChat";
 import ReportDialog from "../../../components/ReportDialog";
 import GameOverModal from "../../../components/GameOverModal";
@@ -38,6 +39,17 @@ interface GameOver {
 }
 
 export default function GamePage() {
+  /**
+   * Focus mode.
+   *
+   * Hides the move list, chat and side panels, leaving the board, the clocks
+   * and a single indicator of whose turn it is. Bound to F, with Escape to
+   * leave.
+   *
+   * The clocks stay. Time pressure is exactly when someone reaches for this,
+   * and a focus mode that hid the clock would be actively harmful.
+   */
+  const [focusMode, setFocusMode] = useState(false);
   const params = useParams();
   const router = useRouter();
   const gameId = params.id as string;
@@ -82,7 +94,12 @@ export default function GamePage() {
     R: () => status === "ACTIVE" && !gameOver && setConfirmResign(true),
     f: () => setFlipDisplay((f) => !f),
     F: () => setFlipDisplay((f) => !f),
+    // z rather than f: f is already board flip, and a key that does two
+    // things depending on context is worse than an unfamiliar one.
+    z: () => setFocusMode((v) => !v),
+    Z: () => setFocusMode((v) => !v),
     Escape: () => {
+      setFocusMode(false);
       setConfirmResign(false);
       setConfirmDraw(false);
       setConfirmAcceptDraw(false);
@@ -157,7 +174,7 @@ export default function GamePage() {
         const { data } = await api.get(`/api/v1/games/${gameId}`);
         await loadGame(data);
       } catch {
-        // Not authenticated or game not found — try public view
+        // Not authenticated or game not found - try public view
         try {
           const { data } = await api.get(`/api/v1/games/${gameId}/view`);
           await loadGame(data);
@@ -372,9 +389,40 @@ export default function GamePage() {
   }
 
   return (
-    <main className="flex flex-col h-[100dvh] lg:h-auto lg:min-h-screen overflow-hidden lg:overflow-auto p-1 lg:p-4">
+    <main
+      /* `min-h` rather than a fixed `h`, and scrollable rather than clipped.
+         
+         A fixed 100dvh with overflow-hidden means that on any window shorter
+         than the board plus both player strips, the strips are simply cut off
+         with no way to reach them - which is what made usernames invisible on
+         some screens. Letting it scroll costs nothing when it fits. */
+      className="flex flex-col min-h-[100dvh] lg:h-auto lg:min-h-screen overflow-y-auto p-1 lg:p-4"
+    >
       <div className="max-w-5xl w-full mx-auto flex flex-col flex-1 min-h-0 lg:block">
         <div className="flex flex-col lg:flex-row gap-1 lg:gap-6 items-start flex-1 min-h-0">
+          {focusMode && (
+            <div className="fixed inset-x-0 top-0 z-40 flex items-center justify-center gap-2 bg-night-950/90 py-2 backdrop-blur">
+              {/* Whose move it is, since the player strips are hidden. A dot
+                  rather than text: it reads instantly and does not compete
+                  with the board for attention. */}
+              <span
+                aria-hidden="true"
+                className={`h-3 w-3 rounded-full ${
+                  clocks?.turn === "white" ? "bg-night-200" : "bg-night-600 ring-1 ring-night-400"
+                }`}
+              />
+              <span className="text-xs uppercase tracking-[0.2em] text-night-400">
+                {clocks?.turn === "white" ? "White" : "Black"} to move
+              </span>
+              <button
+                onClick={() => setFocusMode(false)}
+                className="ml-3 rounded px-2 py-0.5 text-xs text-night-400 ring-1 ring-inset ring-night-700"
+              >
+                Exit focus
+              </button>
+            </div>
+          )}
+
           {/* ── LEFT: Board area ── */}
           <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full justify-center lg:justify-start">
             {/* Top player */}
@@ -385,16 +433,25 @@ export default function GamePage() {
                 </div>
                 <span className="truncate text-xs font-medium lg:text-sm">
                   {topPlayer ? (
-                    <PlayerName
-                      username={topPlayer.username}
-                      title={topPlayer.title}
-                      fideVerified={topPlayer.fideVerified}
-                      modShield={topPlayer.modShield}
-                      flair={topPlayer.activeFlair}
-                      rating={topPlayer.rating}
-                      size="sm"
-                      href={`/profile/${topPlayer.username}`}
-                    />
+                    <PlayerHoverCard username={topPlayer.username}>
+                      {topPlayer.countryCode && (
+                        <Flag
+                          code={topPlayer.countryCode}
+                          size={12}
+                          title={topPlayer.countryCode}
+                        />
+                      )}{" "}
+                      <PlayerName
+                        username={topPlayer.username}
+                        title={topPlayer.title}
+                        fideVerified={topPlayer.fideVerified}
+                        modShield={topPlayer.modShield}
+                        flair={topPlayer.activeFlair}
+                        rating={topPlayer.rating}
+                        size="sm"
+                        href={`/profile/${topPlayer.username}`}
+                      />
+                    </PlayerHoverCard>
                   ) : (
                     "Opponent"
                   )}
@@ -443,16 +500,25 @@ export default function GamePage() {
                 </div>
                 <span className="truncate text-xs font-medium lg:text-sm">
                   {bottomPlayer ? (
-                    <PlayerName
-                      username={bottomPlayer.username}
-                      title={bottomPlayer.title}
-                      fideVerified={bottomPlayer.fideVerified}
-                      modShield={bottomPlayer.modShield}
-                      flair={bottomPlayer.activeFlair}
-                      rating={bottomPlayer.rating}
-                      size="sm"
-                      href={`/profile/${bottomPlayer.username}`}
-                    />
+                    <PlayerHoverCard username={bottomPlayer.username}>
+                      {bottomPlayer.countryCode && (
+                        <Flag
+                          code={bottomPlayer.countryCode}
+                          size={12}
+                          title={bottomPlayer.countryCode}
+                        />
+                      )}{" "}
+                      <PlayerName
+                        username={bottomPlayer.username}
+                        title={bottomPlayer.title}
+                        fideVerified={bottomPlayer.fideVerified}
+                        modShield={bottomPlayer.modShield}
+                        flair={bottomPlayer.activeFlair}
+                        rating={bottomPlayer.rating}
+                        size="sm"
+                        href={`/profile/${bottomPlayer.username}`}
+                      />
+                    </PlayerHoverCard>
                   ) : (
                     "You"
                   )}
@@ -528,7 +594,7 @@ export default function GamePage() {
           </div>
 
           {/* ── RIGHT: Desktop panel ── */}
-          <div className="hidden lg:block flex-1 space-y-4 min-w-0">
+          <div className={`flex-1 space-y-4 min-w-0 ${focusMode ? "hidden" : "hidden lg:block"}`}>
             {openingName && (
               <div className="text-xs text-night-400 text-center px-2 py-1 bg-night-900 rounded">
                 {openingName}

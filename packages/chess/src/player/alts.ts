@@ -3,7 +3,7 @@
  *
  * A second account is normally the clearest signal of ban evasion there is, so
  * this is not a feature anyone gets by default. Staff grant it per user, and
- * the link between the accounts is recorded rather than hidden — an authorised
+ * the link between the accounts is recorded rather than hidden - an authorised
  * alt should be MORE visible to moderation than an unauthorised one, not less.
  *
  * The legitimate uses are narrow and real: a titled player who streams and
@@ -62,7 +62,7 @@ export function altDenialText(reason: AltEligibility["reason"]): string {
 /**
  * Settings an alt keeps separate from its owner.
  *
- * Everything else — punishments, standing, the moderation record — is shared
+ * Everything else - punishments, standing, the moderation record - is shared
  * deliberately. An alt is a different name, not a fresh start, and a ban on
  * one applies to all of them. Making that explicit here means nobody has to
  * infer it from behaviour.
@@ -86,8 +86,8 @@ export function isPerAccount(setting: string): boolean {
 /**
  * Whether a punishment on one account applies to another.
  *
- * Always true within an alt family. The alternative — punishing one name while
- * the others keep playing — turns an authorised alt into exactly the evasion
+ * Always true within an alt family. The alternative - punishing one name while
+ * the others keep playing - turns an authorised alt into exactly the evasion
  * tool the authorisation was meant to prevent.
  */
 export function punishmentApplies(opts: {

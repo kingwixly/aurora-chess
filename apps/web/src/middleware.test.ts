@@ -64,7 +64,7 @@ describe("standing subdomain", () => {
 
 describe("middleware", () => {
   it("never redirects away from auth pages, even with a cookie present", () => {
-    // Middleware cannot tell a valid refresh token from an expired one — it is
+    // Middleware cannot tell a valid refresh token from an expired one - it is
     // httpOnly and signed server-side. Redirecting /login to /play on the mere
     // presence of a cookie locked users out entirely once their token expired:
     // /play said "signed out", and clicking Log in bounced straight back.

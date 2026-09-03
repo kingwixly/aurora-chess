@@ -133,7 +133,7 @@ export default function CollectionsPage() {
                   className="flex-1 hover:text-aurora-cyan transition-colors"
                 >
                   <span className="font-medium">
-                    {c.name === "Favorites" ? "❤️ " : ""}
+                    {c.name === "Favorites" ? "♥ " : ""}
                     {c.name}
                   </span>
                   <span className="text-night-400 text-sm ml-2">({c.gameCount} games)</span>

@@ -35,7 +35,7 @@ describe("suggestions", () => {
 
 describe("material odds", () => {
   it("removes the piece from the STRONGER player", () => {
-    // Black receives the handicap, so White — the stronger side — loses the
+    // Black receives the handicap, so White - the stronger side - loses the
     // queen. Taking it from the wrong player would double the mismatch.
     const fen = fenForOdds("queen", "black")!;
     const board = fen.split(" ")[0];

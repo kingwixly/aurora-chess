@@ -1504,3 +1504,156 @@ export async function adminRoutes(app: FastifyInstance) {
     return { created, updated };
   });
 }
+
+/**
+ * Blog administration.
+ *
+ * Registered inside the admin plugin, so `adminMiddleware` already guards
+ * everything here - there is no per-route check to forget.
+ */
+export async function adminBlogRoutes(app: FastifyInstance) {
+  app.addHook("preHandler", adminMiddleware);
+
+  /** Every post, drafts included. The public route excludes drafts. */
+  app.get("/admin/blog", async () => {
+    const posts = await prisma.post.findMany({
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        summary: true,
+        publishedAt: true,
+        updatedAt: true,
+        author: { select: { id: true, username: true } },
+      },
+    });
+    return { posts };
+  });
+
+  app.get<{ Params: { id: string } }>("/admin/blog/:id", async (request, reply) => {
+    const post = await prisma.post.findUnique({ where: { id: request.params.id } });
+    if (!post) return apiError(reply, 404, VALIDATION_FAILED, "No such post");
+    return { post };
+  });
+
+  app.post<{
+    Body: { title?: string; summary?: string; body?: string; publish?: boolean };
+  }>("/admin/blog", async (request, reply) => {
+    const title = String(request.body?.title ?? "").trim();
+    const summary = String(request.body?.summary ?? "").trim();
+    const body = String(request.body?.body ?? "").trim();
+
+    if (title.length < 3) {
+      return apiError(reply, 400, VALIDATION_FAILED, "Give the post a title");
+    }
+    if (!body) {
+      return apiError(reply, 400, VALIDATION_FAILED, "Write something");
+    }
+
+    // Slug derived once, from the title, and never regenerated on edit -
+    // changing it later would break every link already shared.
+    const base = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+
+    // Collisions get a numeric suffix rather than failing, so publishing a
+    // second "Update" post does not throw an error at the writer.
+    let slug = base || "post";
+    for (let n = 2; await prisma.post.findUnique({ where: { slug } }); n++) {
+      slug = `${base}-${n}`;
+    }
+
+    const post = await prisma.post.create({
+      data: {
+        slug,
+        title,
+        summary: summary || title,
+        body,
+        authorId: request.user.userId,
+        publishedAt: request.body?.publish ? new Date() : null,
+      },
+      select: { id: true, slug: true },
+    });
+    return { post };
+  });
+
+  app.patch<{
+    Params: { id: string };
+    Body: { title?: string; summary?: string; body?: string; publish?: boolean };
+  }>("/admin/blog/:id", async (request, reply) => {
+    const existing = await prisma.post.findUnique({
+      where: { id: request.params.id },
+      select: { id: true, publishedAt: true },
+    });
+    if (!existing) return apiError(reply, 404, VALIDATION_FAILED, "No such post");
+
+    const { title, summary, body, publish } = request.body ?? {};
+
+    const post = await prisma.post.update({
+      where: { id: existing.id },
+      data: {
+        ...(title !== undefined ? { title: String(title).trim() } : {}),
+        ...(summary !== undefined ? { summary: String(summary).trim() } : {}),
+        ...(body !== undefined ? { body: String(body).trim() } : {}),
+        // Publishing sets the date once. Re-publishing an already-live post
+        // keeps the original date, so editing a typo does not move it back to
+        // the top of the blog.
+        ...(publish === true && !existing.publishedAt ? { publishedAt: new Date() } : {}),
+        ...(publish === false ? { publishedAt: null } : {}),
+      },
+      select: { id: true, slug: true, publishedAt: true },
+    });
+    return { post };
+  });
+
+  app.delete<{ Params: { id: string } }>("/admin/blog/:id", async (request, reply) => {
+    const post = await prisma.post.findUnique({
+      where: { id: request.params.id },
+      select: { id: true },
+    });
+    if (!post) return apiError(reply, 404, VALIDATION_FAILED, "No such post");
+    await prisma.post.delete({ where: { id: post.id } });
+    return { success: true };
+  });
+
+  /** Pin, lock or remove a forum thread. */
+  app.patch<{
+    Params: { id: string };
+    Body: { pinned?: boolean; locked?: boolean; deleted?: boolean };
+  }>("/admin/forum/threads/:id", async (request, reply) => {
+    const thread = await prisma.thread.findUnique({
+      where: { id: request.params.id },
+      select: { id: true },
+    });
+    if (!thread) return apiError(reply, 404, VALIDATION_FAILED, "No such thread");
+
+    const { pinned, locked, deleted } = request.body ?? {};
+    await prisma.thread.update({
+      where: { id: thread.id },
+      data: {
+        ...(pinned !== undefined ? { pinned } : {}),
+        ...(locked !== undefined ? { locked } : {}),
+        // Soft delete, so a removal can be undone and the thread is not lost.
+        ...(deleted !== undefined ? { deletedAt: deleted ? new Date() : null } : {}),
+      },
+    });
+    return { success: true };
+  });
+
+  /** Remove a single forum post. Leaves a tombstone. */
+  app.delete<{ Params: { id: string } }>("/admin/forum/posts/:id", async (request, reply) => {
+    const post = await prisma.threadPost.findUnique({
+      where: { id: request.params.id },
+      select: { id: true },
+    });
+    if (!post) return apiError(reply, 404, VALIDATION_FAILED, "No such post");
+    await prisma.threadPost.update({
+      where: { id: post.id },
+      data: { deletedAt: new Date() },
+    });
+    return { success: true };
+  });
+}

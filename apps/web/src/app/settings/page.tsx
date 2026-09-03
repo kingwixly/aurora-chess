@@ -91,7 +91,7 @@ function Toggle({
         {/* `left-0.5` stated explicitly.
             
             Without a `left`, an absolutely positioned element falls back to its
-            static position — which shifts with any padding the button inherits
+            static position - which shifts with any padding the button inherits
             from a global style. The knob was therefore starting somewhere other
             than the track's left edge, and the transform carried it past the
             right edge. Anchoring it removes the guesswork: track 44, knob 20,
@@ -297,7 +297,7 @@ export default function SettingsPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-night-400">
-          Piece sets have been removed for now — the old control only applied a colour filter rather
+          Piece sets have been removed for now - the old control only applied a colour filter rather
           than changing the pieces.
         </p>
       </div>

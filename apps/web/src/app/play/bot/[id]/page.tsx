@@ -9,6 +9,7 @@ import { useSettingsStore } from "../../../../stores/settings";
 import { useBotEngine } from "../../../../lib/useBotEngine";
 import { useOnlineStatus } from "../../../../lib/useOnlineStatus";
 import { lookupOpeningClient } from "../../../../lib/openings";
+import { shouldLabelAsBook } from "@aurora/chess";
 import {
   type GameModeSettings,
   type GameModePreset,
@@ -205,7 +206,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
       savePendingSync({ gameId, moves: syncMoves, result, termination });
       try {
         const { useToast } = await import("@aurora/ui");
-        useToast.getState().show("Game sync failed — will retry later", "error");
+        useToast.getState().show("Game sync failed - will retry later", "error");
       } catch {}
     }
   }
@@ -472,7 +473,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
           if (config) {
             applyConfig(config);
           } else {
-            // Page refresh without sessionStorage — load bot from cache by elo
+            // Page refresh without sessionStorage - load bot from cache by elo
             const cachedBot = loadBotFromCache(null, g.botElo);
             if (cachedBot) setBot(cachedBot);
             setActiveSettings(GAME_MODE_PRESETS.friendly);
@@ -631,7 +632,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
         // Single eval call for all features (evalBar, threats, suggestions, engine)
         // Chatter must not depend on the evaluation running. Friendly mode has
         // the eval bar, threats, suggestions and engine all off, so anything
-        // inside the eval block below never fires — which is why bots said
+        // inside the eval block below never fires - which is why bots said
         // almost nothing in the default mode.
         const plies = chess.history().length;
         if (plies > 4 && plies % 3 === 0) {
@@ -751,14 +752,19 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
           evBefore = await botEngine.evaluate(fenBefore);
           evAfter = await botEngine.evaluate(chess.fen());
         } catch {
-          // Eval failed — continue without feedback, don't crash the game
+          // Eval failed - continue without feedback, don't crash the game
           makeBotMove(chess, newMoves);
           return;
         }
         if (activeSettings.evalBar) setEvalScore(evAfter.score);
         if (activeSettings.moveFeedback) {
-          const opening = lookupOpeningClient(newSans);
-          if (opening) {
+          // Whether THIS move is still theory, not whether the game has an
+          // opening name.
+          //
+          // `lookupOpeningClient` returns the deepest opening the game has
+          // passed through, so once you are two moves in it is truthy forever
+          // - which marked every subsequent move as book, however bad it was.
+          if (shouldLabelAsBook(fenBefore, move.san, newSans.length)) {
             setFeedback("BOOK");
           } else {
             const isWhiteMove = fenBefore.split(" ")[1] === "w";
@@ -899,7 +905,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
       } catch (err: unknown) {
         // Surface what the server said. A bare "Failed to create rematch" gave
         // no way to tell a validation error from a moderation block from a
-        // network blip — and the retry appearing to work made it look random.
+        // network blip - and the retry appearing to work made it look random.
         const res = (err as { response?: { status?: number; data?: { error?: string } } })
           ?.response;
         setError(
@@ -975,7 +981,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
     return (
       <main className="flex items-center justify-center min-h-screen p-4">
         <div className="text-center max-w-md">
-          <div className="text-4xl mb-4">♟️</div>
+          <div className="text-4xl mb-4">♟</div>
           <h1 className="text-xl font-bold text-red-400 mb-2 font-display">Game Error</h1>
           <p className="text-sm text-night-400 mb-2">{error}</p>
           <p className="text-xs text-night-400 mb-4">
@@ -991,7 +997,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
             <button
               // router.push, not window.location. A full page load throws away
               // the in-memory access token, so Exit dropped you on /play/bot
-              // signed out — it looked like the button had logged you out.
+              // signed out - it looked like the button had logged you out.
               onClick={() => router.push("/play/bot")}
               className="rounded-lg bg-night-800 px-4 py-2 text-sm font-medium hover:bg-night-700"
             >

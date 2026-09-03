@@ -46,7 +46,7 @@ export default function RatingPools({
       {ORDER.map((pool) => {
         const r = byPool.get(pool);
         const played = (r?.games ?? 0) > 0;
-        // Falls back to the shared constant rather than a literal — this was
+        // Falls back to the shared constant rather than a literal - this was
         // hardcoded to the old Elo centre and kept showing 1200 after the move
         // to Glicko-2.
         const rating = r?.rating ?? DEFAULT_RATING;
@@ -67,7 +67,7 @@ export default function RatingPools({
               {rating}
               {provisional && (
                 <span
-                  title="Provisional — not enough games for a settled rating"
+                  title="Provisional - not enough games for a settled rating"
                   className="ml-0.5 align-super text-xs font-normal text-night-400"
                 >
                   ?

@@ -11,6 +11,8 @@ const NAV_ITEMS = [
   { href: "/bots", label: "Bots", icon: "B" },
   { href: "/settings", label: "Settings", icon: "S" },
   { href: "/moderation", label: "Moderation", icon: "M" },
+  { href: "/support", label: "Support", icon: "S" },
+  { href: "/blog", label: "Blog", icon: "B" },
   { href: "/audit-log", label: "Audit Log", icon: "A" },
 ];
 

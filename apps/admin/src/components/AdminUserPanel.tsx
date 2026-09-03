@@ -99,15 +99,25 @@ export default function AdminUserPanel({
         <div className="sticky top-0 border-b border-gray-700 bg-gray-800 p-5">
           <h2 className="text-lg font-bold">{user.username}</h2>
           <div className="mt-3 flex gap-1">
-            {(["fide", "badges", "rating", "history"] as const).map((t) => (
+            {/* Labels stated rather than derived. CSS `capitalize` turns
+                "fide" into "Fide", which is wrong for an acronym and cannot be
+                fixed with styling. */}
+            {(
+              [
+                ["fide", "FIDE"],
+                ["badges", "Badges"],
+                ["rating", "Rating"],
+                ["history", "History"],
+              ] as const
+            ).map(([t, label]) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`rounded px-3 py-1.5 text-sm capitalize transition-colors ${
+                className={`rounded px-3 py-1.5 text-sm transition-colors ${
                   tab === t ? "bg-blue-600" : "bg-gray-700 hover:bg-gray-600"
                 }`}
               >
-                {t}
+                {label}
               </button>
             ))}
           </div>
@@ -304,7 +314,7 @@ export default function AdminUserPanel({
             <>
               <p className="rounded bg-yellow-500/10 px-3 py-2 text-xs text-yellow-200 ring-1 ring-inset ring-yellow-500/30">
                 A correction moves their peak rating too, and automatic titles are recomputed from
-                it — so lowering a rating can strip a title they no longer qualify for.
+                it - so lowering a rating can strip a title they no longer qualify for.
               </p>
 
               <Field
@@ -363,9 +373,9 @@ export default function AdminUserPanel({
               </p>
             </div>
 
-            <hr className="border-gray-700" />
+            <hr className="my-3 border-gray-700" />
 
-            <label className="flex items-start gap-2">
+            <label className="flex items-start gap-2 text-sm">
               <input
                 type="checkbox"
                 checked={user.cheatExempt ?? false}

@@ -24,8 +24,8 @@ api.interceptors.response.use(undefined, (error) => {
   if (error.response?.status === 429) {
     const retryAfter = error.response.headers?.["retry-after"];
     const msg = retryAfter
-      ? `Too many requests — try again in ${retryAfter}s`
-      : "Too many requests — please wait a moment";
+      ? `Too many requests - try again in ${retryAfter}s`
+      : "Too many requests - please wait a moment";
     useToast.getState().show(msg, "error");
   }
   return Promise.reject(error);

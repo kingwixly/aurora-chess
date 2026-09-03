@@ -5,7 +5,7 @@
  *
  * - **Verification** is a boolean on the user. It means site verification is
  *   complete *and* a registered FIDE account has been confirmed. It renders as
- *   a mark before everything else — shield, title, name — because it qualifies
+ *   a mark before everything else - shield, title, name - because it qualifies
  *   the identity rather than the playing strength.
  * - **The profile panel** is staff-maintained detail shown only on a player's
  *   profile: FIDE's own rating pools, arena and arbiter titles, a link.
@@ -15,7 +15,7 @@
  * username next to a real GM would misrepresent both.
  */
 
-/** FIDE Arena titles — online-only, distinct from over-the-board titles. */
+/** FIDE Arena titles - online-only, distinct from over-the-board titles. */
 export const ARENA_TITLES = ["AGM", "AIM", "AFM", "ACM"] as const;
 
 /** Arbiter and trainer credentials, which say nothing about playing strength. */

@@ -124,7 +124,7 @@ function RegisterForm() {
             <p className="text-xs text-night-400 mt-1">Minimum 8 characters</p>
           </div>
           {/* Optional, and last. Signing up should not begin with a hurdle,
-              but an outstanding invite must still work — otherwise every code
+              but an outstanding invite must still work - otherwise every code
               already sent out silently stops meaning anything. */}
           <details className="rounded-lg border border-night-700 bg-night-900/50 px-3 py-2">
             <summary className="cursor-pointer text-sm text-night-400">

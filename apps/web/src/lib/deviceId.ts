@@ -3,7 +3,7 @@
  *
  * Sent as a header so moderation can act on a device rather than only an
  * account or an address. Without it, device bans and the per-device signup
- * limit are both dead code — the server looks for a header nobody sends.
+ * limit are both dead code - the server looks for a header nobody sends.
  *
  * **This is not a hardware ID.** A browser cannot produce one. This survives a
  * new account, a cleared cookie and a VPN; it does not survive a different
@@ -12,7 +12,7 @@
  * "device" rather than anything implying hardware.
  *
  * Deliberately built from coarse, stable properties. Canvas and audio
- * fingerprinting would be more unique and much more fragile — they change with
+ * fingerprinting would be more unique and much more fragile - they change with
  * driver and browser updates, so a ban would evaporate for innocent reasons
  * while the technique reads as far more invasive than it is worth here.
  */
@@ -21,7 +21,7 @@ const STORAGE_KEY = "aurora-device-id";
 
 function hash(input: string): string {
   // FNV-1a, doubled with different offsets for a 64-bit-ish value. Not
-  // cryptographic — this identifies, it does not authenticate.
+  // cryptographic - this identifies, it does not authenticate.
   let h1 = 0x811c9dc5;
   let h2 = 0x01000193;
   for (let i = 0; i < input.length; i++) {
@@ -54,7 +54,7 @@ function computeFingerprint(): string {
  * The device identifier for this browser.
  *
  * Cached in localStorage so it stays stable even if the browser is updated and
- * a property changes. Clearing storage regenerates it — which is the honest
+ * a property changes. Clearing storage regenerates it - which is the honest
  * limit of the technique.
  */
 export function getDeviceId(): string {

@@ -132,8 +132,8 @@ export default function AdminGamesPage() {
               <tbody>
                 {games.map((g) => (
                   <tr key={g.id} className="border-b border-gray-800/50 hover:bg-gray-900/50">
-                    <td className="px-3 py-2">{g.white?.username || "—"}</td>
-                    <td className="px-3 py-2">{g.black?.username || "—"}</td>
+                    <td className="px-3 py-2">{g.white?.username || "-"}</td>
+                    <td className="px-3 py-2">{g.black?.username || "-"}</td>
                     <td className="px-3 py-2">
                       <span
                         className={`px-2 py-0.5 rounded text-xs ${
@@ -143,7 +143,7 @@ export default function AdminGamesPage() {
                         {g.status}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-gray-400">{g.result || "—"}</td>
+                    <td className="px-3 py-2 text-gray-400">{g.result || "-"}</td>
                     <td className="px-3 py-2 text-gray-400">{g.timeControl}</td>
                     <td className="px-3 py-2 text-gray-400">
                       {new Date(g.createdAt).toLocaleDateString()}
