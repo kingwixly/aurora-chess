@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * The engine that ships with the site and is known to load.
+ *
+ * Used when a chosen engine fails, so one bad download cannot make bot play
+ * impossible.
+ */
+const FALLBACK_WORKER = "/stockfish/stockfish.js";
+
 import { useEffect, useRef, useCallback, useState } from "react";
 
 export interface EngineLine {
@@ -59,6 +67,25 @@ export function useStockfish(
    */
   workerType: "classic" | "module" = "classic"
 ): StockfishHook {
+  /**
+   * The engine actually in use, which may not be the one asked for.
+   *
+   * A worker that fails to load used to leave the hook permanently not-ready,
+   * and every caller treats not-ready as "cannot play" - so one engine failing
+   * to download broke bot games entirely, including for people who had never
+   * changed the setting. Falling back to the build we know works keeps the
+   * game playable; the engine choice is a preference, not a reason to stop.
+   */
+  const [activePath, setActivePath] = useState(workerPath);
+  const [activeType, setActiveType] = useState(workerType);
+  const triedFallback = useRef(false);
+
+  // A change of preference is a fresh start, not a continued fallback.
+  useEffect(() => {
+    triedFallback.current = false;
+    setActivePath(workerPath);
+    setActiveType(workerType);
+  }, [workerPath, workerType]);
   const workerRef = useRef<Worker | null>(null);
   const [ready, setReady] = useState(false);
   /**
@@ -103,7 +130,7 @@ export function useStockfish(
     // Path comes from the chosen engine. It used to be hardcoded here, which
     // meant the engine picker in settings changed a stored value and nothing
     // else - every game and every analysis ran the same binary regardless.
-    const worker = new Worker(workerPath, { type: workerType });
+    const worker = new Worker(activePath, { type: activeType });
     workerRef.current = worker;
 
     let sawUciOk = false;
@@ -134,8 +161,17 @@ export function useStockfish(
     };
 
     worker.onerror = () => {
-      setLoadState("failed");
       finish(new Error("Stockfish worker error"));
+      // One retry, on the engine that ships with the site and is known to
+      // load. Retrying the same one would just fail again, and retrying
+      // forever would hammer a 404.
+      if (!triedFallback.current && activePath !== FALLBACK_WORKER) {
+        triedFallback.current = true;
+        setActivePath(FALLBACK_WORKER);
+        setActiveType("classic");
+        return;
+      }
+      setLoadState("failed");
     };
 
     worker.postMessage("uci");
@@ -143,7 +179,17 @@ export function useStockfish(
     // A handshake that never completes is a failure, not a slow load. Without
     // a bound the page waits forever and says nothing useful.
     const handshakeTimeout = setTimeout(() => {
-      if (!readyRef.current) setLoadState("failed");
+      if (readyRef.current) return;
+      // A silent worker is the ES-module failure mode: it constructs, the
+      // import throws inside it, and no message ever arrives. Indistinguishable
+      // from a slow load except by waiting, so the fallback applies here too.
+      if (!triedFallback.current && activePath !== FALLBACK_WORKER) {
+        triedFallback.current = true;
+        setActivePath(FALLBACK_WORKER);
+        setActiveType("classic");
+        return;
+      }
+      setLoadState("failed");
     }, 45000);
 
     return () => {
@@ -154,7 +200,7 @@ export function useStockfish(
       queueRef.current = [];
       readyRef.current = false;
     };
-  }, [finish, workerPath, workerType]);
+  }, [finish, activePath, activeType]);
 
   const send = useCallback(
     (cmd: string, waitFor: string, timeoutMs = 30000): Promise<string[]> =>

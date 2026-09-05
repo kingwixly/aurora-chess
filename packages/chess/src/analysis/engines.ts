@@ -13,7 +13,6 @@ export type EngineId =
   | "stockfish-18-lite"
   | "stockfish-18-single"
   | "stockfish-classic"
-  | "stockfish-16-7"
   | "fairy-sf14";
 
 export interface EngineSpec {
@@ -72,7 +71,7 @@ export const ENGINES: Record<EngineId, EngineSpec> = {
     id: "stockfish-18-lite",
     name: "Stockfish 18 Lite",
     description:
-      "The strongest engine there is, in its smaller build. Uses multiple threads where the browser allows it. The right choice for almost everyone.",
+      "A smaller build of the strongest engine there is. Uses multiple threads where the browser allows it. The right choice for almost everyone.",
     sizeMb: 7,
     strength: "superhuman",
     canAnalyse: true,
@@ -83,28 +82,14 @@ export const ENGINES: Record<EngineId, EngineSpec> = {
   },
   "stockfish-18-single": {
     id: "stockfish-18-single",
-    name: "Stockfish 18 (single thread)",
+    name: "Stockfish 18P",
     description:
-      "The same engine without threading. Slower, but works in browsers and privacy modes that block SharedArrayBuffer - which is why it is here rather than as a fallback nobody can choose.",
+      "Runs on a single thread. Slower than the multi-threaded build, but works in browsers and privacy modes that block SharedArrayBuffer, where the others will not load at all.",
     sizeMb: 7,
     strength: "superhuman",
     canAnalyse: true,
     canPlay: true,
     worker: "/engines/stockfish-18-lite-single.js",
-    licence: "GPL-3.0",
-    available: true,
-  },
-  "stockfish-16-7": {
-    id: "stockfish-16-7",
-    name: "Stockfish 16.7",
-    description:
-      "A much smaller build from the Lichess project. Under half a megabyte, so it loads almost instantly and works well on older phones. Weaker than 18, but far stronger than any human.",
-    sizeMb: 1,
-    strength: "superhuman",
-    canAnalyse: true,
-    canPlay: true,
-    worker: "/engines/lila-adapter.js?engine=stockfish-16-7",
-    workerType: "module",
     licence: "GPL-3.0",
     available: true,
   },
@@ -128,12 +113,15 @@ export const ENGINES: Record<EngineId, EngineSpec> = {
     variants: ["chess960", "crazyhouse", "atomic", "horde", "kingofthehill", "3check", "antichess"],
     licence: "GPL-3.0",
     available: true,
+    // The field, not just the comment above. It was missing entirely, which is
+    // why Fairy kept appearing in the picker no matter what the comment said.
+    selectable: false,
   },
   "stockfish-classic": {
     id: "stockfish-classic",
-    name: "Stockfish (classic build)",
+    name: "Stockfish 18",
     description:
-      "The build Aurora shipped originally. Kept so analysis you have already run stays comparable.",
+      "The full build. Larger download than the Lite version and correspondingly stronger, which matters most for deep analysis rather than for a quick game.",
     sizeMb: 7,
     strength: "superhuman",
     canAnalyse: true,

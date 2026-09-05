@@ -6,8 +6,6 @@ import {
   PUBLIC_USER_SELECT,
   TITLE_SELECT,
   withTitle,
-  withTitleOrNull,
-  withTitles,
   withGamePlayers,
   withGamesPlayers,
 } from "../lib/titles.js";
@@ -21,7 +19,6 @@ import {
   randomPositionId,
   fenForPosition,
   startingFenFor,
-  needsFairyEngine,
   type Variant,
 } from "@aurora/chess";
 import {
@@ -449,6 +446,7 @@ export async function gameRoutes(app: FastifyInstance) {
         preset,
         initialTime: customTime,
         increment: customIncrement,
+        botId,
       } = request.body;
 
       const variant = request.body.variant ?? "STANDARD";
@@ -501,6 +499,7 @@ export async function gameRoutes(app: FastifyInstance) {
           blackTimeLeft: initialTime * 1000,
           isVsBot: true,
           botElo,
+          botId,
           variant,
           positionId,
           // Only set for Chess960; standard games keep the schema default.
@@ -543,7 +542,8 @@ export async function gameRoutes(app: FastifyInstance) {
               ? ((profile?.preferredOpenings as OpeningPrefs | null) ?? undefined)
               : undefined,
             variant === "CHESS960",
-            variant as Variant
+            variant as Variant,
+            botId
           );
           const chess = new Chess(game.fen);
           const from = botMoveUci.slice(0, 2);
@@ -674,7 +674,12 @@ export async function gameRoutes(app: FastifyInstance) {
         chess.fen(),
         game.botElo!,
         2000,
-        (botProfile?.preferredOpenings as OpeningPrefs | null) ?? undefined
+        (botProfile?.preferredOpenings as OpeningPrefs | null) ?? undefined,
+        game.variant === "CHESS960",
+        game.variant as Variant,
+        // From the game, not the request: the client does not get to change
+        // which bot it is playing halfway through.
+        game.botId ?? undefined
       );
       const botFrom = botMoveUci.slice(0, 2);
       const botTo = botMoveUci.slice(2, 4);

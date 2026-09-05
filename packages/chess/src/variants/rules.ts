@@ -165,11 +165,15 @@ export function applyAtomicMove(
   to: Square,
   promotion?: string
 ): { fen: string; exploded: Square[] } | null {
-  const chess = new Chess(fen);
-  const mover = chess.turn();
-
+  // The constructor is inside the guard too. A malformed FEN threw from here
+  // rather than returning null, so a bad position ended the game instead of
+  // rejecting the move.
+  let chess: Chess;
+  let mover: "w" | "b";
   let move: Move | null = null;
   try {
+    chess = new Chess(fen);
+    mover = chess.turn();
     move = chess.move({ from, to, promotion: promotion ?? "q" });
   } catch {
     return null;
@@ -234,15 +238,6 @@ export function countPieces(fen: string): {
   return { white, black, whiteTotal, blackTotal };
 }
 
-function hasKing(chess: Chess, colour: "w" | "b"): boolean {
-  for (const row of chess.board()) {
-    for (const sq of row) {
-      if (sq && sq.type === "k" && sq.color === colour) return true;
-    }
-  }
-  return false;
-}
-
 /** In Atomic, a side with no king has lost, checkmate or not. */
 export function atomicResult(fen: string): "white" | "black" | null {
   const { white, black } = countPieces(fen);
@@ -262,10 +257,16 @@ export function hillWinner(fen: string): "white" | "black" | null {
   // but keeping every result function on the same footing avoids a surprise
   // the first time one is called with an unusual position.
   const rows = fen.split(" ")[0].split("/");
+  // A FEN from a game record, an engine, or a URL is not guaranteed
+  // well-formed. Indexing a short row list threw "row is not iterable" and
+  // took the board down with it.
+  if (rows.length !== 8) return null;
+
   for (const sq of HILL) {
     const file = sq.charCodeAt(0) - 97;
     const rank = Number(sq[1]);
     const row = rows[8 - rank];
+    if (typeof row !== "string") continue;
     let col = 0;
     for (const ch of row) {
       if (ch >= "1" && ch <= "8") {
@@ -307,8 +308,15 @@ export function countCheck(
   fenAfter: string,
   moverWasWhite: boolean
 ): CheckCount {
-  const chess = new Chess(fenAfter);
-  if (!chess.isCheck()) return counts;
+  // Runs after every move in Three-check, so a malformed FEN would end the
+  // game rather than simply failing to count a check.
+  let inCheck = false;
+  try {
+    inCheck = new Chess(fenAfter).isCheck();
+  } catch {
+    return counts;
+  }
+  if (!inCheck) return counts;
   return moverWasWhite
     ? { ...counts, white: counts.white + 1 }
     : { ...counts, black: counts.black + 1 };
@@ -328,8 +336,14 @@ export function countCheck(
  * for immediate client feedback.
  */
 export function antichessMoves(fen: string): Move[] {
-  const chess = new Chess(fen);
-  const all = chess.moves({ verbose: true });
+  // Called on every Antichess turn to build the legal move list. An exception
+  // here leaves the player unable to move at all.
+  let all: Move[];
+  try {
+    all = new Chess(fen).moves({ verbose: true });
+  } catch {
+    return [];
+  }
   const captures = all.filter((m) => m.captured);
   return captures.length > 0 ? captures : all;
 }

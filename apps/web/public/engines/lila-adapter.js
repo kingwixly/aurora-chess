@@ -27,7 +27,6 @@ const engine = params.get("engine");
  */
 const BUILDS = {
   "fairy-sf14": "./fairy-sf14.js",
-  "stockfish-16-7": "./stockfish-16-7.js",
 };
 
 const path = BUILDS[engine];

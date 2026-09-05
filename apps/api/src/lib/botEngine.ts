@@ -102,7 +102,15 @@ export async function getBotMove(
    * Crazyhouse; without it, it plays ordinary chess on a variant board, which
    * looks like the engine making illegal moves.
    */
-  variant: string = "STANDARD"
+  variant: string = "STANDARD",
+  /**
+   * The bot's identity, for the ones whose behaviour is not a strength level.
+   *
+   * WorstFish and DrawFish were dispatched on rating, which collided with an
+   * ordinary 200-rated bot. Identity is the thing that actually distinguishes
+   * them, so it is what gets checked.
+   */
+  botId?: string
 ): Promise<string> {
   const fromBook = bookMove(fen, preferredOpenings);
   if (fromBook) return fromBook;
@@ -110,12 +118,12 @@ export async function getBotMove(
   // WorstFish inverts the search rather than weakening it. A very low UCI_Elo
   // plays badly at random; this plays badly on purpose, which is a different
   // and much funnier thing — and it is genuinely hard to beat yourself to.
-  if (elo === WORSTFISH_ELO_SENTINEL) {
+  if (botId === "worstfish") {
     const worst = await getWorstMove(fen);
     if (worst) return worst;
   }
 
-  if (elo === DRAWFISH_ELO_SENTINEL) {
+  if (botId === "drawfish") {
     const level = await getLevellingMove(fen);
     if (level) return level;
   }
@@ -189,7 +197,11 @@ export function destroyBotEngine(): void {
   }
 }
 
-/** WorstFish is identified by this rating; it is not a strength setting. */
+/**
+ * Kept for the tests that reference it, but no longer used for dispatch.
+ *
+ * Rating is not an identity: Pip is also 200.
+ */
 export const WORSTFISH_ELO_SENTINEL = 200;
 
 /**
@@ -242,7 +254,7 @@ export async function getWorstMove(fen: string): Promise<string | null> {
   return worst?.uci ?? null;
 }
 
-/** DrawFish is identified by this rating; it is not a strength setting. */
+/** As above - retained for reference, not used for dispatch. */
 export const DRAWFISH_ELO_SENTINEL = 201;
 
 /**

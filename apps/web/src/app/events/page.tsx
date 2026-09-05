@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AuroraBand } from "@aurora/ui";
-import { ENGINES } from "@aurora/chess";
+import { availableEngines } from "@aurora/chess";
 
 interface EventEntry {
   id: string;
@@ -109,7 +109,7 @@ export default function EventsPage() {
             pay the download, so you get to pick.
           </p>
           <ul className="mt-3 space-y-2">
-            {Object.values(ENGINES).map((eng) => (
+            {availableEngines("play").map((eng) => (
               <li key={eng.id} className="flex items-baseline justify-between gap-3 text-sm">
                 <span>
                   <span className="font-medium">{eng.name}</span>

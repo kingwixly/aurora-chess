@@ -105,6 +105,8 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
   // --- Bot personality ---
   const [bot, setBot] = useState<BotPersonality | null>(null);
   const [botElo, setBotElo] = useState(800);
+  /** The bot identity stored on the game, which survives a reload. */
+  const [gameBotId, setGameBotId] = useState<string | null>(null);
 
   // --- Game-phase state ---
   const [game, setGame] = useState(() => new Chess());
@@ -212,6 +214,18 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
   }
 
   // --- Hooks ---
+  /**
+   * Fall back to the game's own bot identity.
+   *
+   * `botElo` and `botId` are stored on the game, so they are available however
+   * the page was reached. Without this the bot is silent on every reload.
+   */
+  useEffect(() => {
+    if (bot || botElo === undefined || botElo === null) return;
+    const found = loadBotFromCache(gameBotId, botElo);
+    if (found) setBot(found);
+  }, [bot, botElo, gameBotId]);
+
   const botChatRaw = useBotChat({ messages: bot?.messages });
   const botReactionsRaw = useBotReactions();
 
@@ -334,6 +348,17 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
   }, [isLoading, user, router]);
 
   // --- Load bot personality from localStorage cache ---
+  /**
+   * Resolve the bot from the cached roster.
+   *
+   * The identity used to come only from a sessionStorage config written by the
+   * selection page and deleted on first read - so reloading the game page, or
+   * opening it from a link, left `bot` null. A null bot has no `messages`, and
+   * the chat hook returns immediately, which is why bots never spoke.
+   *
+   * Now also called with the identity from the game record itself, which
+   * survives anything.
+   */
   function loadBotFromCache(botId?: string | null, elo?: number): BotPersonality | null {
     try {
       const cached = localStorage.getItem("aurorachess-bots");
@@ -468,6 +493,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
           setGame(chess);
           setPlayerIsWhite(g.whiteId === user?.id);
           setBotElo(g.botElo || 800);
+          setGameBotId(g.botId ?? null);
 
           // Apply config from sessionStorage, or fall back to defaults
           if (config) {
@@ -559,6 +585,7 @@ export default function BotGamePage({ params }: { params: { id: string } }) {
     try {
       const personality = bot || buildFallbackPersonality(botElo);
       const currentSans = currentMoves.map((m) => m.san);
+
       const moveUci = await botEngine.getPersonalityMove(chess.fen(), personality, currentSans);
       if (!moveUci) return;
       const from = moveUci.slice(0, 2);

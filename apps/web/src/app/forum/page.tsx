@@ -65,7 +65,13 @@ export default function ForumPage() {
     <main className="min-h-screen bg-night-950">
       <AuroraBand />
       <div className="mx-auto max-w-3xl px-6 py-10">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
+        {/* Every other page has a route out. Without this the forum index is
+            a dead end reachable only from the nav you have just left. */}
+        <Link href="/play" className="text-sm text-night-400 hover:text-white">
+          &larr; Back to play
+        </Link>
+
+        <div className="mt-4 flex flex-wrap items-baseline justify-between gap-3">
           <div>
             <h1 className="font-display text-3xl tracking-tight">Forum</h1>
             <p className="mt-1 text-sm text-night-400">

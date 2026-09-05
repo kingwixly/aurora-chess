@@ -4,6 +4,7 @@ import {
   DEFAULT_ENGINE,
   enginesFor,
   availableEngines,
+  engineForVariant,
   isEngineValidFor,
   resolveEngine,
 } from "./engines";
@@ -86,7 +87,6 @@ describe("worker construction", () => {
     // Worker constructs, the import throws inside it, and no message ever
     // arrives. The board then waits forever for a ready that never comes.
     expect(ENGINES["fairy-sf14"].workerType).toBe("module");
-    expect(ENGINES["stockfish-16-7"].workerType).toBe("module");
   });
 
   it("leaves classic builds classic", () => {
@@ -116,5 +116,33 @@ describe("variants", () => {
 
   it("includes chess960, which the site already supports", () => {
     expect(ENGINES["fairy-sf14"].variants).toContain("chess960");
+  });
+});
+
+describe("what the picker offers", () => {
+  it("never offers Fairy-Stockfish", () => {
+    // It shipped in the picker once because the explaining comment landed and
+    // the `selectable: false` field did not. A comment cannot fail a test;
+    // this can.
+    for (const purpose of ["play", "analyse"] as const) {
+      const ids = availableEngines(purpose).map((e) => e.id);
+      expect(ids, purpose).not.toContain("fairy-sf14");
+    }
+  });
+
+  it("offers every engine that is not special-purpose", () => {
+    // The other side of the same coin: filtering must not be so eager that it
+    // hides engines people are meant to choose.
+    const ids = availableEngines("play").map((e) => e.id);
+    expect(ids).toContain("stockfish-18-lite");
+    expect(ids.length).toBeGreaterThan(1);
+  });
+
+  it("still resolves Fairy for variant games", () => {
+    // Hidden from the picker, but reachable by the code that needs it.
+    expect(engineForVariant("ATOMIC", "stockfish-18-lite")).toBe("fairy-sf14");
+    expect(engineForVariant("STANDARD", "stockfish-18-lite")).toBe("stockfish-18-lite");
+    // Chess960 is a shuffled start, not a rule change.
+    expect(engineForVariant("CHESS960", "stockfish-18-lite")).toBe("stockfish-18-lite");
   });
 });

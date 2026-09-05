@@ -86,6 +86,14 @@ export const createBotGameBodySchema = z.object({
   /** Specific Chess960 position, or omitted for a random one. */
   positionId: z.number().int().min(0).max(959).optional(),
   botElo: z.number().int().min(200).max(3200),
+  /**
+   * Which bot, when it matters.
+   *
+   * Rating alone cannot identify a bot: Pip and WorstFish are both 200, and
+   * dispatching on rating meant playing Pip silently got you WorstFish's
+   * inverted search. Optional so existing callers keep working.
+   */
+  botId: z.string().max(64).optional(),
   color: z.enum(["white", "black", "random"]),
   preset: z.string().optional(),
   initialTime: z.number().optional(),
@@ -101,6 +109,14 @@ export const makeMoveBodySchema = z.object({
 export const syncOfflineGameBodySchema = z.object({
   offlineId: z.string().optional(),
   botElo: z.number().int().min(200).max(3200),
+  /**
+   * Which bot, when it matters.
+   *
+   * Rating alone cannot identify a bot: Pip and WorstFish are both 200, and
+   * dispatching on rating meant playing Pip silently got you WorstFish's
+   * inverted search. Optional so existing callers keep working.
+   */
+  botId: z.string().max(64).optional(),
   playerIsWhite: z.boolean(),
   moves: z
     .array(

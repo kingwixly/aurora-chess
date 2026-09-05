@@ -28,7 +28,11 @@ describe("bot roster", () => {
 
   it("gives every bot a repertoire", () => {
     for (const b of bots) {
-      if (b.name === "WorstFish" || b.name === "DrawFish") continue; // novelty bots have none
+      // Novelty bots have no repertoire by design, and Maia bots do not need
+      // one - the model is trained on human games, so its opening choices are
+      // already those of a player at that rating.
+      if (["WorstFish", "DrawFish"].includes(b.name)) continue;
+      if (b.name.startsWith("Maia ")) continue;
       expect(b.preferredOpenings?.asWhite?.length, b.name).toBeGreaterThan(0);
       expect(b.preferredOpenings?.asBlack?.length, b.name).toBeGreaterThan(0);
     }
@@ -53,7 +57,10 @@ describe("bot roster", () => {
 
   it("starts black repertoires from principled replies", () => {
     // The reported bug: strong bots answering 1.e4 with the Scandinavian.
-    const strong = bots.filter((b) => b.elo >= 2000 && !["WorstFish", "DrawFish"].includes(b.name));
+    const strong = bots.filter(
+      (b) =>
+        b.elo >= 2000 && !["WorstFish", "DrawFish"].includes(b.name) && !b.name.startsWith("Maia ")
+    );
     expect(strong.length).toBeGreaterThan(0);
     for (const b of strong) {
       for (const line of b.preferredOpenings!.asBlack!) {

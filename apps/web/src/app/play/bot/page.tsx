@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import api from "../../../lib/api";
 import { useAuthStore } from "../../../stores/auth";
@@ -43,7 +44,7 @@ function eloLabel(elo: number): string {
   return "Engine";
 }
 
-export default function PlayBotPage() {
+function BotPlayContent() {
   const router = useRouter();
   const { user, isLoading, fetchMe } = useAuthStore();
   const botEngine = useBotEngine();
@@ -89,6 +90,28 @@ export default function PlayBotPage() {
   // Game mode
   const [modePreset, setModePreset] = useState<GameModePreset>("friendly");
   const [variant, setVariant] = useState<Variant>("STANDARD");
+  const searchParams = useSearchParams();
+
+  /**
+   * Preselect a bot named in the URL.
+   *
+   * The events page links to `/play/bot?bot=worstfish`. Without this the
+   * parameter is ignored and "Play WorstFish" drops you on the ordinary picker
+   * with no explanation.
+   *
+   * Sets the rating as well as the bot. Selecting a bot anywhere else sets
+   * both together, and setting only one would send WorstFish's identity with
+   * whatever rating happened to be in the box.
+   */
+  useEffect(() => {
+    const wanted = searchParams.get("bot");
+    if (!wanted || botList.length === 0) return;
+    const match = botList.find((b) => b.id === wanted);
+    if (!match) return;
+    setSelectedBot(match);
+    setBotElo(match.elo);
+    setUseCustomElo(false);
+  }, [searchParams, botList]);
   const [customSettings, setCustomSettings] = useState<GameModeSettings>({ ...DEFAULT_CUSTOM });
 
   // Restore last-used settings from localStorage
@@ -214,6 +237,9 @@ export default function PlayBotPage() {
           botElo,
           color: isWhite ? "white" : "black",
           variant,
+          // Identity, not just rating. WorstFish and Pip are both rated 200,
+          // and without this the server cannot tell which one you picked.
+          ...(selectedBot ? { botId: selectedBot.id } : {}),
         };
         if (showCustomTime) {
           body.initialTime = customMinutes * 60;
@@ -528,5 +554,25 @@ export default function PlayBotPage() {
         />
       </div>
     </main>
+  );
+}
+
+/**
+ * `useSearchParams` needs a Suspense boundary.
+ *
+ * Without one, Next cannot statically prerender this page and the build fails
+ * outright. The fallback is deliberately plain - it is on screen for a frame.
+ */
+export default function PlayBotPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-night-950">
+          <p className="text-night-400">Loading...</p>
+        </main>
+      }
+    >
+      <BotPlayContent />
+    </Suspense>
   );
 }

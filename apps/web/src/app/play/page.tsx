@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { AuroraBand, PlayerName } from "@aurora/ui";
 import SignedOut from "../../components/SignedOut";
 import { useAuthStore } from "../../stores/auth";
@@ -16,7 +15,7 @@ import ErrorBoundary from "../../components/ErrorBoundary";
 import MiniBoard from "../../components/MiniBoard";
 import TimeControlPanel, { type TimeControlChoice } from "../../components/TimeControlPanel";
 import RatingPools from "../../components/RatingPools";
-import MobileNav from "../../components/MobileNav";
+import SiteHeader, { MobileSidebar } from "../../components/SiteHeader";
 
 /**
  * Quick-pairing presets.
@@ -44,6 +43,7 @@ const ART = {
 };
 
 export default function PlayPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const { user, isLoading, fetchMe, logout, sessionError } = useAuthStore();
   const isOnline = useOnlineStatus();
@@ -101,41 +101,10 @@ export default function PlayPage() {
     <main className="min-h-screen bg-night-950">
       <AuroraBand />
 
-      <header className="border-b border-night-700">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
-          <Link href="/play" className="flex items-center gap-2.5">
-            <Image src="/logo-mark.png" alt="Aurora Chess" width={28} height={28} />
-            <span className="hidden font-display text-lg font-semibold tracking-tight sm:inline">
-              Aurora
-            </span>
-          </Link>
-
-          <nav className="hidden gap-1 md:flex">
-            {[
-              { href: "/play", label: "Play" },
-              { href: "/history", label: "Games" },
-              { href: "/stats", label: "Stats" },
-              { href: "/puzzles", label: "Puzzles" },
-              { href: "/analysis", label: "Analysis" },
-              { href: "/leaderboard", label: "Leaderboard" },
-              { href: "/events", label: "Events" },
-              { href: "/search", label: "Search" },
-              { href: "/forum", label: "Forum" },
-              { href: "/friends", label: "Friends" },
-              { href: "/messages", label: "Messages" },
-            ].map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-night-400 transition-colors hover:bg-night-800 hover:text-white"
-              >
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="relative flex items-center gap-2">
-            <MobileNav />
+      <SiteHeader
+        onOpenMenu={() => setMenuOpen(true)}
+        right={
+          <>
             <span
               className={`h-2 w-2 rounded-full ${isOnline ? "bg-emerald-400" : "bg-red-400"}`}
               title={isOnline ? "Connected" : "No connection"}
@@ -192,9 +161,74 @@ export default function PlayPage() {
             >
               Log out
             </button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
+
+      <MobileSidebar
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        right={
+          <>
+            <span
+              className={`h-2 w-2 rounded-full ${isOnline ? "bg-emerald-400" : "bg-red-400"}`}
+              title={isOnline ? "Connected" : "No connection"}
+            />
+            {user.role === "ADMIN" && isOnline && (
+              <a
+                href={process.env.NEXT_PUBLIC_ADMIN_URL || "#"}
+                className="rounded-lg px-3 py-1.5 text-sm text-night-400 transition-colors hover:text-white"
+              >
+                Admin
+              </a>
+            )}
+            <Link
+              href={`/profile/${user.username}`}
+              className="rounded-lg px-2 py-1.5 transition-colors hover:bg-night-800"
+            >
+              <PlayerName
+                username={user.username}
+                title={user.title}
+                fideVerified={user.fideVerified}
+                modShield={user.modShield}
+                flair={user.activeFlair}
+                rating={user.rating}
+                size="sm"
+              />
+            </Link>
+            <Link
+              href="/settings"
+              aria-label="Settings"
+              title="Settings"
+              className="rounded-lg px-2 py-1.5 text-night-400 transition-colors hover:text-white"
+            >
+              {/* Gear */}
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </Link>
+            <button
+              onClick={async () => {
+                await logout();
+                router.push("/");
+              }}
+              disabled={!isOnline}
+              className="rounded-lg px-2 py-1.5 text-sm text-night-400 transition-colors hover:text-white disabled:opacity-40"
+            >
+              Log out
+            </button>
+          </>
+        }
+      />
 
       <div className="mx-auto max-w-7xl px-6 py-8">
         {/* Quick pairing leads. One tap from landing to a game. */}

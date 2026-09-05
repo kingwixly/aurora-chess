@@ -295,11 +295,6 @@ export default function SettingsPage() {
             />
           </Section>
         </div>
-
-        <p className="mt-6 text-center text-xs text-night-400">
-          Piece sets have been removed for now - the old control only applied a colour filter rather
-          than changing the pieces.
-        </p>
       </div>
     </main>
   );
